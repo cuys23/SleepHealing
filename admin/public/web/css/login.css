@@ -1,0 +1,145 @@
+
+/* LogIn */
+:root {
+    --main-color: #009688c0;
+}
+
+.login-section {
+    height: 100vh;
+    font-family: "Roboto", sans-serif;
+    background: #b395030d;
+    background-image: url(../images/loginBG2.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-section .page-content {
+    margin-top: 30px;
+    margin-bottom: 40px;
+}
+
+.login-section .card {
+    max-width: 460px;
+    min-width: 350px;
+    border-radius: 15px !important;
+    /* box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; */
+    position: relative;
+}
+
+.login-section .logo {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    padding: 6px;
+    background: #fff;
+    border: 6px solid #b395030d;
+    overflow: hidden;
+    border-radius: 50%;
+    top: -50px;
+    left: calc(50% - 50px);
+}
+
+.login-section .logo img {
+    height: -webkit-fill-available;
+}
+
+.login-section .pageTitle {
+    font-size: 24px;
+    color: var(--main-color);
+    font-weight: 500;
+    padding-top: 16px;
+    margin-bottom: 5px;
+}
+
+.login-section input::placeholder {
+    font-size: 14px !important;
+}
+
+.passwordInput .eye {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.form-check-label {
+    font-size: 14px;
+}
+
+.pagePera {
+    font-size: 14px;
+    color: var(--paragraph-color);
+}
+
+.loginButton {
+    width: 100%;
+    font-size: 16px;
+    margin-top: 30px;
+    margin-bottom: 10px;
+    background: var(--main-color);
+    color: #fff;
+}
+
+.loginButton:hover {
+    background: #00968880;
+    color: #fff;
+}
+
+.smallBox {
+    width: 20px;
+    height: 1px;
+    background: #000;
+}
+
+.shotbox {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin: 20px 0;
+}
+
+.shotbox,
+.socallogIcon {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 25px 0;
+}
+
+.socallogIcon .iconButton {
+    padding: 9px 22px;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    color: #000;
+    border-radius: 8px;
+}
+
+.socallogIcon .iconText {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.socallogIcon i {
+    font-size: 16px;
+}
+
+@media (max-width: 580px) {
+
+    .login-section {
+        display: block;
+        padding-top: 40px;
+    }
+
+    .login-section .card {
+        margin: auto;
+    }
+
+}

@@ -1,0 +1,47 @@
+
+
+services:
+  app:
+    build: ./Admin
+    ports:
+      - "9080:8000"
+    environment:
+      APP_ENV: local
+      APP_KEY: base64:GGf7OhWfkv0s0a40QtDb+q23s0lSGjdSmmArv49aBhw=
+      APP_URL: http://localhost:9080
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: maditam
+      DB_USERNAME: maditam
+      DB_PASSWORD: secret123
+      DEMO_USER: admin@example.com
+      DEMO_PASS: secret
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - app_storage:/var/www/storage
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: maditam
+      MYSQL_USER: maditam
+      MYSQL_PASSWORD: secret123
+      MYSQL_ROOT_PASSWORD: rootsecret123
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3308:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "maditam", "-psecret123"]
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  app_storage:

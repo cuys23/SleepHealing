@@ -1,0 +1,2 @@
+/Users/mdshakilhossain/development/Project/maditam-flutter/android/app/.cxx/Debug/5d1k4g64/x86/CMakeFiles/edit_cache.dir
+/Users/mdshakilhossain/development/Project/maditam-flutter/android/app/.cxx/Debug/5d1k4g64/x86/CMakeFiles/rebuild_cache.dir
