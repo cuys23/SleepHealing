@@ -20,7 +20,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SettingSeeder::class);
         $this->call(WebSettingSeeder::class);
         $this->call(ShiftSeeder::class);
-        $this->call(PaymentGatewaySeeder::class);
 
         if(app()->environment('local')){
             $this->call(UserSeeder::class);

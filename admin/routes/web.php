@@ -7,7 +7,6 @@ use App\Http\Controllers\Web\AlbamController;
 use App\Http\Controllers\Web\BannerController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\NotificationController;
-use App\Http\Controllers\Web\PaymentConfigurationController;
 use App\Http\Controllers\Web\PlaylistController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\SettingController;
@@ -20,24 +19,9 @@ use App\Http\Controllers\CreateSuperAdmin;
 use App\Http\Controllers\FCMController;
 use App\Http\Controllers\MailConfigurationController;
 use App\Http\Controllers\SMSConfigurationController;
-use App\Http\Controllers\PaymentController;
 
 // Email verification
 Route::get('/email-verify/{userId}/{token}', [EmailVerifyController::class, 'verify'])->name('email-verify');
-
-// Payment callbacks (public, no auth)
-Route::get('/payment', [PaymentController::class, 'index'])->name('payment');
-Route::post('/payment/process', [PaymentController::class, 'payment'])->name('payment.process');
-Route::get('/payment/success', [PaymentController::class, 'successPayment'])->name('payment.success');
-Route::get('/payment/cancel', [PaymentController::class, 'cancelPayment'])->name('payment.cancel');
-Route::get('/payment/success/response', [PaymentController::class, 'success'])->name('payment.success.response');
-Route::get('/payment/paypal/success/{transaction_id}', [PaymentController::class, 'paymentSuccess'])->name('paypal.payment.success');
-Route::get('/payment/paypal/cancel', [PaymentController::class, 'paymentCancel'])->name('paypal.payment.cancel');
-Route::get('/payment/stripe/success/{transaction_id}', [PaymentController::class, 'stripePaymentSuccess'])->name('stripe.payment.success');
-Route::get('/payment/stripe/cancel', [PaymentController::class, 'stripePaymentCancel'])->name('stripe.payment.cancel');
-Route::get('/payment/aamarpay/success', [PaymentController::class, 'aamarpayPaymentSuccess'])->name('aamrpay.payment.success');
-Route::get('/payment/aamarpay/cancel', [PaymentController::class, 'aamarpayPaymentCancel'])->name('aamrpay.payment.cancel');
-Route::post('/payment/aamarpay/fail', [PaymentController::class, 'aamarpayPaymentFail'])->name('aamrpay.payment.fail');
 
 // Guest routes (unauthenticated only)
 Route::middleware(['web', 'guest'])->group(function () {
@@ -173,12 +157,6 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::post('/{webSetting}/update', [WebSettingController::class, 'update'])->name('update');
         Route::get('/{webSetting}/toggle', [WebSettingController::class, 'toggle'])->name('toggle');
         Route::get('/{webSetting}/toggle-ads', [WebSettingController::class, 'AdsToggle'])->name('toggle.ads');
-    });
-
-    // Payment Configuration
-    Route::prefix('payment-config')->name('paymentConfig.')->group(function () {
-        Route::get('/', [PaymentConfigurationController::class, 'index'])->name('index');
-        Route::post('/update', [PaymentConfigurationController::class, 'update'])->name('update');
     });
 
     // Mail Configuration

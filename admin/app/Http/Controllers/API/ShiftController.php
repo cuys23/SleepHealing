@@ -4,7 +4,6 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AlbamResource;
-use App\Repositories\DashboardCategoryRepository;
 use App\Repositories\ShiftRepository;
 
 class ShiftController extends Controller
