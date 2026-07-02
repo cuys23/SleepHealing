@@ -72,8 +72,6 @@ Route::middleware('auth:api')->group(function () {
 
     // Subscriptions
     Route::get('/subscription/plans', [SubscriptionController::class, 'index']);
-    Route::post('/buy/subscription', [SubscriptionController::class, 'buySubscription']);
     Route::post('/get/subscription', [SubscriptionController::class, 'store']);
     Route::get('/my-subscription/plans', [SubscriptionController::class, 'myPlans']);
-    Route::get('/subscription/payment/{transaction_id}', [SubscriptionController::class, 'paymentView']);
 });

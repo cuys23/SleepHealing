@@ -201,6 +201,5 @@ return [
     */
     'update_commands' => [
         'composer update',
-        'php artisan db:seed PaymentGatewaySeeder --force'
     ],
 ];

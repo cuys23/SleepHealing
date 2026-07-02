@@ -15,7 +15,6 @@ import 'package:medyo/widgets/regular_app_bar.dart';
 import 'package:medyo/widgets/screen_wrapper.dart';
 
 import '../../../config/hive_contants.dart';
-import '../../payment/widgets/onlinepaymen_list.dart';
 
 class PremiumSubScreen extends ConsumerStatefulWidget {
   const PremiumSubScreen({super.key});
@@ -110,63 +109,11 @@ class _PremiumSubScreenState extends ConsumerState<PremiumSubScreen> {
                                   return;
                                 }
 
-                                showModalBottomSheet(
-                                  context: context,
-                                  backgroundColor: AppColors.slidePanel,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.vertical(
-                                        top: Radius.circular(16.r)),
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Payment is currently unavailable.'),
                                   ),
-                                  builder: (context) {
-                                    return Padding(
-                                      padding: EdgeInsets.all(16.r),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text("Select Payment Method",
-                                              style: AppTextDecor.bold16White),
-                                          SizedBox(height: 16.h),
-                                          _PaymentMethodContainer(
-                                            ontap: () {
-                                              Navigator.of(context)
-                                                  .pop(); // Optional: if previous bottom sheet is open
-                                              Future.delayed(
-                                                  const Duration(
-                                                      milliseconds: 200), () {
-                                                showModalBottomSheet(
-                                                  context: context,
-                                                  isScrollControlled: true,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.vertical(
-                                                            top:
-                                                                Radius.circular(
-                                                                    16.r)),
-                                                  ),
-                                                  builder: (_) => Padding(
-                                                    padding:
-                                                        EdgeInsets.all(16.r),
-                                                    child:
-                                                        OnlinePaymentMethodList(
-                                                      planId: data.id!,
-                                                    ),
-                                                  ),
-                                                );
-                                              });
-                                              print(
-                                                  "Selected Online - planId: ${data.id}");
-
-                                              print("Selected Online");
-                                            },
-                                            icon:
-                                                "assets/images/online_payment_icon.png",
-                                            isselected: false,
-                                            type: 'Online',
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
                                 );
                               },
                               title: 'Get Premium',
@@ -289,77 +236,3 @@ class PremiumCardTile extends StatelessWidget {
   }
 }
 
-// paymnet method con tainer
-class _PaymentMethodContainer extends StatelessWidget {
-  const _PaymentMethodContainer({
-    required this.icon,
-    required this.type,
-    required this.isselected,
-    this.ontap,
-  });
-  final String icon;
-  final String type;
-  final bool isselected;
-  final Function()? ontap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: ontap,
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          // color: context.isDarkMode ? AppColor.cardBlackBg : Colors.white,
-          border: Border.all(color: AppColors.buttonBorder, width: 1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.h, vertical: 12.h),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Image.asset(
-                    icon,
-                    width: 48.w,
-                    height: 48.h,
-                    fit: BoxFit.cover,
-                  ),
-                  SizedBox(
-                    height: 8.h,
-                  ),
-                  Text(
-                    type,
-                    style: AppTextDecor.bold14White,
-                  ),
-                ],
-              ),
-              Container(
-                width: 20.w,
-                height: 20.h,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: isselected ? AppColors.primaryColor : Colors.grey,
-                    width: 3,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Container(
-                    width: 8.w,
-                    height: 8.h,
-                    decoration: BoxDecoration(
-                      color: isselected ? AppColors.primaryColor : Colors.grey,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

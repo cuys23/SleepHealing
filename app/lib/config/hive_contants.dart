@@ -9,7 +9,6 @@ class AppHSC {
 
   static const String authToken = 'token';
   static const String authTokenType = 'auth_type';
-  static const String stripeCustomerID = 'stripeCustomerID';
 
   //
   static const String firstName = 'name';

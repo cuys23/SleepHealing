@@ -7,7 +7,7 @@ import 'package:medyo/config/app_text_decor.dart';
 import 'package:medyo/features/core/logic/core_provider.dart';
 import 'package:medyo/features/core/models/my_subscription_model/my_subscription_model.dart';
 import 'package:medyo/features/core/views/premium_sub_screen.dart';
-import 'package:medyo/features/payment/widgets/custom_button.dart';
+import 'package:medyo/widgets/buttons/custom_button.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/routes.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
