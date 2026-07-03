@@ -7,6 +7,7 @@ import 'package:medyo/features/auth/logic/auth_provider.dart';
 import 'package:medyo/features/auth/views/auth_screen_wrapper.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/routes.dart';
+import 'package:medyo/widgets/brand_logo.dart';
 import 'package:medyo/widgets/buttons/full_width_button.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
 import 'package:medyo/widgets/regular_app_bar.dart';
@@ -42,7 +43,9 @@ class _ResetPassPhaseOneScreenState
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   AppSpacerH(48.h),
+                   AppSpacerH(24.h),
+                  const Center(child: BrandLogo(size: 56)),
+                  AppSpacerH(24.h),
                   Text(
                     'Reset Password',
                     style: AppTextDecor.bold24White,

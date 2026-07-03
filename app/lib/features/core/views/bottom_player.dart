@@ -57,16 +57,20 @@ class _BottomPlayerControlState extends ConsumerState<BottomPlayerControl> {
                     return Container(
                       height: 80.h,
                       width: 390.w,
-                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      padding: EdgeInsets.symmetric(horizontal: 8.w),
+                      child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12.w),
                       decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                        colors: [
-                          AppColors.darkTeal.withOpacity(0),
-                          AppColors.darkTeal.withOpacity(1)
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(20.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.25),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
                         ],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      )),
+                      ),
                       child: Column(
                         children: [
                           Expanded(
@@ -98,15 +102,15 @@ class _BottomPlayerControlState extends ConsumerState<BottomPlayerControl> {
                                                 Text(
                                                   snapshot.data!.title,
                                                   style:
-                                                      AppTextDecor.bold12White,
+                                                      AppTextDecor.bodyTitle15,
                                                   maxLines: 2,
                                                   overflow:
                                                       TextOverflow.ellipsis,
                                                 ),
                                                 Text(
                                                   snapshot.data!.album ?? '',
-                                                  style: AppTextDecor
-                                                      .regular12White,
+                                                  style:
+                                                      AppTextDecor.caption12,
                                                   maxLines: 1,
                                                   overflow:
                                                       TextOverflow.ellipsis,
@@ -151,11 +155,9 @@ class _BottomPlayerControlState extends ConsumerState<BottomPlayerControl> {
                                             height: 40.h,
                                             width: 40.h,
                                             decoration: BoxDecoration(
+                                              color: AppColors.accentPrimary,
                                               borderRadius:
                                                   BorderRadius.circular(20.h),
-                                              border: Border.all(
-                                                  color: AppColors.lightGeay,
-                                                  width: 1.w),
                                             ),
                                             child: Center(
                                               child: PlayerIconsSmall(
@@ -193,12 +195,15 @@ class _BottomPlayerControlState extends ConsumerState<BottomPlayerControl> {
                                   return Row(
                                     children: [
                                       Text(AppGLF.format(position),
-                                          style: AppTextDecor.regular14White),
+                                          style: AppTextDecor.caption12),
                                       Expanded(
                                         child: SliderTheme(
                                           data: SliderThemeData(
+                                            trackHeight: 3.h,
                                             overlayShape:
                                                 SliderComponentShape.noThumb,
+                                            thumbShape: RoundSliderThumbShape(
+                                                enabledThumbRadius: 5.r),
                                           ),
                                           child: Slider(
                                             value: _isDragging
@@ -213,11 +218,11 @@ class _BottomPlayerControlState extends ConsumerState<BottomPlayerControl> {
                                                                 .inMilliseconds)
                                                         .clamp(0.0, 1.0)
                                                     : 0.0,
-                                            activeColor: AppColors.white,
-                                            thumbColor: AppColors.white,
-                                            inactiveColor: AppColors.white
-                                                .withOpacity(0.5)
-                                                .withOpacity(0.3),
+                                            activeColor:
+                                                AppColors.accentPrimary,
+                                            thumbColor:
+                                                AppColors.accentPrimary,
+                                            inactiveColor: AppColors.divider,
                                             onChangeStart: (value) {
                                               setState(() {
                                                 _isDragging = true;
@@ -249,7 +254,7 @@ class _BottomPlayerControlState extends ConsumerState<BottomPlayerControl> {
                                         totalDuration != null
                                             ? AppGLF.format(totalDuration)
                                             : "0:00",
-                                        style: AppTextDecor.regular14White,
+                                        style: AppTextDecor.caption12,
                                       ),
                                     ],
                                   );
@@ -258,6 +263,7 @@ class _BottomPlayerControlState extends ConsumerState<BottomPlayerControl> {
                             },
                           )
                         ],
+                      ),
                       ),
                     );
                   } else {

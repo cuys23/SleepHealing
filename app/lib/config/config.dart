@@ -10,6 +10,13 @@ class AppConfig {
       'pk_test_2Iu9vNpu2ROjYOb9KHDBa3Hb00KSavaClK';
   static const String currencyCode = "USD";
 
+  //Store links (Invite Friend)
+  static const String androidStoreUrl =
+      'https://play.google.com/store/apps/details?id=com.maditam';
+  // TODO: replace with the real App Store URL (https://apps.apple.com/app/idXXXXXXXXXX) once published.
+  static const String iosStoreUrl =
+      'https://apps.apple.com/app/com.maditam.app';
+
   //Contact US Config
   static const String ctAboutCompany =
       'RazinSoft, Dhaka, 1216'; //Company name And Address

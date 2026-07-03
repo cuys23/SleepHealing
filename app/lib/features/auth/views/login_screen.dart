@@ -14,6 +14,7 @@ import 'package:medyo/features/auth/views/auth_screen_wrapper.dart';
 import 'package:medyo/features/core/logic/core_provider.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/routes.dart';
+import 'package:medyo/widgets/brand_logo.dart';
 import 'package:medyo/widgets/buttons/full_width_button.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
 
@@ -50,26 +51,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   'password': loginBox.get('password')
                 });
               },
-              child: SizedBox(
-                height: 61.h,
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Image.asset(
-                    "assets/images/app_logo.png",
-                    fit: BoxFit.fitHeight,
-                  ),
-                ),
+              child: const Center(
+                child: BrandLogo(size: 72),
               ),
             ),
             AppSpacerH(40.h),
             Text(
               "login_screen.sign_in".tr(),
-              style: AppTextDecor.bold24White,
+              style: AppTextDecor.largeTitle28,
             ),
             AppSpacerH(12.h),
             Text(
               "login_screen.sign_in_text".tr(),
-              style: AppTextDecor.regular18lightGeay,
+              style: AppTextDecor.caption13,
             ),
             AppSpacerH(56.h),
             FormBuilderTextField(
@@ -78,10 +72,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 labelText: "signup_screen.email".tr(),
                 hintText: "signup_screen.hint_email".tr(),
               ),
-              style: AppTextDecor.regular18White,
+              style: AppTextDecor.bodyTitle16,
               validator: FormBuilderValidators.required(),
             ),
-            AppSpacerH(24.h),
+            AppSpacerH(16.h),
             FormBuilderTextField(
               name: "password",
               decoration: AppInputDecor.dgBordered.copyWith(
@@ -97,15 +91,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     obsecureText
                         ? Icons.visibility_off_outlined
                         : Icons.visibility,
-                    color: AppColors.lightGeay,
+                    color: AppColors.textTertiary,
                   ),
                 ),
               ),
-              style: AppTextDecor.regular18White,
+              style: AppTextDecor.bodyTitle16,
               obscureText: obsecureText,
               validator: FormBuilderValidators.required(),
             ),
-            AppSpacerH(24.h),
+            AppSpacerH(16.h),
             Row(
               children: [
                 const Expanded(child: SizedBox()),
@@ -115,8 +109,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   },
                   child: Text(
                     "login_screen.forgot_pass".tr(),
-                    style: AppTextDecor.regular14White
-                        .copyWith(decoration: TextDecoration.underline),
+                    style: AppTextDecor.caption13
+                        .copyWith(color: AppColors.accentPrimary),
                   ),
                 ),
               ],
@@ -199,7 +193,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       text: TextSpan(children: [
                     TextSpan(
                       text: "login_screen.dont_have_acc".tr(),
-                      style: AppTextDecor.regular16White,
+                      style: AppTextDecor.caption13,
                     ),
                     WidgetSpan(
                         child: SizedBox(
@@ -207,8 +201,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     )),
                     TextSpan(
                       text: "signup_screen.sign_up".tr(),
-                      style: AppTextDecor.regular16White
-                          .copyWith(decoration: TextDecoration.underline),
+                      style: AppTextDecor.caption13.copyWith(
+                        color: AppColors.accentPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ]))),
             ),

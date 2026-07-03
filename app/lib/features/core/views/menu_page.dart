@@ -106,7 +106,7 @@ class _MenuPageState extends ConsumerState<MenuPage> {
     _interstitialAd = ad;
   }
 
-  late BannerAd bannerAd;
+  BannerAd? bannerAd;
   bool isloaded = false;
 
   initbannerAd() {
@@ -128,12 +128,12 @@ class _MenuPageState extends ConsumerState<MenuPage> {
       ),
       request: const AdRequest(),
     );
-    bannerAd.load();
+    bannerAd!.load();
   }
 
   @override
   void dispose() {
-    bannerAd.dispose();
+    bannerAd?.dispose();
     _interstitialAd?.dispose();
     super.dispose();
   }
@@ -193,72 +193,9 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                 top: false,
                                 child: CustomScrollView(
                                   slivers: [
-                                    // if (authBox.get(AppHSC.authToken) == null)
                                     SliverToBoxAdapter(
                                       child: SizedBox(
-                                        height: 40.h,
-                                      ),
-                                    ),
-                                    SliverAppBar(
-                                      //floating: false,
-                                      pinned: true,
-                                      backgroundColor: saved == null
-                                          ? AppColors.darkTeal
-                                          : Colors.transparent,
-                                      flexibleSpace: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 20.0, vertical: 8),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            authBox.get(AppHSC.authToken) ==
-                                                    null
-                                                ? TextButton(
-                                                    onPressed: () {
-                                                      context.nav.pushNamed(
-                                                          Routes.loginScreen);
-                                                    },
-                                                    style: TextButton.styleFrom(
-                                                      padding: EdgeInsets.zero,
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        side: const BorderSide(
-                                                          color:
-                                                              AppColors.white,
-                                                          width: 1,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10.r),
-                                                      ),
-                                                      minimumSize:
-                                                          Size(150.w, 50.h),
-                                                      alignment:
-                                                          Alignment.center,
-                                                    ),
-                                                    child: Text(
-                                                      "login_screen.login".tr(),
-                                                      style: const TextStyle(
-                                                        color: Colors.white,
-                                                      ),
-                                                    ),
-                                                  )
-                                                : const SizedBox(),
-                                            GestureDetector(
-                                              onTap: () {
-                                                context.nav.pushNamed(
-                                                    Routes.themechange);
-                                                debugPrint(scene);
-                                              },
-                                              child: SvgPicture.asset(
-                                                "assets/svgs/scene.svg",
-                                                height: 40.h,
-                                                color: AppColors.white,
-                                              ),
-                                            )
-                                          ],
-                                        ),
+                                        height: 0.15.sh,
                                       ),
                                     ),
                                     SliverList(
@@ -300,8 +237,24 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                             children: [
                                               AppSpacerH(8.h),
                                               Text(
-                                                "${"menu_screen.good".tr()} ${AppGLF.getTimeOfDay().tr()}, ${(authBox.get(AppHSC.authToken) != null && userBox.get(AppHSC.firstName) != null && userBox.get(AppHSC.firstName) != '') ? userBox.get(AppHSC.firstName) : 'Guest'}",
-                                                style: AppTextDecor.bold18White,
+                                                "${"menu_screen.good".tr()} ${AppGLF.getTimeOfDay().tr()}".toUpperCase(),
+                                                style: AppTextDecor.caption12,
+                                              ),
+                                              AppSpacerH(4.h),
+                                              Text(
+                                                (authBox.get(AppHSC.authToken) !=
+                                                            null &&
+                                                        userBox.get(AppHSC
+                                                                .firstName) !=
+                                                            null &&
+                                                        userBox.get(AppHSC
+                                                                .firstName) !=
+                                                            '')
+                                                    ? userBox
+                                                        .get(AppHSC.firstName)
+                                                    : 'Guest',
+                                                style:
+                                                    AppTextDecor.largeTitle28,
                                               ),
                                               AppSpacerH(16.h),
                                               ref
@@ -324,15 +277,16 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                                                 const NeverScrollableScrollPhysics(),
                                                             padding:
                                                                 EdgeInsets.zero,
-                                                            crossAxisCount: 4,
+                                                            crossAxisCount: 3,
                                                             crossAxisSpacing:
-                                                                12.w,
+                                                                10.w,
                                                             childAspectRatio:
-                                                                78 / 86,
+                                                                104 / 96,
                                                             mainAxisSpacing:
                                                                 10.h,
                                                             children: _.data
                                                                 .data!.category!
+                                                                .take(6)
                                                                 .map((e) =>
                                                                     AllCatagoriesCard(
                                                                       data: e,
@@ -368,23 +322,20 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                                     }),
                                                     child: Container(
                                                       width: 168.w,
-                                                      height: 32.h,
+                                                      height: 36.h,
                                                       decoration: BoxDecoration(
-                                                          color: Colors
-                                                              .transparent,
+                                                          color: AppColors
+                                                              .inputBg,
                                                           borderRadius:
                                                               BorderRadius
-                                                                  .circular(16),
-                                                          border: Border.all(
-                                                              color: AppColors
-                                                                  .buttonBorder,
-                                                              width: 1.w)),
+                                                                  .circular(
+                                                                      14.r)),
                                                       child: Center(
                                                         child: Text(
                                                           "menu_screen.view_all"
                                                               .tr(),
                                                           style: AppTextDecor
-                                                              .regular12White,
+                                                              .caption13,
                                                           maxLines: 1,
                                                           overflow: TextOverflow
                                                               .ellipsis,
@@ -457,13 +408,14 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                                     MainAxisAlignment
                                                         .spaceBetween,
                                                 children: [
-                                                  Text(
-                                                    "${AppGLF.getTimeOfDay() == "Morning" ? "menu_screen.morning".tr() : AppGLF.getTimeOfDay() == "Afternoon" ? "menu_screen.afternoon".tr() : AppGLF.getTimeOfDay() == "Evening" ? "menu_screen.evening".tr() : "menu_screen.night".tr()} ${"menu_screen.reset".tr()}",
-                                                    style: AppTextDecor
-                                                        .bold14White
-                                                        .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.w700,
+                                                  Expanded(
+                                                    child: Text(
+                                                      "${AppGLF.getTimeOfDay() == "Morning" ? "menu_screen.morning".tr() : AppGLF.getTimeOfDay() == "Afternoon" ? "menu_screen.afternoon".tr() : AppGLF.getTimeOfDay() == "Evening" ? "menu_screen.evening".tr() : "menu_screen.night".tr()} ${"menu_screen.reset".tr()}",
+                                                      style: AppTextDecor
+                                                          .sectionHeader20,
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow
+                                                          .ellipsis,
                                                     ),
                                                   ),
                                                   GestureDetector(
@@ -493,7 +445,10 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                                           "menu_screen.see_all"
                                                               .tr(),
                                                           style: AppTextDecor
-                                                              .regular14lightGeay,
+                                                              .caption13
+                                                              .copyWith(
+                                                                  color: AppColors
+                                                                      .accentPrimary),
                                                         ),
                                                       ),
                                                     ),
@@ -502,7 +457,7 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                               ),
                                               AppSpacerH(8.h),
                                               const DashboardCatagories(),
-                                              isloaded
+                                              isloaded && bannerAd != null
                                                   ? Padding(
                                                       padding: const EdgeInsets
                                                           .symmetric(
@@ -511,11 +466,11 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                                         child: SizedBox(
                                                           width:
                                                               double.infinity,
-                                                          height: bannerAd
+                                                          height: bannerAd!
                                                               .size.height
                                                               .toDouble(),
                                                           child: AdWidget(
-                                                              ad: bannerAd),
+                                                              ad: bannerAd!),
                                                         ),
                                                       ),
                                                     )
@@ -525,15 +480,16 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                                     MainAxisAlignment
                                                         .spaceBetween,
                                                 children: [
-                                                  Text(
-                                                    "menu_screen.recommand"
-                                                        .tr(),
-                                                    style: AppTextDecor
-                                                        .bold14White
-                                                        .copyWith(
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w700),
+                                                  Expanded(
+                                                    child: Text(
+                                                      "menu_screen.recommand"
+                                                          .tr(),
+                                                      style: AppTextDecor
+                                                          .sectionHeader20,
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow
+                                                          .ellipsis,
+                                                    ),
                                                   ),
                                                   GestureDetector(
                                                     onTap: () {
@@ -553,7 +509,10 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                                           "menu_screen.see_all"
                                                               .tr(),
                                                           style: AppTextDecor
-                                                              .regular14lightGeay,
+                                                              .caption13
+                                                              .copyWith(
+                                                                  color: AppColors
+                                                                      .accentPrimary),
                                                         ),
                                                       ),
                                                     ),
@@ -705,7 +664,7 @@ class AppBannerContainer extends StatelessWidget {
               width: 320.w,
               decoration: const BoxDecoration(),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(20.r),
                 child: banner != null
                     ? Image.network(
                         banner!.thumbnail.toString(),
@@ -724,7 +683,7 @@ class AppBannerContainer extends StatelessWidget {
               banner != null
                   ? banner!.title.toString().tr()
                   : "10 Minute Mindfulness Meditation",
-              style: AppTextDecor.bold12White,
+              style: AppTextDecor.bodyTitle15,
             ),
           ],
         ));
@@ -760,7 +719,7 @@ class MostRecommendedCard extends StatelessWidget {
                       height: 160.h,
                       decoration: const BoxDecoration(),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(20.r),
                         child: data != null
                             ? Image.network(
                                 data.thumbnail.toString(),
@@ -779,7 +738,7 @@ class MostRecommendedCard extends StatelessWidget {
                           child: CircleAvatar(
                               maxRadius: 13,
                               backgroundColor:
-                                  AppColors.darkTeal.withOpacity(0.4),
+                                  AppColors.bgPrimary.withOpacity(0.6),
                               child: SvgPicture.asset(
                                 "assets/svgs/lock_icon.svg",
                                 width: 12.w,
@@ -796,23 +755,23 @@ class MostRecommendedCard extends StatelessWidget {
                         data != null
                             ? Text(
                                 data.name.toString().tr(),
-                                style: AppTextDecor.bold12White,
+                                style: AppTextDecor.bodyTitle15,
                               )
                             : Text(
                                 "menu_screen.mindful".tr(),
-                                style: AppTextDecor.bold12White,
+                                style: AppTextDecor.bodyTitle15,
                               ),
                         data != null
                             ? Expanded(
                                 child: Text(
                                   data.description ?? "".tr(),
-                                  style: AppTextDecor.regular12Gray,
+                                  style: AppTextDecor.caption12,
                                   maxLines: 2,
                                 ),
                               )
                             : Text(
                                 "menu_screen.relieve".tr(),
-                                style: AppTextDecor.regular12Gray,
+                                style: AppTextDecor.caption12,
                               ),
                       ],
                     ),
@@ -845,7 +804,7 @@ class AfterNoonResteCard extends StatelessWidget {
         left: 5.h,
         child: CircleAvatar(
           maxRadius: 13,
-          backgroundColor: AppColors.darkTeal.withOpacity(0.4),
+          backgroundColor: AppColors.bgPrimary.withOpacity(0.6),
           child: SvgPicture.asset(
             "assets/svgs/lock_icon.svg",
             width: 12.w,
@@ -876,7 +835,7 @@ class AfterNoonResteCard extends StatelessWidget {
                       height: 160.h,
                       decoration: const BoxDecoration(),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(20.r),
                         child: data != null
                             ? Image.network(
                                 data!.thumbnail.toString(),
@@ -898,17 +857,17 @@ class AfterNoonResteCard extends StatelessWidget {
                       data != null
                           ? Text(
                               data!.name.toString().tr(),
-                              style: AppTextDecor.bold12White,
+                              style: AppTextDecor.bodyTitle15,
                             )
                           : Text(
                               "menu_screen.mindful".tr(),
-                              style: AppTextDecor.bold12White,
+                              style: AppTextDecor.bodyTitle15,
                             ),
                       AppSpacerW(4.w),
                       Text.rich(TextSpan(children: [
                         TextSpan(
                             text: 'menu_screen.daily_meditam'.tr(),
-                            style: AppTextDecor.regular12Gray),
+                            style: AppTextDecor.caption12),
                         WidgetSpan(
                             child: Padding(
                                 padding: EdgeInsets.only(
@@ -919,7 +878,7 @@ class AfterNoonResteCard extends StatelessWidget {
                                 ))),
                         TextSpan(
                             text: 'menu_screen.tamara_lev'.tr(),
-                            style: AppTextDecor.regular12Gray),
+                            style: AppTextDecor.caption12),
                       ])),
                     ],
                   ),
@@ -940,36 +899,39 @@ class AllCatagoriesCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final tint = AppColors.categoryColor(data?.name ?? '');
     return GestureDetector(
         onTap: onTap,
         child: Container(
-          width: 78.w,
-          height: 66.h,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.gray),
-            color: AppColors.gray.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16.r),
+            color: AppColors.surface,
           ),
-          child: Column(children: [
-            AppSpacerH(12.h),
-            data!.icon != null
-                ? Image.network(
-                    data!.icon.toString(),
-                    width: 38.w,
-                    height: 38.h,
-                    //color: AppColors.white,
-                    fit: BoxFit.cover,
-                  )
-                : Image.asset(
-                    "assets/images/home_sgstn_tile_2.png",
-                    fit: BoxFit.cover,
-                  ),
-            AppSpacerH(6.h),
+          padding: EdgeInsets.symmetric(vertical: 12.h),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Container(
+              width: 44.w,
+              height: 44.h,
+              decoration: BoxDecoration(
+                color: tint.withOpacity(0.18),
+                shape: BoxShape.circle,
+              ),
+              child: data!.icon != null
+                  ? Padding(
+                      padding: EdgeInsets.all(10.w),
+                      child: Image.network(
+                        data!.icon.toString(),
+                        fit: BoxFit.contain,
+                      ),
+                    )
+                  : Icon(Icons.spa_outlined, color: tint),
+            ),
+            AppSpacerH(8.h),
             Text(
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               data!.name != null ? data!.name.toString().tr() : "Chill",
-              style: AppTextDecor.regular12White,
+              style: AppTextDecor.caption12,
             )
           ]),
         ));

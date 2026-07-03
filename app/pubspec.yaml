@@ -70,6 +70,7 @@ flutter:
   assets:
     - assets/images/
     - assets/svgs/
+    - assets/branding/
     - assets/sounds/
     - assets/translations/
     - assets/sounds/birds-in-the-morning-24147.mp3
@@ -87,8 +88,21 @@ flutter:
           style: italic
         - asset: assets/fonts/OpenSans-Bold.ttf
           weight: 700
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/Outfit-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Outfit-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Outfit-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Outfit-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Outfit-Bold.ttf
+          weight: 700
 
 flutter_icons:
   android: true
   ios: true
+  remove_alpha_ios: true
   image_path: "assets/images/app_icon.png"

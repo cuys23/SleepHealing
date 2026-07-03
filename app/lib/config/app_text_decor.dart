@@ -23,10 +23,6 @@ class AppTextDecor {
     color: AppColors.lightGeay,
     fontSize: 14.sp,
   );
-  static TextStyle regular14DarkTeal = TextStyle(
-    color: AppColors.darkTeal,
-    fontSize: 14.sp,
-  );
   static TextStyle regular14White = TextStyle(
     color: AppColors.white,
     fontSize: 14.sp,
@@ -114,5 +110,61 @@ class AppTextDecor {
     color: AppColors.white,
     fontSize: 12.sp,
     fontWeight: FontWeight.bold,
+  );
+
+  // ---- Deep Calm design system (Outfit) ----
+  static TextStyle largeTitle28 = TextStyle(
+    fontFamily: 'Outfit',
+    color: AppColors.textPrimary,
+    fontSize: 28.sp,
+    fontWeight: FontWeight.w700,
+  );
+  static TextStyle sectionHeader20 = TextStyle(
+    fontFamily: 'Outfit',
+    color: AppColors.textPrimary,
+    fontSize: 20.sp,
+    fontWeight: FontWeight.w700,
+  );
+  static TextStyle sectionHeader22 = TextStyle(
+    fontFamily: 'Outfit',
+    color: AppColors.textPrimary,
+    fontSize: 22.sp,
+    fontWeight: FontWeight.w700,
+  );
+  static TextStyle bodyTitle15 = TextStyle(
+    fontFamily: 'Outfit',
+    color: AppColors.textPrimary,
+    fontSize: 15.sp,
+    fontWeight: FontWeight.w500,
+  );
+  static TextStyle bodyTitle16 = TextStyle(
+    fontFamily: 'Outfit',
+    color: AppColors.textPrimary,
+    fontSize: 16.sp,
+    fontWeight: FontWeight.w600,
+  );
+  static TextStyle caption12 = TextStyle(
+    fontFamily: 'Outfit',
+    color: AppColors.textSecondary,
+    fontSize: 12.sp,
+    fontWeight: FontWeight.w400,
+  );
+  static TextStyle caption13 = TextStyle(
+    fontFamily: 'Outfit',
+    color: AppColors.textSecondary,
+    fontSize: 13.sp,
+    fontWeight: FontWeight.w500,
+  );
+  static TextStyle tagBadge11 = TextStyle(
+    fontFamily: 'Outfit',
+    color: AppColors.textPrimary,
+    fontSize: 11.sp,
+    fontWeight: FontWeight.w600,
+  );
+  static TextStyle tabBarLabel10 = TextStyle(
+    fontFamily: 'Outfit',
+    color: AppColors.textSecondary,
+    fontSize: 10.sp,
+    fontWeight: FontWeight.w500,
   );
 }

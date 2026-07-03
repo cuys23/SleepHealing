@@ -149,7 +149,7 @@ class AlbumTile extends ConsumerWidget {
                   child: Stack(
                     children: [
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(5.r),
+                        borderRadius: BorderRadius.circular(16.r),
                         child: CachedNetworkImage(
                           imageUrl: albam.thumbnail ?? '',
                           width: 167.w,
@@ -165,8 +165,8 @@ class AlbumTile extends ConsumerWidget {
                           child: Container(
                             padding: EdgeInsets.all(27.r),
                             decoration: BoxDecoration(
-                                color: AppColors.darkTeal.withOpacity(0.75),
-                                borderRadius: BorderRadius.circular(5.r)),
+                                color: AppColors.bgPrimary.withOpacity(0.75),
+                                borderRadius: BorderRadius.circular(16.r)),
                             child: SvgPicture.asset(
                               'assets/svgs/icon_prem_lock.svg',
                               height: 26.h,
@@ -179,7 +179,7 @@ class AlbumTile extends ConsumerWidget {
                 AppSpacerH(8.h),
                 Text(
                   albam.name.toString().tr(),
-                  style: AppTextDecor.semiBold16White,
+                  style: AppTextDecor.bodyTitle15,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
                 ),
@@ -187,7 +187,7 @@ class AlbumTile extends ConsumerWidget {
                 Expanded(
                     child: Text(
                   albam.description ?? "".tr(),
-                  style: AppTextDecor.regular12lightGeay,
+                  style: AppTextDecor.caption12,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
                 ))

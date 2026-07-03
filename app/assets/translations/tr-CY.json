@@ -37,6 +37,15 @@
     "save": "Kaydetmek",
     "solid": "Düz Renk"
   },
+  "explore_screen": {
+    "title": "Keşfet",
+    "featured": "Öne Çıkanlar",
+    "collections": "Koleksiyonlar",
+    "search_hint": "Sesler, seanslar ara...",
+    "no_results": "Sonuç bulunamadı",
+    "collection_of_the_day": "Günün Koleksiyonu",
+    "collection_default_desc": "Özenle seçilmiş sesler ve nazik anlatımla huzurlu anlara sürüklenin."
+  },
   "menu_screen": {
     "good": "İyi",
     "morning": "Sabah",
@@ -56,8 +65,6 @@
   },
   "profile_screen": {
     "send_mail": "Posta göndermek",
-    "change_lang": "Dili değiştir{} ",
-    "select_language": "Dil Seçin",
     "send_code": "Kod gönderildi",
     "invite_friend": "Bir arkadaş davet et",
     "privacy_policy": "Gizlilik Politikası",
