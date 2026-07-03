@@ -10,12 +10,10 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:medyo/config/app_colors.dart';
-import 'package:medyo/config/config.dart';
 import 'package:medyo/config/hive_contants.dart';
 import 'package:medyo/services/audio_service.dart';
 import 'package:medyo/utils/routes.dart';
@@ -144,7 +142,6 @@ void main() async {
     debugPrint('Failed to get FCM token: $e');
   }
   await Hive.initFlutter();
-  Stripe.publishableKey = AppConfig.publishableKey;
   await Hive.openBox(AppHSC.appSettingsBox);
   await Hive.openBox(AppHSC.authBox);
   await Hive.openBox(AppHSC.userBox);

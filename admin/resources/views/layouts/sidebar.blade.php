@@ -86,9 +86,6 @@
                 <li class="{{ request()->routeIs('smsConfig.*') ? 'active' : '' }}">
                     <a href="{{ route('smsConfig.index') }}">SMS config</a>
                 </li>
-                <li class="{{ request()->routeIs('paymentConfig.*') ? 'active' : '' }}">
-                    <a href="{{ route('paymentConfig.index') }}">Payment config</a>
-                </li>
                 <li class="{{ request()->routeIs('mailConfig.*') ? 'active' : '' }}">
                     <a href="{{ route('mailConfig.index') }}">SMTP Config</a>
                 </li>

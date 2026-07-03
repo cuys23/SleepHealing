@@ -24,7 +24,6 @@ import 'package:medyo/features/theme/theme_change.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:page_transition/page_transition.dart';
 
-import '../features/payment/widgets/inweb_viewpayment.dart';
 
 class Routes {
   /*We are mapping all th eroutes here
@@ -54,7 +53,6 @@ class Routes {
   static const mostrecommendedchannel = '/mostrecommendedchannel';
   static const themechange = '/themechange';
   static const menupage = '/menupage';
-  static const webviewPayment = '/webviewPayment';
 }
 
 Route generatedRoutes(RouteSettings settings) {
@@ -115,12 +113,6 @@ Route generatedRoutes(RouteSettings settings) {
       break;
     case Routes.privacyPolicy:
       child = const PrivacyPolicy();
-      break;
-    case Routes.webviewPayment:
-      final arg = settings.arguments! as WebPaymentScreenArg;
-      child = WebPayementScreen(
-        webPaymentScreenAr: arg,
-      );
       break;
     case Routes.allcatagories:
       child = const AllCatagoriesScreen();

@@ -3,13 +3,6 @@ class AppConfig {
   static const String baseUrl = 'http://localhost:9080/api';
   static const String uatbaseUrl = 'http://maditam.razinsoft.com/api';
 
-  //Demo Key
-  static const String paymentSecret =
-      'sk_test_AC8LYQ8cVN0RNGdhZ7G02zWe00lYKYw7LR';
-  static const String publishableKey =
-      'pk_test_2Iu9vNpu2ROjYOb9KHDBa3Hb00KSavaClK';
-  static const String currencyCode = "USD";
-
   //Store links (Invite Friend)
   static const String androidStoreUrl =
       'https://play.google.com/store/apps/details?id=com.maditam';
