@@ -8,6 +8,7 @@ class Albam {
   String? description;
   String? thumbnail;
   bool? isPaid;
+  bool? isNew;
   Category? category;
 
   Albam({
@@ -16,6 +17,7 @@ class Albam {
     this.description,
     this.thumbnail,
     this.isPaid,
+    this.isNew,
     this.category,
   });
 
@@ -25,6 +27,7 @@ class Albam {
         description: data['description'] as String?,
         thumbnail: data['thumbnail'] as String?,
         isPaid: data['is_paid'] as bool?,
+        isNew: data['is_new'] as bool?,
         category: data['category'] == null
             ? null
             : Category.fromMap(data['category'] as Map<String, dynamic>),
@@ -36,6 +39,7 @@ class Albam {
         'description': description,
         'thumbnail': thumbnail,
         'is_paid': isPaid,
+        'is_new': isNew,
         'category': category?.toMap(),
       };
 

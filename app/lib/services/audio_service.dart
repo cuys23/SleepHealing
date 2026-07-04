@@ -1,12 +1,15 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:medyo/features/core/logic/core_provider.dart';
+import 'package:medyo/features/core/logic/player_prefs_provider.dart';
 import 'package:medyo/features/core/models/play_list_model/albam.dart';
 import 'package:medyo/features/theme/misc_provider.dart';
+import 'package:medyo/services/local_storage_service.dart';
 import 'package:medyo/utils/global_function.dart';
 
 final isAudioPaused = StateProvider<bool>((ref) => false);
@@ -79,6 +82,11 @@ class MyAudioHandler extends BaseAudioHandler {
       if (state == ProcessingState.completed &&
           !_isSkippingToNext &&
           _player.playing) {
+        if (ref.read(repeatModeProvider) == RepeatMode.one) {
+          seek(Duration.zero);
+          play();
+          return;
+        }
         _isSkippingToNext = true;
         skipToNext();
       }
@@ -99,6 +107,10 @@ class MyAudioHandler extends BaseAudioHandler {
     ref.read(isAudioPaused.notifier).state = false;
     ref.read(bottomShow.notifier).state = true;
     _startPositionTimer();
+    final item = mediaItem.value;
+    if (item != null) {
+      LocalStorageService.addRecentlyPlayed(item);
+    }
     return _player.play();
   }
 
@@ -106,7 +118,18 @@ class MyAudioHandler extends BaseAudioHandler {
   Future<void> pause() {
     ref.read(isAudioPaused.notifier).state = true;
     _stopPositionTimer();
+    _saveContinueListening();
     return _player.pause();
+  }
+
+  void _saveContinueListening() {
+    final item = mediaItem.value;
+    if (item == null) return;
+    LocalStorageService.saveContinueListening(
+      item: item,
+      position: ref.read(playBackDurationProvider),
+      duration: item.duration ?? ref.read(currentDurationProvider),
+    );
   }
 
   @override
@@ -116,14 +139,39 @@ class MyAudioHandler extends BaseAudioHandler {
     return _player.seek(position);
   }
 
+  int? _nextIndex(List<MusicTrack> playList, int musicIndex, bool goForward) {
+    if (playList.isEmpty) return null;
+    final shuffle = ref.read(isShuffleEnabledProvider);
+    final repeatMode = ref.read(repeatModeProvider);
+
+    if (shuffle && playList.length > 1) {
+      final random = Random();
+      int candidate;
+      do {
+        candidate = random.nextInt(playList.length);
+      } while (candidate == musicIndex);
+      return candidate;
+    }
+
+    if (goForward) {
+      if (musicIndex < playList.length - 1) return musicIndex + 1;
+      if (repeatMode == RepeatMode.all) return 0;
+      return null;
+    } else {
+      if (musicIndex > 0) return musicIndex - 1;
+      if (repeatMode == RepeatMode.all) return playList.length - 1;
+      return null;
+    }
+  }
+
   @override
   Future<void> skipToNext() async {
     ref.read(bottomShow.notifier).state = true;
     final playList = ref.read(currentPlayListProvider);
     final musicIndex = ref.read(selectedMusicIndex);
+    final newIndex = _nextIndex(playList, musicIndex, true);
 
-    if (musicIndex < playList.length - 1) {
-      final newIndex = musicIndex + 1;
+    if (newIndex != null) {
       ref.read(selectedMusicIndex.notifier).state = newIndex;
       await _playNewItem(playList[newIndex], true);
     } else {
@@ -150,9 +198,9 @@ class MyAudioHandler extends BaseAudioHandler {
     ref.read(bottomShow.notifier).state = true;
     final playList = ref.read(currentPlayListProvider);
     final musicIndex = ref.read(selectedMusicIndex);
+    final newIndex = _nextIndex(playList, musicIndex, false);
 
-    if (musicIndex > 0) {
-      final newIndex = musicIndex - 1;
+    if (newIndex != null) {
       ref.read(selectedMusicIndex.notifier).state = newIndex;
       await _playNewItem(playList[newIndex], true);
     }
@@ -208,6 +256,7 @@ class MyAudioHandler extends BaseAudioHandler {
   @override
   Future<void> stop() {
     ref.read(isAudioPaused.notifier).state = false;
+    _saveContinueListening();
     _resetPosition();
     ref.read(playBackDurationProvider.notifier).state = Duration.zero;
     return _player.stop();

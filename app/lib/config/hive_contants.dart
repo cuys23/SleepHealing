@@ -6,6 +6,9 @@ class AppHSC {
   static const String authBox = 'medyo_authBox';
   static const String userBox = 'medyo_userBox';
   static const String loginInfoBox = 'medyo_loginInfoBox';
+  static const String recentlyPlayedBox = 'medyo_recentlyPlayedBox';
+  static const String continueListeningBox = 'medyo_continueListeningBox';
+  static const String playerPrefsBox = 'medyo_playerPrefsBox';
 
   static const String authToken = 'token';
   static const String authTokenType = 'auth_type';

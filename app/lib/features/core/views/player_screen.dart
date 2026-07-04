@@ -9,9 +9,12 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:medyo/config/app_colors.dart';
 import 'package:medyo/config/app_text_decor.dart';
 import 'package:medyo/features/core/logic/core_provider.dart';
+import 'package:medyo/features/core/logic/player_prefs_provider.dart';
+import 'package:medyo/features/core/logic/sleep_timer_provider.dart';
 import 'package:medyo/features/favourites/views/favourites_tab.dart';
 import 'package:medyo/services/ad_helper.dart';
 import 'package:medyo/services/audio_service.dart';
+import 'package:medyo/services/local_storage_service.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/global_function.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
@@ -42,6 +45,20 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   void initState() {
     super.initState();
     initinterad();
+  }
+
+  @override
+  void deactivate() {
+    final audioHandler = ref.read(audioServiceProvider);
+    final item = audioHandler?.mediaItem.value;
+    if (item != null) {
+      LocalStorageService.saveContinueListening(
+        item: item,
+        position: ref.read(playBackDurationProvider),
+        duration: item.duration ?? ref.read(currentDurationProvider),
+      );
+    }
+    super.deactivate();
   }
 
   initinterad() {
@@ -268,10 +285,24 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  // const PlayerIcons(
-                                  //   svgPath: 'assets/svgs/icon_suffle.svg',
-                                  // ),
-                                  const SizedBox(),
+                                  Consumer(
+                                    builder: (context, ref, _) {
+                                      final isShuffle =
+                                          ref.watch(isShuffleEnabledProvider);
+                                      return PlayerIcons(
+                                        onTap: () {
+                                          ref
+                                              .read(isShuffleEnabledProvider
+                                                  .notifier)
+                                              .state = !isShuffle;
+                                        },
+                                        svgPath: 'assets/svgs/icon_suffle.svg',
+                                        color: isShuffle
+                                            ? AppColors.white
+                                            : AppColors.white.withOpacity(0.4),
+                                      );
+                                    },
+                                  ),
                                   PlayerIcons(
                                     onTap: () async {
                                       audioHandler?.skipToPrevious();
@@ -342,12 +373,30 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                         ? 'assets/svgs/icon_previous.svg'
                                         : 'assets/svgs/icon_next.svg',
                                   ),
-                                  const SizedBox(),
-                                  // const PlayerIcons(
-                                  //   svgPath: 'assets/svgs/icon_repeat.svg',
-                                  // ),
+                                  Consumer(
+                                    builder: (context, ref, _) {
+                                      final repeatMode =
+                                          ref.watch(repeatModeProvider);
+                                      return PlayerIcons(
+                                        onTap: () {
+                                          final next = RepeatMode.values[
+                                              (repeatMode.index + 1) %
+                                                  RepeatMode.values.length];
+                                          ref
+                                              .read(repeatModeProvider.notifier)
+                                              .state = next;
+                                        },
+                                        svgPath: 'assets/svgs/icon_repeat.svg',
+                                        color: repeatMode == RepeatMode.off
+                                            ? AppColors.white.withOpacity(0.4)
+                                            : AppColors.white,
+                                      );
+                                    },
+                                  ),
                                 ],
                               ),
+                              AppSpacerH(16.h),
+                              const SleepTimerButton(),
                               Consumer(
                                 builder: (context, ref, _) {
                                   final position =
@@ -452,9 +501,11 @@ class PlayerIcons extends StatelessWidget {
     super.key,
     required this.svgPath,
     this.onTap,
+    this.color,
   });
   final String svgPath;
   final Function()? onTap;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -465,6 +516,7 @@ class PlayerIcons extends StatelessWidget {
         child: SvgPicture.asset(
           svgPath,
           width: 23.h,
+          color: color,
         ),
       ),
     );
@@ -491,6 +543,101 @@ class PlayerIconsSmall extends StatelessWidget {
           width: 12.h,
         ),
       ),
+    );
+  }
+}
+
+class SleepTimerButton extends ConsumerWidget {
+  const SleepTimerButton({super.key});
+
+  static const List<int> options = [15, 30, 45, 60];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final remaining = ref.watch(sleepTimerRemainingProvider);
+
+    return GestureDetector(
+      onTap: () => _openSleepTimerSheet(context, ref),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: AppColors.lightGeay, width: 1.w),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.bedtime_outlined, color: AppColors.white, size: 16.h),
+            AppSpacerW(8.w),
+            Text(
+              remaining != null
+                  ? '${remaining.inMinutes}:${(remaining.inSeconds % 60).toString().padLeft(2, '0')}'
+                  : 'player_screen.sleep_timer'.tr(),
+              style: AppTextDecor.regular14White,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openSleepTimerSheet(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.slidePanel,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (sheetContext) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final activeMinutes = ref.watch(sleepTimerMinutesProvider);
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('player_screen.sleep_timer'.tr(),
+                        style: AppTextDecor.bold18White),
+                    AppSpacerH(16.h),
+                    ...options.map((minutes) => ListTile(
+                          onTap: () {
+                            ref
+                                .read(sleepTimerMinutesProvider.notifier)
+                                .start(minutes);
+                            Navigator.of(sheetContext).pop();
+                          },
+                          title: Text(
+                            '$minutes ${'player_screen.minutes'.tr()}',
+                            style: AppTextDecor.regular16White,
+                          ),
+                          trailing: activeMinutes == minutes
+                              ? const Icon(Icons.check, color: AppColors.white)
+                              : null,
+                        )),
+                    ListTile(
+                      onTap: () {
+                        ref
+                            .read(sleepTimerMinutesProvider.notifier)
+                            .cancelTimer();
+                        Navigator.of(sheetContext).pop();
+                      },
+                      title: Text(
+                        'player_screen.sleep_timer_off'.tr(),
+                        style: AppTextDecor.regular16White,
+                      ),
+                      trailing: activeMinutes == null
+                          ? const Icon(Icons.check, color: AppColors.white)
+                          : null,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

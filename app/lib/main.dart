@@ -147,6 +147,9 @@ void main() async {
   await Hive.openBox(AppHSC.userBox);
   await Hive.openBox(AppHSC.loginInfoBox);
   await Hive.openBox(AppHSC.appBox);
+  await Hive.openBox(AppHSC.recentlyPlayedBox);
+  await Hive.openBox(AppHSC.continueListeningBox);
+  await Hive.openBox(AppHSC.playerPrefsBox);
 
   HttpOverrides.global = MyHttpOverrides();
 

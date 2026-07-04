@@ -50,7 +50,20 @@
     "mindful": "المشي اليقظ",
     "relieve": "تخفيف مشاعر القلق والتوتر",
     "daily_meditam": "ديلي ميديتام",
-    "tamara_lev": "تمارا ليفيت"
+    "tamara_lev": "تمارا ليفيت",
+    "continue_listening": "متابعة الاستماع",
+    "recently_played": "الأخيرة",
+    "new": "جديد"
+  },
+  "player_screen": {
+    "sleep_timer": "مؤقت النوم",
+    "sleep_timer_off": "إيقاف",
+    "minutes": "دقيقة"
+  },
+  "search_screen": {
+    "title": "بحث",
+    "hint": "البحث بالاسم أو الوصف",
+    "no_results": "لا توجد نتائج"
   },
   "profile_screen": {
     "send_mail": "ارسل بريد",

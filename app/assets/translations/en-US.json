@@ -52,7 +52,20 @@
     "mindful": "Mindful Walking",
     "relieve": "Relieve feelings of anxiety \n and tension",
     "daily_meditam": "Daily Meditam",
-    "tamara_lev": "Tamara Levitt"
+    "tamara_lev": "Tamara Levitt",
+    "continue_listening": "Continue Listening",
+    "recently_played": "Recently Played",
+    "new": "New"
+  },
+  "player_screen": {
+    "sleep_timer": "Sleep Timer",
+    "sleep_timer_off": "Off",
+    "minutes": "minutes"
+  },
+  "search_screen": {
+    "title": "Search",
+    "hint": "Search by name or description",
+    "no_results": "No results found"
   },
   "profile_screen": {
     "send_mail": "Send Mail",

@@ -16,6 +16,7 @@ import 'package:medyo/features/core/models/app_banner_list_model/banner.dart';
 import 'package:medyo/features/core/models/category_list_model/category.dart';
 import 'package:medyo/features/core/models/dashboard_category_a_lbums_list/albam.dart'
     as hAlbam;
+import 'package:medyo/features/core/views/home_sections.dart';
 import 'package:medyo/features/theme/misc_provider.dart';
 import 'package:medyo/services/ad_helper.dart';
 import 'package:medyo/utils/context_less_nav.dart';
@@ -245,17 +246,33 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                                     ),
                                                   )
                                                 : const SizedBox(),
-                                            GestureDetector(
-                                              onTap: () {
-                                                context.nav.pushNamed(
-                                                    Routes.themechange);
-                                                debugPrint(scene);
-                                              },
-                                              child: SvgPicture.asset(
-                                                "assets/svgs/scene.svg",
-                                                height: 40.h,
-                                                color: AppColors.white,
-                                              ),
+                                            Row(
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    context.nav.pushNamed(
+                                                        Routes.searchScreen);
+                                                  },
+                                                  child: Icon(
+                                                    Icons.search,
+                                                    size: 28.h,
+                                                    color: AppColors.white,
+                                                  ),
+                                                ),
+                                                AppSpacerW(16.w),
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    context.nav.pushNamed(
+                                                        Routes.themechange);
+                                                    debugPrint(scene);
+                                                  },
+                                                  child: SvgPicture.asset(
+                                                    "assets/svgs/scene.svg",
+                                                    height: 40.h,
+                                                    color: AppColors.white,
+                                                  ),
+                                                ),
+                                              ],
                                             )
                                           ],
                                         ),
@@ -304,6 +321,8 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                                 style: AppTextDecor.bold18White,
                                               ),
                                               AppSpacerH(16.h),
+                                              const ContinueListeningSection(),
+                                              const RecentlyPlayedSection(),
                                               ref
                                                   .watch(categoriessProvider)
                                                   .map(
@@ -647,6 +666,8 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                                               error: _.error),
                                                     ),
                                               ),
+                                              AppSpacerH(16.h),
+                                              const NewFeaturedSection(),
                                             ],
                                           ),
                                         ),
