@@ -35,6 +35,15 @@
     "save": "يحفظ",
     "solid": "لون صلب"
   },
+  "explore_screen": {
+    "title": "استكشف",
+    "featured": "مميز",
+    "collections": "المجموعات",
+    "search_hint": "ابحث عن أصوات، جلسات...",
+    "no_results": "لا توجد نتائج",
+    "collection_of_the_day": "مجموعة اليوم",
+    "collection_default_desc": "انغمس في لحظات هادئة مع أصوات منتقاة وسرد لطيف."
+  },
   "menu_screen": {
     "good": "جيد",
     "morning": "صباح",
@@ -67,8 +76,6 @@
   },
   "profile_screen": {
     "send_mail": "ارسل بريد",
-    "change_lang": "تغيير اللغة{} ",
-    "select_language": "اختار اللغة",
     "send_code": "تم ارسال الكود",
     "invite_friend": "أدع صديقا",
     "privacy_policy": "سياسة الخصوصية",

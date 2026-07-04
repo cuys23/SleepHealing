@@ -257,7 +257,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
                   supportedLocales: context.supportedLocales,
                   locale: context.locale,
                   theme: ThemeData(
-                    fontFamily: "Open Sans",
+                    fontFamily: "Outfit",
                     textSelectionTheme: const TextSelectionThemeData(
                         cursorColor: AppColors.lightGeay),
                   ),

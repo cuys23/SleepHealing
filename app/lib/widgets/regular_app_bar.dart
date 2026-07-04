@@ -12,38 +12,44 @@ class RegularAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        border:
-            Border(bottom: BorderSide(color: AppColors.lightGeay, width: 1)),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.divider, width: 0.5)),
       ),
       child: Column(
         children: [
           AppSpacerH(44.h),
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  context.nav.pop();
-                },
-                child: Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-                  color: Colors.transparent,
-                  child: Icon(
-                    Icons.arrow_back_rounded,
-                    size: 18.h,
-                    color: AppColors.white,
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    context.nav.pop();
+                  },
+                  child: Container(
+                    width: 36.w,
+                    height: 36.h,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.arrow_back_ios_new,
+                      size: 16.sp,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: Text(
-                  title,
-                  style: AppTextDecor.bold18White,
-                  overflow: TextOverflow.ellipsis,
+                AppSpacerW(12.w),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: AppTextDecor.sectionHeader20,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           AppSpacerH(16.h),
         ],

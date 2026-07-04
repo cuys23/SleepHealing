@@ -7,6 +7,7 @@ import 'package:medyo/config/app_text_decor.dart';
 import 'package:medyo/config/hive_contants.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/routes.dart';
+import 'package:medyo/widgets/brand_logo.dart';
 import 'package:medyo/widgets/buttons/full_width_button.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
 import 'package:medyo/widgets/screen_wrapper.dart';
@@ -61,11 +62,7 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
               Center(
                 child: Hero(
                   tag: "LOGO",
-                  child: Image.asset(
-                    "assets/images/app_logo.png",
-                    //height: 125.h,
-                    fit: BoxFit.fill,
-                  ),
+                  child: BrandLogo(size: 96.w, showText: true),
                 ),
               ),
               const Expanded(child: SizedBox()),

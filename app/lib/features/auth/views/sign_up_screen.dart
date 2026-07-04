@@ -14,6 +14,7 @@ import 'package:medyo/features/auth/logic/auth_provider.dart';
 import 'package:medyo/features/auth/views/auth_screen_wrapper.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/routes.dart';
+import 'package:medyo/widgets/brand_logo.dart';
 import 'package:medyo/widgets/buttons/full_width_button.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
 
@@ -37,26 +38,36 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         key: _formkey,
         child: ListView(
           children: [
-            AppSpacerH(59.h),
-            SizedBox(
-              height: 61.h,
-              child: Align(
-                alignment: Alignment.center,
-                child: Image.asset(
-                  "assets/images/app_logo.png",
-                  fit: BoxFit.fitHeight,
+            AppSpacerH(20.h),
+            GestureDetector(
+              onTap: () {
+                context.nav.pushNamedAndRemoveUntil(
+                    Routes.loginScreen, (route) => false);
+              },
+              child: Container(
+                width: 36.w,
+                height: 36.h,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  shape: BoxShape.circle,
                 ),
+                child: Icon(Icons.arrow_back_ios_new,
+                    color: AppColors.textPrimary, size: 16.sp),
               ),
+            ),
+            AppSpacerH(24.h),
+            const Center(
+              child: BrandLogo(size: 72),
             ),
             AppSpacerH(40.h),
             Text(
               "signup_screen.sign_up".tr(),
-              style: AppTextDecor.bold24White,
+              style: AppTextDecor.largeTitle28,
             ),
             AppSpacerH(12.h),
             Text(
               "signup_screen.sign_up_text".tr(),
-              style: AppTextDecor.regular18lightGeay,
+              style: AppTextDecor.caption13,
             ),
             AppSpacerH(56.h),
             FormBuilderTextField(
@@ -65,23 +76,23 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 labelText: "signup_screen.full_name".tr(),
                 hintText: "signup_screen.hint_name".tr(),
               ),
-              style: AppTextDecor.regular18White,
+              style: AppTextDecor.bodyTitle16,
               validator: FormBuilderValidators.required(),
             ),
-            AppSpacerH(24.h),
+            AppSpacerH(16.h),
             FormBuilderTextField(
               name: "email",
               decoration: AppInputDecor.dgBordered.copyWith(
                 labelText: "signup_screen.email".tr(),
                 hintText: "signup_screen.hint_email".tr(),
               ),
-              style: AppTextDecor.regular18White,
+              style: AppTextDecor.bodyTitle16,
               validator: FormBuilderValidators.compose([
                 FormBuilderValidators.required(),
                 FormBuilderValidators.email(),
               ]),
             ),
-            AppSpacerH(24.h),
+            AppSpacerH(16.h),
             FormBuilderTextField(
               name: "password",
               decoration: AppInputDecor.dgBordered.copyWith(
@@ -97,11 +108,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     obsecureText
                         ? Icons.visibility_off_outlined
                         : Icons.visibility,
-                    color: AppColors.lightGeay,
+                    color: AppColors.textTertiary,
                   ),
                 ),
               ),
-              style: AppTextDecor.regular18White,
+              style: AppTextDecor.bodyTitle16,
               obscureText: obsecureText,
               validator: FormBuilderValidators.compose([
                 FormBuilderValidators.required(),
@@ -163,7 +174,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     children: [
                       TextSpan(
                         text: "signup_screen.already_have_acc".tr(),
-                        style: AppTextDecor.regular16White,
+                        style: AppTextDecor.caption13,
                       ),
                       WidgetSpan(
                           child: SizedBox(
@@ -171,8 +182,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       )),
                       TextSpan(
                         text: "login_screen.sign_in".tr(),
-                        style: AppTextDecor.regular16White
-                            .copyWith(decoration: TextDecoration.underline),
+                        style: AppTextDecor.caption13.copyWith(
+                          color: AppColors.accentPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),

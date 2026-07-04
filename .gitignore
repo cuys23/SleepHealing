@@ -6,3 +6,7 @@
 
 # OS
 Thumbs.db
+
+# Production secrets (copy .env.production.example -> .env on the server, never commit it)
+.env
+.env.production
