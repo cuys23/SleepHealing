@@ -30,7 +30,8 @@ class PlayerScreen extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _PlayerScreenState();
 }
 
-class _PlayerScreenState extends ConsumerState<PlayerScreen> {
+class _PlayerScreenState extends ConsumerState<PlayerScreen>
+    with SingleTickerProviderStateMixin {
   late InterstitialAd interad;
   bool isloaded = false;
   bool allowUpdate = true;
@@ -38,10 +39,21 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   bool _isDragging = false;
   double _dragValue = 0.0;
   String? _initializedFor;
+  late final AnimationController _breatheController;
   @override
   void initState() {
     super.initState();
     initinterad();
+    _breatheController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _breatheController.dispose();
+    super.dispose();
   }
 
   initinterad() {
@@ -174,16 +186,24 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                       maxHeight: 600.h,
                       panelBuilder: (controller) => ClipRRect(
                         borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(20.r),
-                            topRight: Radius.circular(20.r)),
+                            topLeft: Radius.circular(24.r),
+                            topRight: Radius.circular(24.r)),
                         child: Container(
                           padding: EdgeInsets.symmetric(
                               horizontal: 20.w, vertical: 20.h),
                           decoration:
-                              const BoxDecoration(color: AppColors.slidePanel),
+                              const BoxDecoration(color: AppColors.surface),
                           child: Column(
                             children: [
-                              AppSpacerH(20.h),
+                              Container(
+                                width: 40.w,
+                                height: 4.h,
+                                decoration: BoxDecoration(
+                                  color: AppColors.divider,
+                                  borderRadius: BorderRadius.circular(2.r),
+                                ),
+                              ),
+                              AppSpacerH(16.h),
                               Expanded(
                                 child: playList.isNotEmpty
                                     ? ListView.builder(
@@ -212,38 +232,57 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                           color: AppColors.darkTeal,
                           child: Column(
                             children: [
-                              Container(
-                                height: 246.h,
-                                width: 246.h,
-                                padding: EdgeInsets.all(12.h),
-                                decoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  borderRadius: BorderRadius.circular(123.h),
-                                  border: Border.all(
-                                      color: AppColors.lightGeay, width: 1.w),
-                                ),
-                                child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(111.h),
-                                    child: CachedNetworkImage(
-                                      imageUrl: media.data != null
-                                          ? media.data!.artUri.toString()
-                                          : "",
-                                      height: 222.h,
-                                      width: 222.h,
-                                      fit: BoxFit.cover,
-                                      errorWidget: (context, url, error) =>
-                                          Image.asset(
-                                        'assets/images/cdlabel.png',
+                              AnimatedBuilder(
+                                animation: _breatheController,
+                                builder: (context, child) {
+                                  final scale = 1.0 +
+                                      (_breatheController.value * 0.05);
+                                  return Transform.scale(
+                                    scale: scale,
+                                    child: child,
+                                  );
+                                },
+                                child: Container(
+                                  height: 260.h,
+                                  width: 260.h,
+                                  padding: EdgeInsets.all(10.h),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(32.r),
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        AppColors.accentPrimary
+                                            .withOpacity(0.35),
+                                        AppColors.accentSecondary
+                                            .withOpacity(0.15),
+                                      ],
+                                    ),
+                                  ),
+                                  child: ClipRRect(
+                                      borderRadius:
+                                          BorderRadius.circular(24.r),
+                                      child: CachedNetworkImage(
+                                        imageUrl: media.data != null
+                                            ? media.data!.artUri.toString()
+                                            : "",
+                                        height: 240.h,
+                                        width: 240.h,
                                         fit: BoxFit.cover,
-                                      ),
-                                    )),
+                                        errorWidget: (context, url, error) =>
+                                            Image.asset(
+                                          'assets/images/cdlabel.png',
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )),
+                                ),
                               ),
                               AppSpacerH(23.h),
                               SizedBox(
                                 width: 340.w,
                                 child: Text(
                                   media.data != null ? media.data!.title : "",
-                                  style: AppTextDecor.regular16White,
+                                  style: AppTextDecor.bodyTitle16,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.center,
@@ -255,7 +294,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                   child: Center(
                                     child: TextScroll(
                                       media.data?.extras?['desc'] ?? "",
-                                      style: AppTextDecor.regular16White,
+                                      style: AppTextDecor.caption13,
                                       textAlign: TextAlign.center,
                                       velocity: const Velocity(
                                           pixelsPerSecond: Offset(30, 0)),
@@ -309,16 +348,24 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                                 }
                                               },
                                               child: Container(
-                                                height: 57.h,
-                                                width: 57.h,
+                                                height: 64.h,
+                                                width: 64.h,
                                                 decoration: BoxDecoration(
+                                                  color:
+                                                      AppColors.accentPrimary,
                                                   borderRadius:
                                                       BorderRadius.circular(
-                                                          28.5.h),
-                                                  border: Border.all(
-                                                      color:
-                                                          AppColors.lightGeay,
-                                                      width: 1.w),
+                                                          32.h),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: AppColors
+                                                          .accentPrimary
+                                                          .withOpacity(0.35),
+                                                      blurRadius: 16,
+                                                      offset:
+                                                          const Offset(0, 4),
+                                                    ),
+                                                  ],
                                                 ),
                                                 child: Center(
                                                   child: PlayerIcons(
@@ -361,8 +408,11 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                             horizontal: 20.w),
                                         child: SliderTheme(
                                           data: SliderThemeData(
+                                            trackHeight: 4.h,
                                             overlayShape:
                                                 SliderComponentShape.noThumb,
+                                            thumbShape: RoundSliderThumbShape(
+                                                enabledThumbRadius: 6.r),
                                           ),
                                           child: Slider(
                                             value: _isDragging
@@ -377,11 +427,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                                                 .inMilliseconds)
                                                         .clamp(0.0, 1.0)
                                                     : 0.0,
-                                            activeColor: AppColors.lightGeay,
-                                            thumbColor: AppColors.lightGeay,
-                                            inactiveColor: AppColors.lightGeay
-                                                .withOpacity(0.5)
-                                                .withOpacity(0.3),
+                                            activeColor:
+                                                AppColors.accentPrimary,
+                                            thumbColor:
+                                                AppColors.accentPrimary,
+                                            inactiveColor:
+                                                AppColors.divider,
                                             onChangeStart: (value) {
                                               setState(() {
                                                 _isDragging = true;
@@ -419,16 +470,14 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                                           children: [
                                             Text(
                                               AppGLF.format(position),
-                                              style:
-                                                  AppTextDecor.regular14White,
+                                              style: AppTextDecor.caption12,
                                             ),
                                             Text(
                                               totalDuration != null
                                                   ? AppGLF.format(
                                                       totalDuration)
                                                   : "0:00",
-                                              style:
-                                                  AppTextDecor.regular14White,
+                                              style: AppTextDecor.caption12,
                                             ),
                                           ],
                                         ),

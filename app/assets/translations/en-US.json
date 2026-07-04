@@ -37,6 +37,15 @@
     "save": "Save",
     "solid": "Solid Color"
   },
+  "explore_screen": {
+    "title": "Explore",
+    "featured": "Featured",
+    "collections": "Collections",
+    "search_hint": "Search sounds, sessions...",
+    "no_results": "No results found",
+    "collection_of_the_day": "Collection of the Day",
+    "collection_default_desc": "Drift into peaceful moments with curated sounds and gentle narration."
+  },
   "menu_screen": {
     "good": "Good",
     "morning": "Morning",
@@ -56,8 +65,6 @@
   },
   "profile_screen": {
     "send_mail": "Send Mail",
-    "change_lang": "Change Language{} ",
-    "select_language": "Select Language",
     "send_code": "Code Sent",
     "invite_friend": "Invite a Friend",
     "privacy_policy": "Privacy Policy",

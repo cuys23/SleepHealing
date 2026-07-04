@@ -1,0 +1,11 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Moon Drop badge — deep indigo circle, crescent moon, meditation drop, stars -->
+  <circle cx="60" cy="60" r="56" fill="#1A1040"/>
+  <circle cx="35" cy="35" r="1.5" fill="#FFFFFF" fill-opacity="0.6"/>
+  <circle cx="85" cy="28" r="1" fill="#FFFFFF" fill-opacity="0.4"/>
+  <circle cx="90" cy="50" r="1.5" fill="#FFFFFF" fill-opacity="0.5"/>
+  <circle cx="28" cy="55" r="1" fill="#FFFFFF" fill-opacity="0.3"/>
+  <path d="M65 25a30 30 0 100 50 25 25 0 010-50z" fill="#E8EAF6"/>
+  <path d="M60 60c-5 8-10 16-10 22a10 10 0 0020 0c0-6-5-14-10-22z" fill="#7C4DFF" fill-opacity="0.8"/>
+  <circle cx="56" cy="76" r="2.5" fill="#FFFFFF" fill-opacity="0.6"/>
+</svg>

@@ -27,26 +27,32 @@ class PLayerAppBar extends ConsumerWidget {
               AppSpacerH(44.h),
               Row(
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      context.nav.pop();
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 20.w, vertical: 10.h),
-                      color: Colors.transparent,
-                      child: Icon(
-                        Icons.arrow_back_rounded,
-                        size: 18.h,
-                        color: AppColors.white,
+                  Padding(
+                    padding: EdgeInsets.only(left: 20.w),
+                    child: GestureDetector(
+                      onTap: () {
+                        context.nav.pop();
+                      },
+                      child: Container(
+                        width: 36.w,
+                        height: 36.h,
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.arrow_back_ios_new,
+                          size: 16.sp,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
                   ),
-
+                  AppSpacerW(12.w),
                   Expanded(
                     child: Text(
                       media.data?.title ?? '',
-                      style: AppTextDecor.bold18White,
+                      style: AppTextDecor.sectionHeader20,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

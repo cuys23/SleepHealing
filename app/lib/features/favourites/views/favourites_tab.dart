@@ -132,16 +132,12 @@ class SongTile extends ConsumerWidget {
                     padding: EdgeInsets.only(bottom: 10.h),
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.r),
+                        borderRadius: BorderRadius.circular(14.r),
                         color: isSelected
-                            ? AppColors.black
-                                .withOpacity(0.2) // selected হলে dark
-                            : AppColors.darkTeal.withOpacity(0.15),
+                            ? AppColors.accentPrimary.withOpacity(0.15)
+                            : AppColors.surface,
                       ),
-                      // color: isSelected
-                      //     ? AppColors.black.withOpacity(0.2)
-                      //     : Colors.transparent),
-                      padding: EdgeInsets.all(5.r),
+                      padding: EdgeInsets.all(8.r),
                       child: Row(
                         children: [
                           ClipRRect(

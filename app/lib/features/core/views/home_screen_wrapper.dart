@@ -1,13 +1,17 @@
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:medyo/config/app_colors.dart';
+import 'package:medyo/config/app_text_decor.dart';
 import 'package:medyo/config/hive_contants.dart';
 import 'package:medyo/features/core/logic/core_provider.dart';
 import 'package:medyo/features/core/views/bottom_player.dart';
-import 'package:medyo/features/core/views/home_page.dart';
+import 'package:medyo/features/core/views/explore_tab.dart';
 import 'package:medyo/features/core/views/menu_page.dart';
 import 'package:medyo/features/profile/views/profile_tab.dart';
 import 'package:medyo/utils/context_less_nav.dart';
@@ -48,46 +52,58 @@ class _HomeScreenWrapperState extends ConsumerState<HomeScreenWrapper> {
           }
           return Scaffold(
             extendBody: true,
-            bottomNavigationBar: Container(
-              height: 60.h,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: AppColors.darkTeal.withOpacity(0.75),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  HomePageBottomBarItem(
-                    onTap: () {
-                      setState(() {
-                        selcetedIndex = 0;
-                        isappbar = true;
-                      });
-                    },
-                    isSelected: selcetedIndex == 0,
-                    svgPath: "assets/svgs/app_icon.svg",
+            bottomNavigationBar: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: Container(
+                  height: 83.h,
+                  width: double.infinity,
+                  padding: EdgeInsets.only(bottom: 20.h, top: 10.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.tabBarBg,
+                    border: Border(
+                      top: BorderSide(color: AppColors.divider, width: 0.5),
+                    ),
                   ),
-                  HomePageBottomBarItem(
-                    onTap: () {
-                      setState(() {
-                        selcetedIndex = 1;
-                        isappbar = true;
-                      });
-                    },
-                    isSelected: selcetedIndex == 1,
-                    svgPath: "assets/svgs/menu_icon.svg",
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      HomePageBottomBarItem(
+                        onTap: () {
+                          setState(() {
+                            selcetedIndex = 0;
+                            isappbar = true;
+                          });
+                        },
+                        isSelected: selcetedIndex == 0,
+                        iconData: CupertinoIcons.home,
+                        label: "Home",
+                      ),
+                      HomePageBottomBarItem(
+                        onTap: () {
+                          setState(() {
+                            selcetedIndex = 1;
+                            isappbar = true;
+                          });
+                        },
+                        isSelected: selcetedIndex == 1,
+                        svgPath: "assets/svgs/menu_icon.svg",
+                        label: "Explore",
+                      ),
+                      HomePageBottomBarItem(
+                        onTap: () {
+                          setState(() {
+                            selcetedIndex = 2;
+                            isappbar = true;
+                          });
+                        },
+                        isSelected: selcetedIndex == 2,
+                        svgPath: "assets/svgs/icon_user.svg",
+                        label: "Profile",
+                      )
+                    ],
                   ),
-                  HomePageBottomBarItem(
-                    onTap: () {
-                      setState(() {
-                        selcetedIndex = 2;
-                        isappbar = true;
-                      });
-                    },
-                    isSelected: selcetedIndex == 2,
-                    svgPath: "assets/svgs/icon_user.svg",
-                  )
-                ],
+                ),
               ),
             ),
             body: Stack(
@@ -113,7 +129,11 @@ class _HomeScreenWrapperState extends ConsumerState<HomeScreenWrapper> {
                       Expanded(
                         child: IndexedStack(
                           index: selcetedIndex,
-                          children: const [MenuPage(), HomeTab(), ProfileTab()],
+                          children: const [
+                            MenuPage(),
+                            ExploreTab(),
+                            ProfileTab()
+                          ],
                         ),
                       ),
                     ],
@@ -121,7 +141,7 @@ class _HomeScreenWrapperState extends ConsumerState<HomeScreenWrapper> {
                 ),
                 AnimatedPositioned(
                     duration: 500.milisec,
-                    bottom: 96.h - ref.watch(bottomPlayerOffset('y')),
+                    bottom: 119.h - ref.watch(bottomPlayerOffset('y')),
                     left: 0 + ref.watch(bottomPlayerOffset('x')),
                     child: const BottomPlayerControl())
               ],
@@ -133,24 +153,47 @@ class _HomeScreenWrapperState extends ConsumerState<HomeScreenWrapper> {
 
 class HomePageBottomBarItem extends StatelessWidget {
   const HomePageBottomBarItem(
-      {super.key, this.onTap, this.isSelected = false, required this.svgPath});
+      {super.key,
+      this.onTap,
+      this.isSelected = false,
+      this.svgPath,
+      this.iconData,
+      required this.label});
   final Function()? onTap;
   final bool isSelected;
-  final String svgPath;
+  final String? svgPath;
+  final IconData? iconData;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
+    final color =
+        isSelected ? AppColors.accentPrimary : AppColors.textSecondary;
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedScale(
-        scale: isSelected ? 1.25 : 1,
-        duration: 200.milisec,
-        child: SvgPicture.asset(
-          svgPath,
-          color: isSelected ? AppColors.white : AppColors.buttonBorder,
-          fit: BoxFit.cover,
-          height: 24.h,
-        ),
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedScale(
+            scale: isSelected ? 1.1 : 1,
+            duration: 200.milisec,
+            child: iconData != null
+                ? Icon(iconData, color: color, size: 22.h)
+                : SvgPicture.asset(
+                    svgPath!,
+                    color: color,
+                    fit: BoxFit.cover,
+                    height: 22.h,
+                  ),
+          ),
+          SizedBox(height: 4.h),
+          AnimatedDefaultTextStyle(
+            duration: 200.milisec,
+            style: AppTextDecor.tabBarLabel10.copyWith(color: color),
+            child: Text(label),
+          ),
+        ],
       ),
     );
   }
