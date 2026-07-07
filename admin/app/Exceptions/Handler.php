@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use League\OAuth2\Server\Exception\OAuthServerException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -22,7 +23,8 @@ class Handler extends ExceptionHandler
      * @var array<int, class-string<\Throwable>>
      */
     protected $dontReport = [
-        //
+        // Passport reports this on every expired/invalid bearer token on public routes, even though it already falls back to guest gracefully.
+        OAuthServerException::class,
     ];
 
     /**

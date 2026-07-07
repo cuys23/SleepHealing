@@ -16,6 +16,7 @@ import 'package:medyo/features/core/models/app_banner_list_model/banner.dart';
 import 'package:medyo/features/core/models/category_list_model/category.dart';
 import 'package:medyo/features/core/models/dashboard_category_a_lbums_list/albam.dart'
     as hAlbam;
+import 'package:medyo/features/core/views/home_sections.dart';
 import 'package:medyo/features/theme/misc_provider.dart';
 import 'package:medyo/services/ad_helper.dart';
 import 'package:medyo/utils/context_less_nav.dart';
@@ -235,6 +236,22 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                             physics:
                                                 const NeverScrollableScrollPhysics(),
                                             children: [
+                                              Align(
+                                                alignment:
+                                                    Alignment.centerRight,
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    context.nav.pushNamed(
+                                                        Routes.searchScreen);
+                                                  },
+                                                  child: Icon(
+                                                    Icons.search,
+                                                    size: 24.h,
+                                                    color:
+                                                        AppColors.textPrimary,
+                                                  ),
+                                                ),
+                                              ),
                                               AppSpacerH(8.h),
                                               Text(
                                                 "${"menu_screen.good".tr()} ${AppGLF.getTimeOfDay().tr()}".toUpperCase(),
@@ -257,6 +274,8 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                                     AppTextDecor.largeTitle28,
                                               ),
                                               AppSpacerH(16.h),
+                                              const ContinueListeningSection(),
+                                              const RecentlyPlayedSection(),
                                               ref
                                                   .watch(categoriessProvider)
                                                   .map(
@@ -606,6 +625,8 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                                               error: _.error),
                                                     ),
                                               ),
+                                              AppSpacerH(16.h),
+                                              const NewFeaturedSection(),
                                             ],
                                           ),
                                         ),

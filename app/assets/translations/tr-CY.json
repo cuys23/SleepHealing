@@ -61,7 +61,20 @@
     "mindful": "Dikkatli Yürüyüş",
     "relieve": "Endişe ve gerginlik duygularını rahatlatın",
     "daily_meditam": "Günlük Meditasyon",
-    "tamara_lev": "Tamara Levitt"
+    "tamara_lev": "Tamara Levitt",
+    "continue_listening": "Dinlemeye Devam Et",
+    "recently_played": "Son Çalınanlar",
+    "new": "Yeni"
+  },
+  "player_screen": {
+    "sleep_timer": "Uyku Zamanlayıcısı",
+    "sleep_timer_off": "Kapalı",
+    "minutes": "dakika"
+  },
+  "search_screen": {
+    "title": "Ara",
+    "hint": "İsim veya açıklamaya göre ara",
+    "no_results": "Sonuç bulunamadı"
   },
   "profile_screen": {
     "send_mail": "Posta göndermek",

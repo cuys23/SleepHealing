@@ -14,6 +14,7 @@ import 'package:medyo/features/core/views/menu_page.dart';
 import 'package:medyo/features/core/views/onboarding_screen.dart';
 import 'package:medyo/features/core/views/player_screen.dart';
 import 'package:medyo/features/core/views/premium_sub_screen.dart';
+import 'package:medyo/features/core/views/search_screen.dart';
 import 'package:medyo/features/core/views/splash_screen.dart';
 import 'package:medyo/features/core/views/sub_category_page.dart';
 import 'package:medyo/features/other/views/contact_us.dart';
@@ -53,6 +54,7 @@ class Routes {
   static const mostrecommendedchannel = '/mostrecommendedchannel';
   static const themechange = '/themechange';
   static const menupage = '/menupage';
+  static const searchScreen = '/searchScreen';
 }
 
 Route generatedRoutes(RouteSettings settings) {
@@ -128,6 +130,9 @@ Route generatedRoutes(RouteSettings settings) {
       break;
     case Routes.menupage:
       child = const MenuPage();
+      break;
+    case Routes.searchScreen:
+      child = const SearchScreen();
       break;
 
     default:
