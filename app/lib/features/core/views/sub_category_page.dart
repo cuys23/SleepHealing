@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,12 +9,15 @@ import 'package:medyo/config/app_colors.dart';
 import 'package:medyo/config/app_text_decor.dart';
 import 'package:medyo/config/hive_contants.dart';
 import 'package:medyo/features/core/logic/core_provider.dart';
+import 'package:medyo/features/core/logic/player_prefs_provider.dart';
 import 'package:medyo/features/core/models/album_list_model/albam.dart';
 import 'package:medyo/features/core/models/category_list_model/category.dart';
 import 'package:medyo/services/ad_helper.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/dialouges.dart';
 import 'package:medyo/utils/routes.dart';
+import 'package:medyo/widgets/artwork_image.dart';
+import 'package:medyo/widgets/buttons/full_width_button.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
 import 'package:medyo/widgets/regular_app_bar.dart';
 import 'package:medyo/widgets/screen_wrapper.dart';
@@ -61,6 +63,40 @@ class _SubCategoryPageState extends ConsumerState<SubCategoryPage> {
     bannerAd.load();
   }
 
+  /// Opens an album exactly like tapping its AlbumTile would - the same,
+  /// already-proven entry point (selectedAlbumProvider + selectedMusicProvider
+  /// "Sub" + Player's own tracksProvider-driven auto-play). Prefers a
+  /// non-paid album so "Play All"/"Shuffle" don't immediately hit a paywall
+  /// dialog when free albums are available.
+  void _openAlbum(Albam album) {
+    ref.read(selectedAlbumProvider.notifier).state = album;
+    ref.read(selectedMusicProvider.notifier).state = "Sub";
+    context.nav.pushNamed(Routes.playerScreen);
+  }
+
+  void _playAll(List<Albam> albums) {
+    if (albums.isEmpty) return;
+    final target = albums.firstWhere((a) => a.isPaid != true,
+        orElse: () => albums.first);
+    if (target.isPaid == true) {
+      showPremiumDialouge(context);
+      return;
+    }
+    _openAlbum(target);
+  }
+
+  void _shuffle(List<Albam> albums) {
+    if (albums.isEmpty) return;
+    final free = albums.where((a) => a.isPaid != true).toList();
+    if (free.isEmpty) {
+      showPremiumDialouge(context);
+      return;
+    }
+    ref.read(isShuffleEnabledProvider.notifier).state = true;
+    free.shuffle();
+    _openAlbum(free.first);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScreenWrapper(
@@ -80,16 +116,35 @@ class _SubCategoryPageState extends ConsumerState<SubCategoryPage> {
                       initial: (_) => const LoadingWidget(),
                       loading: (_) => const LoadingWidget(),
                       loaded: (_) {
-                        return GridView.count(
-                          crossAxisCount: 2,
-                          childAspectRatio: 167 / 240,
-                          crossAxisSpacing: 16.w,
-                          mainAxisSpacing: 16.h,
-                          children: _.data.data!.albams!
-                              .map((e) => AlbumTile(
-                                    albam: e,
-                                  ))
-                              .toList(),
+                        final albums = _.data.data!.albams!;
+                        return CustomScrollView(
+                          slivers: [
+                            SliverToBoxAdapter(
+                              child: _CollectionHero(
+                                category: widget.category,
+                                albumCount: albums.length,
+                                onPlayAll: () => _playAll(albums),
+                                onShuffle: () => _shuffle(albums),
+                              ),
+                            ),
+                            SliverPadding(
+                              padding: EdgeInsets.only(top: 16.h, bottom: 16.h),
+                              sliver: SliverGrid(
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  childAspectRatio: 167 / 240,
+                                  crossAxisSpacing: 16.w,
+                                  mainAxisSpacing: 16.h,
+                                ),
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, index) =>
+                                      AlbumTile(albam: albums[index]),
+                                  childCount: albums.length,
+                                ),
+                              ),
+                            ),
+                          ],
                         );
                       },
                       error: (_) => ErrorTextWidget(error: _.error),
@@ -111,6 +166,137 @@ class _SubCategoryPageState extends ConsumerState<SubCategoryPage> {
                 )
               : Container()),
     ]));
+  }
+}
+
+/// Collection Detail hero (design 07): category art/name/description as a
+/// photographic backdrop, album count, and Play All / Shuffle. All fields
+/// come straight off the existing Category the screen already received -
+/// no new data source.
+class _CollectionHero extends StatelessWidget {
+  const _CollectionHero({
+    required this.category,
+    required this.albumCount,
+    required this.onPlayAll,
+    required this.onShuffle,
+  });
+
+  final Category category;
+  final int albumCount;
+  final VoidCallback onPlayAll;
+  final VoidCallback onShuffle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(top: 16.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20.r),
+            child: SizedBox(
+              width: double.infinity,
+              height: 180.h,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ArtworkImage(
+                    imageUrl: category.thumbnail,
+                    width: double.infinity,
+                    height: 180.h,
+                    borderRadius: BorderRadius.zero,
+                    category: category.name,
+                  ),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.bgPrimary.withOpacity(0.85),
+                          AppColors.bgPrimary.withOpacity(0.1),
+                        ],
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 16.w,
+                    right: 16.w,
+                    bottom: 14.h,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          (category.name ?? '').tr(),
+                          style: AppTextDecor.heading2_22,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if ((category.description ?? '').isNotEmpty) ...[
+                          AppSpacerH(4.h),
+                          Text(
+                            category.description!,
+                            style: AppTextDecor.caption13Muted,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                        AppSpacerH(4.h),
+                        Text(
+                          '$albumCount ${'sub_category_screen.albums'.tr()}',
+                          style: AppTextDecor.caption13Muted,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AppSpacerH(16.h),
+          Row(
+            children: [
+              Expanded(
+                child: AppTextButton(
+                  height: 44.h,
+                  title: 'sub_category_screen.play_all'.tr(),
+                  onTap: onPlayAll,
+                ),
+              ),
+              AppSpacerW(12.w),
+              Expanded(
+                child: GestureDetector(
+                  onTap: onShuffle,
+                  child: Container(
+                    height: 44.h,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(22.r),
+                      border: Border.all(color: AppColors.accentPrimary),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.shuffle,
+                            size: 16.sp, color: AppColors.accentPrimary),
+                        AppSpacerW(6.w),
+                        Text(
+                          'sub_category_screen.shuffle'.tr(),
+                          style: AppTextDecor.bodyTitle15
+                              .copyWith(color: AppColors.accentPrimary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -148,17 +334,12 @@ class AlbumTile extends ConsumerWidget {
                   width: 167.w,
                   child: Stack(
                     children: [
-                      ClipRRect(
+                      ArtworkImage(
+                        imageUrl: albam.thumbnail,
+                        width: 167.w,
+                        height: 143.h,
                         borderRadius: BorderRadius.circular(16.r),
-                        child: CachedNetworkImage(
-                          imageUrl: albam.thumbnail ?? '',
-                          width: 167.w,
-                          height: 143.h,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const LoadingWidget(),
-                          errorWidget: (context, url, error) => ErrorTextWidget(
-                              error: "menu_screen.error_text".tr()),
-                        ),
+                        category: albam.name,
                       ),
                       if (isPaid)
                         Center(

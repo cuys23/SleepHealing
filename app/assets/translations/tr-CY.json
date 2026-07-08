@@ -118,6 +118,11 @@
   "all_categories_screen": {
     "title": "Tüm Kategoriler"
   },
+  "sub_category_screen": {
+    "play_all": "Tümünü Çal",
+    "shuffle": "Karıştır",
+    "albums": "albüm"
+  },
   "profile_screen": {
     "send_mail": "Posta göndermek",
     "send_code": "Kod gönderildi",

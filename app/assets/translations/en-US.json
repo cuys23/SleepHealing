@@ -118,6 +118,11 @@
   "all_categories_screen": {
     "title": "All Categories"
   },
+  "sub_category_screen": {
+    "play_all": "Play All",
+    "shuffle": "Shuffle",
+    "albums": "albums"
+  },
   "profile_screen": {
     "send_mail": "Send Mail",
     "send_code": "Code Sent",
