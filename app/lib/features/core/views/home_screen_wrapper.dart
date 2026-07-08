@@ -14,6 +14,7 @@ import 'package:medyo/features/core/views/bottom_player.dart';
 import 'package:medyo/features/core/views/explore_tab.dart';
 import 'package:medyo/features/core/views/menu_page.dart';
 import 'package:medyo/features/profile/views/profile_tab.dart';
+import 'package:medyo/features/wellness/views/sleep_tracker_screen.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/global_function.dart';
 import 'package:medyo/widgets/home_app_bar.dart';
@@ -98,6 +99,17 @@ class _HomeScreenWrapperState extends ConsumerState<HomeScreenWrapper> {
                           });
                         },
                         isSelected: selcetedIndex == 2,
+                        iconData: Icons.nights_stay_outlined,
+                        label: "Sleep",
+                      ),
+                      HomePageBottomBarItem(
+                        onTap: () {
+                          setState(() {
+                            selcetedIndex = 3;
+                            isappbar = true;
+                          });
+                        },
+                        isSelected: selcetedIndex == 3,
                         svgPath: "assets/svgs/icon_user.svg",
                         label: "Profile",
                       )
@@ -119,7 +131,7 @@ class _HomeScreenWrapperState extends ConsumerState<HomeScreenWrapper> {
                           ? HomeAppBar(
                               onProfiletap: () {
                                 setState(() {
-                                  selcetedIndex = 2;
+                                  selcetedIndex = 3;
                                 });
                               },
                             )
@@ -132,6 +144,7 @@ class _HomeScreenWrapperState extends ConsumerState<HomeScreenWrapper> {
                           children: const [
                             MenuPage(),
                             ExploreTab(),
+                            SleepTrackerScreen(),
                             ProfileTab()
                           ],
                         ),

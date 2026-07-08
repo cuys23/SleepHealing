@@ -112,58 +112,72 @@ class AppTextDecor {
     fontWeight: FontWeight.bold,
   );
 
-  // ---- Deep Calm design system (Outfit) ----
-  static TextStyle largeTitle28 = TextStyle(
-    fontFamily: 'Outfit',
+  // ---- SleepHealing design system (Plus Jakarta Sans) ----
+  static const String _fontFamily = 'Plus Jakarta Sans';
+
+  static TextStyle display40 = TextStyle(
+    fontFamily: _fontFamily,
     color: AppColors.textPrimary,
-    fontSize: 28.sp,
+    fontSize: 40.sp,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -1,
+  );
+  static TextStyle heading1_30 = TextStyle(
+    fontFamily: _fontFamily,
+    color: AppColors.textPrimary,
+    fontSize: 30.sp,
     fontWeight: FontWeight.w700,
   );
-  static TextStyle sectionHeader20 = TextStyle(
-    fontFamily: 'Outfit',
-    color: AppColors.textPrimary,
-    fontSize: 20.sp,
-    fontWeight: FontWeight.w700,
-  );
-  static TextStyle sectionHeader22 = TextStyle(
-    fontFamily: 'Outfit',
+  static TextStyle heading2_22 = TextStyle(
+    fontFamily: _fontFamily,
     color: AppColors.textPrimary,
     fontSize: 22.sp,
     fontWeight: FontWeight.w700,
   );
-  static TextStyle bodyTitle15 = TextStyle(
-    fontFamily: 'Outfit',
+  static TextStyle heading3_17 = TextStyle(
+    fontFamily: _fontFamily,
     color: AppColors.textPrimary,
-    fontSize: 15.sp,
-    fontWeight: FontWeight.w500,
-  );
-  static TextStyle bodyTitle16 = TextStyle(
-    fontFamily: 'Outfit',
-    color: AppColors.textPrimary,
-    fontSize: 16.sp,
+    fontSize: 17.sp,
     fontWeight: FontWeight.w600,
   );
-  static TextStyle caption12 = TextStyle(
-    fontFamily: 'Outfit',
+  static TextStyle body15 = TextStyle(
+    fontFamily: _fontFamily,
     color: AppColors.textSecondary,
-    fontSize: 12.sp,
+    fontSize: 15.sp,
     fontWeight: FontWeight.w400,
   );
-  static TextStyle caption13 = TextStyle(
-    fontFamily: 'Outfit',
-    color: AppColors.textSecondary,
+  static TextStyle caption13Muted = TextStyle(
+    fontFamily: _fontFamily,
+    color: AppColors.textMuted,
     fontSize: 13.sp,
     fontWeight: FontWeight.w500,
   );
+  static TextStyle overline11 = TextStyle(
+    fontFamily: _fontFamily,
+    color: AppColors.textTertiary,
+    fontSize: 11.sp,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 2,
+  );
+
+  // Legacy Deep-Calm-era names kept as aliases so already-migrated screens
+  // keep compiling unchanged; new screens should use the canonical names above.
+  static TextStyle largeTitle28 = heading1_30;
+  static TextStyle sectionHeader20 = heading2_22;
+  static TextStyle sectionHeader22 = heading2_22;
+  static TextStyle bodyTitle15 = body15;
+  static TextStyle bodyTitle16 = heading3_17;
+  static TextStyle caption12 = caption13Muted;
+  static TextStyle caption13 = caption13Muted;
   static TextStyle tagBadge11 = TextStyle(
-    fontFamily: 'Outfit',
+    fontFamily: _fontFamily,
     color: AppColors.textPrimary,
     fontSize: 11.sp,
     fontWeight: FontWeight.w600,
   );
   static TextStyle tabBarLabel10 = TextStyle(
-    fontFamily: 'Outfit',
-    color: AppColors.textSecondary,
+    fontFamily: _fontFamily,
+    color: AppColors.textMuted,
     fontSize: 10.sp,
     fontWeight: FontWeight.w500,
   );

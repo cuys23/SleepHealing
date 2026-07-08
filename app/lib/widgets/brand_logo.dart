@@ -44,7 +44,7 @@ class BrandLogo extends StatelessWidget {
     final wordmark = Text(
       'maditam',
       style: TextStyle(
-        fontFamily: 'Outfit',
+        fontFamily: 'Plus Jakarta Sans',
         fontWeight: FontWeight.w600,
         fontSize: size * 0.34,
         letterSpacing: 3,

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medyo/config/app_colors.dart';
 
-const Color _kActiveDotColor = Color(0xFF8B5CF6);
-
 /// Row of tappable dots reflecting [currentIndex] out of [count].
 /// The active dot elongates (AnimatedContainer) and pops (AnimatedScale).
 class CollectionIndicator extends StatelessWidget {
@@ -39,7 +37,9 @@ class CollectionIndicator extends StatelessWidget {
                 width: isActive ? 20.w : 6.w,
                 height: 6.h,
                 decoration: BoxDecoration(
-                  color: isActive ? _kActiveDotColor : AppColors.textTertiary,
+                  color: isActive
+                      ? AppColors.accentPrimary
+                      : AppColors.textTertiary,
                   borderRadius: BorderRadius.circular(3.r),
                 ),
               ),

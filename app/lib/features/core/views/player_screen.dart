@@ -6,11 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:medyo/config/app_colors.dart';
 import 'package:medyo/config/app_text_decor.dart';
 import 'package:medyo/features/core/logic/core_provider.dart';
 import 'package:medyo/features/core/logic/player_prefs_provider.dart';
 import 'package:medyo/features/core/logic/sleep_timer_provider.dart';
+import 'package:medyo/features/core/models/play_list_model/albam.dart';
+import 'package:medyo/features/favourites/logic/fav_provider.dart';
 import 'package:medyo/features/favourites/views/favourites_tab.dart';
 import 'package:medyo/services/ad_helper.dart';
 import 'package:medyo/services/audio_service.dart';
@@ -19,6 +22,7 @@ import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/global_function.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
 import 'package:medyo/widgets/player_app_bar.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:text_scroll/text_scroll.dart';
 
@@ -181,7 +185,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                             duration: 200.milisec,
                             child: const Icon(
                               Icons.arrow_drop_down,
-                              color: AppColors.white,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                         )),
@@ -294,7 +298,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                                       )),
                                 ),
                               ),
-                              AppSpacerH(23.h),
+                              AppSpacerH(16.h),
+                              const _PlayerWaveform(),
+                              AppSpacerH(16.h),
                               SizedBox(
                                 width: 340.w,
                                 child: Text(
@@ -337,8 +343,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                                         },
                                         svgPath: 'assets/svgs/icon_suffle.svg',
                                         color: isShuffle
-                                            ? AppColors.white
-                                            : AppColors.white.withOpacity(0.4),
+                                            ? AppColors.textPrimary
+                                            : AppColors.textPrimary.withOpacity(0.4),
                                       );
                                     },
                                   ),
@@ -364,7 +370,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                                               child: const Center(
                                                 child:
                                                     CircularProgressIndicator(
-                                                  color: AppColors.white,
+                                                  color: AppColors.textPrimary,
                                                   backgroundColor:
                                                       Colors.transparent,
                                                 ),
@@ -435,8 +441,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                                         },
                                         svgPath: 'assets/svgs/icon_repeat.svg',
                                         color: repeatMode == RepeatMode.off
-                                            ? AppColors.white.withOpacity(0.4)
-                                            : AppColors.white,
+                                            ? AppColors.textPrimary.withOpacity(0.4)
+                                            : AppColors.textPrimary,
                                       );
                                     },
                                   ),
@@ -444,6 +450,14 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                               ),
                               AppSpacerH(16.h),
                               const SleepTimerButton(),
+                              AppSpacerH(16.h),
+                              _PlayerBottomActions(
+                                track: (musicIndex >= 0 &&
+                                        musicIndex < playList.length)
+                                    ? playList[musicIndex]
+                                    : null,
+                                trackTitle: media.data?.title,
+                              ),
                               Consumer(
                                 builder: (context, ref, _) {
                                   final position =
@@ -545,6 +559,147 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
   }
 }
 
+/// Purely decorative animated bars — not driven by real playback amplitude
+/// data (the audio engine doesn't expose that). TODO(audio): wire to real
+/// amplitude samples if/when the player exposes them.
+class _PlayerWaveform extends StatefulWidget {
+  const _PlayerWaveform();
+
+  @override
+  State<_PlayerWaveform> createState() => _PlayerWaveformState();
+}
+
+class _PlayerWaveformState extends State<_PlayerWaveform>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1500),
+  )..repeat();
+
+  static const _barHeights = [
+    14.0, 22.0, 28.0, 18.0, 24.0, 30.0, 20.0, 26.0, 16.0, 22.0, 12.0
+  ];
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 32.h,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(_barHeights.length, (index) {
+              final phase =
+                  (_controller.value + index * 0.09) % 1.0;
+              final scale = 0.5 + 0.5 * (0.5 - (phase - 0.5).abs()) * 2;
+              return Padding(
+                padding: EdgeInsets.symmetric(horizontal: 1.5.w),
+                child: Container(
+                  width: 3.w,
+                  height: _barHeights[index].h * scale,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(2.r),
+                    color: index.isEven
+                        ? AppColors.accentPrimary
+                        : AppColors.accentSecondary,
+                  ),
+                ),
+              );
+            }),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Bottom action row (Saved / Download / Share) shown below the sleep-timer
+/// chip, matching the design's Now Playing screen. Saved uses the existing
+/// real favourites API. Download has no backing service yet (downloads_page
+/// is a UI stub with no data source) so it surfaces an honest "coming soon"
+/// message rather than pretending to work.
+/// TODO(backend): wire Download once an offline-cache/download service exists.
+class _PlayerBottomActions extends ConsumerWidget {
+  const _PlayerBottomActions({required this.track, required this.trackTitle});
+
+  final MusicTrack? track;
+  final String? trackTitle;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _ActionItem(
+          icon: track != null && track!.isfavorite == true
+              ? Icons.favorite
+              : Icons.favorite_border,
+          label: 'player_screen.saved'.tr(),
+          iconColor: track != null && track!.isfavorite == true
+              ? AppColors.accentPrimary
+              : AppColors.textMuted,
+          onTap: track == null
+              ? null
+              : () => ref
+                  .read(favunfavProvider(track!.id.toString()).notifier)
+                  .favUnFav(),
+        ),
+        _ActionItem(
+          icon: Icons.file_download_outlined,
+          label: 'player_screen.download'.tr(),
+          onTap: () => EasyLoading.showInfo('player_screen.download_soon'.tr()),
+        ),
+        _ActionItem(
+          icon: Icons.ios_share_outlined,
+          label: 'player_screen.share'.tr(),
+          onTap: trackTitle == null
+              ? null
+              : () => Share.share(trackTitle!),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionItem extends StatelessWidget {
+  const _ActionItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.iconColor,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+  final Color? iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 20.h, color: iconColor ?? AppColors.textMuted),
+          AppSpacerH(3.h),
+          Text(label,
+              style: AppTextDecor.tagBadge11
+                  .copyWith(color: iconColor ?? AppColors.textMuted)),
+        ],
+      ),
+    );
+  }
+}
+
 class PlayerIcons extends StatelessWidget {
   const PlayerIcons({
     super.key,
@@ -611,18 +766,22 @@ class SleepTimerButton extends ConsumerWidget {
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: AppColors.lightGeay, width: 1.w),
+          color: AppColors.accentPrimary.withOpacity(0.12),
+          border: Border.all(
+              color: AppColors.accentPrimary.withOpacity(0.25), width: 1.w),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.bedtime_outlined, color: AppColors.white, size: 16.h),
+            Icon(Icons.bedtime_outlined,
+                color: AppColors.textSecondary, size: 16.h),
             AppSpacerW(8.w),
             Text(
               remaining != null
                   ? '${remaining.inMinutes}:${(remaining.inSeconds % 60).toString().padLeft(2, '0')}'
                   : 'player_screen.sleep_timer'.tr(),
-              style: AppTextDecor.regular14White,
+              style: AppTextDecor.tagBadge11
+                  .copyWith(color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -633,7 +792,7 @@ class SleepTimerButton extends ConsumerWidget {
   void _openSleepTimerSheet(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.slidePanel,
+      backgroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
@@ -662,7 +821,7 @@ class SleepTimerButton extends ConsumerWidget {
                             style: AppTextDecor.regular16White,
                           ),
                           trailing: activeMinutes == minutes
-                              ? const Icon(Icons.check, color: AppColors.white)
+                              ? const Icon(Icons.check, color: AppColors.textPrimary)
                               : null,
                         )),
                     ListTile(
@@ -677,7 +836,7 @@ class SleepTimerButton extends ConsumerWidget {
                         style: AppTextDecor.regular16White,
                       ),
                       trailing: activeMinutes == null
-                          ? const Icon(Icons.check, color: AppColors.white)
+                          ? const Icon(Icons.check, color: AppColors.textPrimary)
                           : null,
                     ),
                   ],

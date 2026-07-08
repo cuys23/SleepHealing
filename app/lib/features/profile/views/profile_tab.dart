@@ -12,6 +12,8 @@ import 'package:medyo/config/app_text_decor.dart';
 import 'package:medyo/config/config.dart';
 import 'package:medyo/config/hive_contants.dart';
 import 'package:medyo/features/auth/logic/auth_provider.dart';
+import 'package:medyo/features/wellness/mock/achievements_mock_data.dart';
+import 'package:medyo/features/wellness/mock/profile_stats_mock_data.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/dialouges.dart';
 import 'package:medyo/utils/routes.dart';
@@ -69,7 +71,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                                             borderRadius:
                                                 BorderRadius.circular(32.h),
                                             border: Border.all(
-                                                color: AppColors.white,
+                                                color: AppColors.textPrimary,
                                                 width: 1.w)),
                                         height: 64.h,
                                         width: 64.h,
@@ -87,7 +89,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                                             decoration: BoxDecoration(
                                                 borderRadius:
                                                     BorderRadius.circular(12.h),
-                                                color: AppColors.white),
+                                                color: AppColors.textPrimary),
                                             child: Center(
                                                 child: Icon(
                                               Icons.camera_alt,
@@ -110,14 +112,14 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                                           child: Icon(
                                             Icons.person,
                                             size: 64.h,
-                                            color: AppColors.white,
+                                            color: AppColors.textPrimary,
                                           )),
                                       Container(
                                         decoration: BoxDecoration(
                                           borderRadius:
                                               BorderRadius.circular(32.h),
                                           border: Border.all(
-                                            color: AppColors.white,
+                                            color: AppColors.textPrimary,
                                             width: 1.w,
                                           ),
                                         ),
@@ -137,7 +139,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                                     children: [
                                       Text(
                                         "${userBox.get(AppHSC.firstName)}",
-                                        style: AppTextDecor.bold18White,
+                                        style: AppTextDecor.heading3_17,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -146,8 +148,8 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                                           Expanded(
                                             child: Text(
                                               "${userBox.get(AppHSC.email)}",
-                                              style: AppTextDecor
-                                                  .regular14lightGeay,
+                                              style:
+                                                  AppTextDecor.caption13Muted,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                             ),
@@ -213,24 +215,34 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                                     padding: EdgeInsets.zero,
                                     shape: RoundedRectangleBorder(
                                       side: const BorderSide(
-                                        color: AppColors.white,
+                                        color: AppColors.accentPrimary,
                                         width: 1,
                                       ),
-                                      borderRadius: BorderRadius.circular(10.r),
+                                      borderRadius: BorderRadius.circular(14.r),
                                     ),
                                     minimumSize: Size(150.w, 50.h),
                                     alignment: Alignment.center,
                                   ),
                                   child: Text(
                                     "login_screen.login".tr(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                    ),
+                                    style: AppTextDecor.bodyTitle16,
                                   ),
                                 ),
                         ],
                       ),
                     ),
+                    if (authbox.get(AppHSC.authToken) != null) ...[
+                      AppSpacerH(20.h),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: _ProfileStatsRow(),
+                      ),
+                      AppSpacerH(20.h),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: _AchievementsRow(),
+                      ),
+                    ],
                     AppSpacerH(24.h),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -275,6 +287,15 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                                                   const FavouritesTab()));
                                     },
                                   ),
+                                ProfileTabWidget(
+                                  iconOverride: Icons.settings_outlined,
+                                  svgPath: "",
+                                  title: "settings_screen.title".tr(),
+                                  onTap: () {
+                                    context.nav
+                                        .pushNamed(Routes.settingsScreen);
+                                  },
+                                ),
                                 ProfileTabWidget(
                                   svgPath: "assets/svgs/icon_share.svg",
                                   title: "profile_screen.invite_friend".tr(),
@@ -367,6 +388,79 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                 );
               });
         });
+  }
+}
+
+/// Nights-tracked / hours-listened / streak stats. No aggregation backend
+/// exists yet — see profile_stats_mock_data.dart TODO.
+class _ProfileStatsRow extends StatelessWidget {
+  const _ProfileStatsRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: profileStatsMock
+          .map((stat) => Expanded(
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 3.w),
+                  padding: EdgeInsets.symmetric(vertical: 12.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(stat.value, style: AppTextDecor.heading3_17),
+                      AppSpacerH(2.h),
+                      Text(stat.labelKey.tr(),
+                          style: AppTextDecor.tagBadge11
+                              .copyWith(color: AppColors.textMuted)),
+                    ],
+                  ),
+                ),
+              ))
+          .toList(),
+    );
+  }
+}
+
+/// Achievement badges. No unlock-tracking backend exists yet — every badge
+/// renders in its locked state. See achievements_mock_data.dart TODO.
+class _AchievementsRow extends StatelessWidget {
+  const _AchievementsRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('profile_screen.achievements'.tr(),
+            style: AppTextDecor.heading3_17),
+        AppSpacerH(10.h),
+        Row(
+          children: achievementBadgesMock
+              .map((badge) => Padding(
+                    padding: EdgeInsets.only(right: 10.w),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 44.w,
+                          height: 44.w,
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(14.r),
+                            border: Border.all(color: AppColors.divider),
+                          ),
+                          child: Icon(badge.icon,
+                              color: AppColors.textTertiary, size: 20.sp),
+                        ),
+                      ],
+                    ),
+                  ))
+              .toList(),
+        ),
+      ],
+    );
   }
 }
 

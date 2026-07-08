@@ -23,27 +23,32 @@ class AppColors {
   static const Color stoneGray = Color(0xFF343025); // 343025
   static const Color brownShade = Color(0xFF342525); // 342525
 
-  // ---- Deep Calm design system ----
-  static const Color bgPrimary = Color(0xFF0A0E27);
-  static const Color bgAlt = Color(0xFF131833);
-  static const Color surface = Color(0xFF1A1F3D);
-  static const Color accentPrimary = Color(0xFF7C4DFF);
-  static const Color accentSecondary = Color(0xFF00BFA5);
-  static const Color textPrimary = Color(0xFFE8EAF6);
-  static const Color textSecondary = Color(0x99E8EAF6); // rgba(232,234,246,0.6)
-  static const Color textTertiary = Color(0x4DE8EAF6); // rgba(232,234,246,0.3)
-  static const Color danger = Color(0xFFFF3B30);
+  // ---- SleepHealing design system (v1.0, SleepHealing.dc.html) ----
+  static const Color bgPrimary = Color(0xFF080810); // Midnight
+  static const Color bgAlt = Color(0xFF12121F); // Deep Indigo
+  static const Color surface = Color(0xFF1A1A2E); // Indigo Night
+  static const Color twilight = Color(0xFF222240); // Twilight — card-on-card
+  static const Color accentPrimary = Color(0xFF7C6DF0); // Soft Purple
+  static const Color accentSecondary = Color(0xFF5EB8EF); // Sky Blue
+  static const Color mint = Color(0xFF4ECFA5);
+  static const Color softGold = Color(0xFFE8C76A);
+  static const Color rose = Color(0xFFF06D9C);
+  static const Color textPrimary = Color(0xFFF0EEF5); // Soft White
+  static const Color textSecondary = Color(0xFFB8A9F0); // Lavender — body text
+  static const Color textMuted = Color(0xFF7D7A96); // captions/metadata
+  static const Color textTertiary = Color(0xFF4A4766); // overline/disabled
+  static const Color danger = Color(0xFFF06D9C); // Rose
   static const Color divider = Color(0x14FFFFFF); // rgba(255,255,255,0.08)
-  static const Color inputBg = Color(0x12FFFFFF); // rgba(255,255,255,0.07)
-  static const Color tabBarBg = Color(0xD90A0E27); // rgba(10,14,39,0.85)
+  static const Color inputBg = Color(0x0DFFFFFF); // rgba(255,255,255,0.05)
+  static const Color tabBarBg = Color(0xF0080810); // rgba(8,8,16,0.94)
 
-  // Category accent colors (Deep Calm spec)
-  static const Color categorySleep = Color(0xFF7E57C2);
-  static const Color categoryBreathe = Color(0xFF26A69A);
-  static const Color categoryFocus = Color(0xFFFFA726);
-  static const Color categoryRelax = Color(0xFF66BB6A);
-  static const Color categoryAnxiety = Color(0xFF42A5F5);
-  static const Color categoryKids = Color(0xFFFFCA28);
+  // Category accent colors (SleepHealing spec — reuse core accents)
+  static const Color categorySleep = accentPrimary;
+  static const Color categoryBreathe = mint;
+  static const Color categoryFocus = softGold;
+  static const Color categoryRelax = mint;
+  static const Color categoryAnxiety = accentSecondary;
+  static const Color categoryKids = softGold;
 
   /// Keyword-based lookup so this degrades gracefully as category names change.
   static Color categoryColor(String name) {

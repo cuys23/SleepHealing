@@ -48,7 +48,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         Container(
           height: 844.h,
           width: 390.w,
-          color: AppColors.bgPrimary,
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment(0, -0.3),
+              radius: 0.9,
+              colors: [Color(0xFF1A1040), AppColors.bgPrimary],
+              stops: [0, 0.7],
+            ),
+          ),
         ),
         Center(
           child: Hero(

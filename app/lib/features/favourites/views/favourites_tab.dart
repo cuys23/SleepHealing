@@ -260,7 +260,7 @@ class SongTile extends ConsumerWidget {
                                     ),
                                     AppSpacerW(10.w),
                                     Text(
-                                      '${track.duration}',
+                                      track.duration ?? '',
                                       style: AppTextDecor.regular14White,
                                     ),
                                   ],

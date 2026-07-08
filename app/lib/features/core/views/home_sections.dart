@@ -47,9 +47,9 @@ class ContinueListeningSection extends ConsumerWidget {
             child: Container(
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: AppColors.gray.withOpacity(0.1),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: AppColors.gray.withOpacity(0.3)),
+                border: Border.all(color: AppColors.divider),
               ),
               child: Row(
                 children: [
@@ -63,7 +63,7 @@ class ContinueListeningSection extends ConsumerWidget {
                       errorWidget: (context, url, error) => Container(
                         width: 56.w,
                         height: 56.h,
-                        color: AppColors.gray.withOpacity(0.2),
+                        color: AppColors.surface,
                       ),
                     ),
                   ),
@@ -73,11 +73,11 @@ class ContinueListeningSection extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('menu_screen.continue_listening'.tr(),
-                            style: AppTextDecor.regular12Gray),
+                            style: AppTextDecor.caption13Muted),
                         AppSpacerH(4.h),
                         Text(
                           data['title']?.toString() ?? '',
-                          style: AppTextDecor.bold14White,
+                          style: AppTextDecor.bodyTitle16,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -87,8 +87,8 @@ class ContinueListeningSection extends ConsumerWidget {
                           child: LinearProgressIndicator(
                             value: progress,
                             minHeight: 3.h,
-                            backgroundColor: AppColors.gray.withOpacity(0.3),
-                            color: AppColors.white,
+                            backgroundColor: AppColors.divider,
+                            color: AppColors.accentPrimary,
                           ),
                         ),
                       ],
@@ -96,7 +96,7 @@ class ContinueListeningSection extends ConsumerWidget {
                   ),
                   AppSpacerW(8.w),
                   const Icon(Icons.play_circle_fill,
-                      color: AppColors.white, size: 32),
+                      color: AppColors.textPrimary, size: 32),
                 ],
               ),
             ),
@@ -124,8 +124,7 @@ class RecentlyPlayedSection extends ConsumerWidget {
           children: [
             Text(
               'menu_screen.recently_played'.tr(),
-              style: AppTextDecor.bold14White
-                  .copyWith(fontWeight: FontWeight.w700),
+              style: AppTextDecor.heading3_17,
             ),
             AppSpacerH(8.h),
             SizedBox(
@@ -156,14 +155,14 @@ class RecentlyPlayedSection extends ConsumerWidget {
                               errorWidget: (context, url, error) => Container(
                                 width: 140.w,
                                 height: 120.h,
-                                color: AppColors.gray.withOpacity(0.2),
+                                color: AppColors.surface,
                               ),
                             ),
                           ),
                           AppSpacerH(8.h),
                           Text(
                             item['title']?.toString() ?? '',
-                            style: AppTextDecor.bold12White,
+                            style: AppTextDecor.tagBadge11,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -216,8 +215,7 @@ class NewFeaturedSection extends ConsumerWidget {
       children: [
         Text(
           'menu_screen.new'.tr(),
-          style:
-              AppTextDecor.bold14White.copyWith(fontWeight: FontWeight.w700),
+          style: AppTextDecor.heading3_17,
         ),
         AppSpacerH(8.h),
         SizedBox(
@@ -258,7 +256,7 @@ class NewFeaturedSection extends ConsumerWidget {
                               errorWidget: (context, url, error) => Container(
                                 width: 160.w,
                                 height: 160.h,
-                                color: AppColors.gray.withOpacity(0.2),
+                                color: AppColors.surface,
                               ),
                             ),
                           ),
@@ -282,7 +280,7 @@ class NewFeaturedSection extends ConsumerWidget {
                       AppSpacerH(8.h),
                       Text(
                         data.name?.toString().tr() ?? '',
-                        style: AppTextDecor.bold12White,
+                        style: AppTextDecor.tagBadge11,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

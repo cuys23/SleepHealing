@@ -236,21 +236,38 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                             physics:
                                                 const NeverScrollableScrollPhysics(),
                                             children: [
-                                              Align(
-                                                alignment:
-                                                    Alignment.centerRight,
-                                                child: GestureDetector(
-                                                  onTap: () {
-                                                    context.nav.pushNamed(
-                                                        Routes.searchScreen);
-                                                  },
-                                                  child: Icon(
-                                                    Icons.search,
-                                                    size: 24.h,
-                                                    color:
-                                                        AppColors.textPrimary,
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      context.nav.pushNamed(
+                                                          Routes
+                                                              .notificationsScreen);
+                                                    },
+                                                    child: Icon(
+                                                      Icons
+                                                          .notifications_none_rounded,
+                                                      size: 24.h,
+                                                      color: AppColors
+                                                          .textPrimary,
+                                                    ),
                                                   ),
-                                                ),
+                                                  AppSpacerW(16.w),
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      context.nav.pushNamed(
+                                                          Routes.searchScreen);
+                                                    },
+                                                    child: Icon(
+                                                      Icons.search,
+                                                      size: 24.h,
+                                                      color: AppColors
+                                                          .textPrimary,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                               AppSpacerH(8.h),
                                               Text(
