@@ -201,15 +201,14 @@ class _BreathingScreenState extends State<BreathingScreen>
                 onTap: () => context.nav.pop(),
                 child: Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  height: 48.h,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.06),
-                    borderRadius: BorderRadius.circular(14.r),
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(24.r),
                   ),
-                  child: Center(
-                    child: Text('breathing_screen.end_session'.tr(),
-                        style: AppTextDecor.bodyTitle16),
-                  ),
+                  child: Text('breathing_screen.end_session'.tr(),
+                      style: AppTextDecor.bodyTitle16),
                 ),
               ),
               AppSpacerH(12.h),
