@@ -57,11 +57,11 @@ class _AppTextButtonState extends State<AppTextButton> {
                     end: Alignment.bottomRight,
                   )
                 : null,
-            borderRadius: BorderRadius.circular(14.r),
+            borderRadius: BorderRadius.circular(27.r),
             boxShadow: [
               BoxShadow(
-                color: shadowColor.withOpacity(0.3),
-                blurRadius: 24,
+                color: shadowColor.withOpacity(0.38),
+                blurRadius: 28,
                 offset: const Offset(0, 8),
               ),
             ],

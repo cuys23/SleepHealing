@@ -28,8 +28,8 @@ class AppColors {
   static const Color bgAlt = Color(0xFF12121F); // Deep Indigo
   static const Color surface = Color(0xFF1A1A2E); // Indigo Night
   static const Color twilight = Color(0xFF222240); // Twilight — card-on-card
-  static const Color accentPrimary = Color(0xFF7C6DF0); // Soft Purple
-  static const Color accentSecondary = Color(0xFF5EB8EF); // Sky Blue
+  static const Color accentPrimary = Color(0xFF7A5FE3); // Soft Purple
+  static const Color accentSecondary = Color(0xFF3E82D6); // Sky Blue
   static const Color mint = Color(0xFF4ECFA5);
   static const Color softGold = Color(0xFFE8C76A);
   static const Color rose = Color(0xFFF06D9C);

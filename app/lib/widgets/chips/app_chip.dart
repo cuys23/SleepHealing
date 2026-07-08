@@ -24,7 +24,7 @@ class AppChip extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.r),
+          borderRadius: BorderRadius.circular(20.r),
           color: selected
               ? AppColors.accentPrimary.withOpacity(0.15)
               : Colors.white.withOpacity(0.04),
