@@ -11,7 +11,13 @@
     "page2_title": "TODO: İlerlemenizi Takip Edin",
     "page2_text": "TODO placeholder metni — gerçek sayfa 2 içeriğiyle değiştirin",
     "page3_title": "TODO: Topluluğa Katılın",
-    "page3_text": "TODO placeholder metni — gerçek sayfa 3 içeriğiyle değiştirin"
+    "page3_text": "TODO placeholder metni — gerçek sayfa 3 içeriğiyle değiştirin",
+    "bullet1_title": "Daha İyi Uyku",
+    "bullet1_text": "Uyku kalitesini artırın",
+    "bullet2_title": "İyileşen Zihin",
+    "bullet2_text": "Stresi ve kaygıyı azaltın",
+    "bullet3_title": "Günlük Gelişim",
+    "bullet3_text": "Sağlıklı alışkanlıklar edinin"
   },
   "login_screen": {
     "sign_in": "Sign In",

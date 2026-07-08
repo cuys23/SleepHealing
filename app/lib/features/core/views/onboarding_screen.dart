@@ -25,6 +25,44 @@ class _OnboardingPageData {
   final Gradient gradient;
 }
 
+class _OnboardingBullet {
+  const _OnboardingBullet({
+    required this.icon,
+    required this.tint,
+    required this.titleKey,
+    required this.textKey,
+  });
+
+  final IconData icon;
+  final Color tint;
+  final String titleKey;
+  final String textKey;
+}
+
+/// Feature highlights shown under the headline on the first onboarding page
+/// only (matches the design's "Welcome" gate). Pages 2-3 keep their existing
+/// TODO placeholder copy untouched — not this phase's concern.
+const _welcomeBullets = [
+  _OnboardingBullet(
+    icon: Icons.nights_stay_rounded,
+    tint: AppColors.accentPrimary,
+    titleKey: 'onboarding_screen.bullet1_title',
+    textKey: 'onboarding_screen.bullet1_text',
+  ),
+  _OnboardingBullet(
+    icon: Icons.favorite_rounded,
+    tint: AppColors.mint,
+    titleKey: 'onboarding_screen.bullet2_title',
+    textKey: 'onboarding_screen.bullet2_text',
+  ),
+  _OnboardingBullet(
+    icon: Icons.eco_rounded,
+    tint: AppColors.softGold,
+    titleKey: 'onboarding_screen.bullet3_title',
+    textKey: 'onboarding_screen.bullet3_text',
+  ),
+];
+
 const _pages = [
   _OnboardingPageData(
     titleKey: 'onboarding_screen.page1_title',
@@ -117,7 +155,11 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
               padding: EdgeInsets.symmetric(horizontal: 24.w).copyWith(
                 bottom: 36.h,
               ),
-              child: Column(
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+                alignment: Alignment.topCenter,
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
@@ -131,6 +173,10 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
                     textAlign: TextAlign.center,
                     style: AppTextDecor.body15.copyWith(height: 1.6),
                   ),
+                  if (_pageIndex == 0) ...[
+                    AppSpacerH(20.h),
+                    _WelcomeBulletCard(bullets: _welcomeBullets),
+                  ],
                   AppSpacerH(24.h),
                   CollectionIndicator(
                     count: _pages.length,
@@ -149,6 +195,7 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
                     onTap: _onCtaTap,
                   ),
                 ],
+                ),
               ),
             ),
           ],
@@ -210,6 +257,77 @@ class _OnboardingOrbState extends State<_OnboardingOrb>
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Rounded glassy card listing the "Better Sleep / Healing Mind / Daily
+/// Growth" feature bullets from the design's Welcome screen.
+class _WelcomeBulletCard extends StatelessWidget {
+  const _WelcomeBulletCard({required this.bullets});
+
+  final List<_OnboardingBullet> bullets;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      decoration: BoxDecoration(
+        color: AppColors.surface.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        children: [
+          for (var i = 0; i < bullets.length; i++) ...[
+            if (i != 0) Divider(height: 1, color: AppColors.divider),
+            _WelcomeBulletRow(bullet: bullets[i]),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _WelcomeBulletRow extends StatelessWidget {
+  const _WelcomeBulletRow({required this.bullet});
+
+  final _OnboardingBullet bullet;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 12.h),
+      child: Row(
+        children: [
+          Container(
+            width: 36.w,
+            height: 36.w,
+            decoration: BoxDecoration(
+              color: bullet.tint.withOpacity(0.16),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Icon(bullet.icon, size: 18.sp, color: bullet.tint),
+          ),
+          AppSpacerW(12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  bullet.titleKey.tr(),
+                  style: AppTextDecor.bodyTitle15
+                      .copyWith(fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  bullet.textKey.tr(),
+                  style: AppTextDecor.caption13Muted,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

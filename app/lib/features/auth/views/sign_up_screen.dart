@@ -55,114 +55,122 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     color: AppColors.textPrimary, size: 16.sp),
               ),
             ),
-            AppSpacerH(24.h),
+            AppSpacerH(20.h),
             const Center(
-              child: BrandLogo(size: 72),
+              child: BrandLogo(size: 64),
             ),
-            AppSpacerH(40.h),
+            AppSpacerH(28.h),
             Text(
               "signup_screen.sign_up".tr(),
+              textAlign: TextAlign.center,
               style: AppTextDecor.largeTitle28,
             ),
-            AppSpacerH(12.h),
+            AppSpacerH(10.h),
             Text(
               "signup_screen.sign_up_text".tr(),
+              textAlign: TextAlign.center,
               style: AppTextDecor.caption13,
             ),
-            AppSpacerH(56.h),
-            FormBuilderTextField(
-              name: "name",
-              decoration: AppInputDecor.dgBordered.copyWith(
-                labelText: "signup_screen.full_name".tr(),
-                hintText: "signup_screen.hint_name".tr(),
-              ),
-              style: AppTextDecor.bodyTitle16,
-              validator: FormBuilderValidators.required(),
-            ),
-            AppSpacerH(16.h),
-            FormBuilderTextField(
-              name: "email",
-              decoration: AppInputDecor.dgBordered.copyWith(
-                labelText: "signup_screen.email".tr(),
-                hintText: "signup_screen.hint_email".tr(),
-              ),
-              style: AppTextDecor.bodyTitle16,
-              validator: FormBuilderValidators.compose([
-                FormBuilderValidators.required(),
-                FormBuilderValidators.email(),
-              ]),
-            ),
-            AppSpacerH(16.h),
-            FormBuilderTextField(
-              name: "password",
-              decoration: AppInputDecor.dgBordered.copyWith(
-                labelText: "signup_screen.password".tr(),
-                hintText: "signup_screen.hint_pass".tr(),
-                suffixIcon: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      obsecureText = !obsecureText;
-                    });
-                  },
-                  child: Icon(
-                    obsecureText
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility,
-                    color: AppColors.textTertiary,
+            AppSpacerH(32.h),
+            _AuthCard(
+              child: Column(
+                children: [
+                  FormBuilderTextField(
+                    name: "name",
+                    decoration: AppInputDecor.dgBordered.copyWith(
+                      labelText: "signup_screen.full_name".tr(),
+                      hintText: "signup_screen.hint_name".tr(),
+                    ),
+                    style: AppTextDecor.bodyTitle16,
+                    validator: FormBuilderValidators.required(),
                   ),
-                ),
-              ),
-              style: AppTextDecor.bodyTitle16,
-              obscureText: obsecureText,
-              validator: FormBuilderValidators.compose([
-                FormBuilderValidators.required(),
-                FormBuilderValidators.minLength(4),
-              ]),
-            ),
-            AppSpacerH(40.h),
-            ref.watch(registerProvider).map(initial: (_) {
-              return AppTextButton(
-                title: "signup_screen.sign_up".tr(),
-                onTap: () {
-                  if (_formkey.currentState!.saveAndValidate()) {
-                    final formValue = _formkey.currentState!.value;
+                  AppSpacerH(16.h),
+                  FormBuilderTextField(
+                    name: "email",
+                    decoration: AppInputDecor.dgBordered.copyWith(
+                      labelText: "signup_screen.email".tr(),
+                      hintText: "signup_screen.hint_email".tr(),
+                    ),
+                    style: AppTextDecor.bodyTitle16,
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                      FormBuilderValidators.email(),
+                    ]),
+                  ),
+                  AppSpacerH(16.h),
+                  FormBuilderTextField(
+                    name: "password",
+                    decoration: AppInputDecor.dgBordered.copyWith(
+                      labelText: "signup_screen.password".tr(),
+                      hintText: "signup_screen.hint_pass".tr(),
+                      suffixIcon: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            obsecureText = !obsecureText;
+                          });
+                        },
+                        child: Icon(
+                          obsecureText
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility,
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
+                    ),
+                    style: AppTextDecor.bodyTitle16,
+                    obscureText: obsecureText,
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                      FormBuilderValidators.minLength(4),
+                    ]),
+                  ),
+                  AppSpacerH(24.h),
+                  ref.watch(registerProvider).map(initial: (_) {
+                    return AppTextButton(
+                      title: "signup_screen.sign_up".tr(),
+                      onTap: () {
+                        if (_formkey.currentState!.saveAndValidate()) {
+                          final formValue = _formkey.currentState!.value;
 
-                    ref.watch(registerProvider.notifier).register(
-                        name: formValue["name"],
-                        email: formValue["email"],
-                        password: formValue["password"]);
-                  }
-                },
-              );
-            }, error: (_) {
-              Future.delayed(50.milisec).then((e) {
-                ref.invalidate(registerProvider);
-              });
-              Future.delayed(50.milisec).then((e) {
-                EasyLoading.showError(_.error.toString());
-              });
-              return ErrorTextWidget(error: _.error);
-            }, loading: (_) {
-              return const LoadingWidget();
-            }, loaded: (_) {
-              Future.delayed(50.milisec).then((e) {
-                final Box authBox = Hive.box(
-                  AppHSC.authBox,
-                ); //Stores Auth Data
-                final Box userBox = Hive.box(
-                  AppHSC.userBox,
-                );
-                authBox.putAll(_.data.data!.access!.toMap());
-                userBox.putAll(_.data.data!.user!.toMap());
-                ref.invalidate(registerProvider);
-                context.nav.pushNamedAndRemoveUntil(
-                    Routes.homeScreen, (route) => false);
-              });
-              return const AppTextButton(
-                title: "Success",
-              );
-            }),
-            AppSpacerH(100.h),
+                          ref.watch(registerProvider.notifier).register(
+                              name: formValue["name"],
+                              email: formValue["email"],
+                              password: formValue["password"]);
+                        }
+                      },
+                    );
+                  }, error: (_) {
+                    Future.delayed(50.milisec).then((e) {
+                      ref.invalidate(registerProvider);
+                    });
+                    Future.delayed(50.milisec).then((e) {
+                      EasyLoading.showError(_.error.toString());
+                    });
+                    return ErrorTextWidget(error: _.error);
+                  }, loading: (_) {
+                    return const LoadingWidget();
+                  }, loaded: (_) {
+                    Future.delayed(50.milisec).then((e) {
+                      final Box authBox = Hive.box(
+                        AppHSC.authBox,
+                      ); //Stores Auth Data
+                      final Box userBox = Hive.box(
+                        AppHSC.userBox,
+                      );
+                      authBox.putAll(_.data.data!.access!.toMap());
+                      userBox.putAll(_.data.data!.user!.toMap());
+                      ref.invalidate(registerProvider);
+                      context.nav.pushNamedAndRemoveUntil(
+                          Routes.homeScreen, (route) => false);
+                    });
+                    return const AppTextButton(
+                      title: "Success",
+                    );
+                  }),
+                ],
+              ),
+            ),
+            AppSpacerH(80.h),
             Center(
               child: GestureDetector(
                 onTap: () {
@@ -196,5 +204,26 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         ),
       ),
     ));
+  }
+}
+
+/// Rounded glassy container for the auth form fields, matching the design's
+/// card style (translucent surface fill, soft border, generous radius).
+class _AuthCard extends StatelessWidget {
+  const _AuthCard({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: AppColors.surface.withOpacity(0.55),
+        borderRadius: BorderRadius.circular(24.r),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: child,
+    );
   }
 }

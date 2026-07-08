@@ -11,7 +11,13 @@
     "page2_title": "TODO: Track Your Progress",
     "page2_text": "TODO placeholder copy — replace with real page 2 content",
     "page3_title": "TODO: Join the Community",
-    "page3_text": "TODO placeholder copy — replace with real page 3 content"
+    "page3_text": "TODO placeholder copy — replace with real page 3 content",
+    "bullet1_title": "Better Sleep",
+    "bullet1_text": "Improve sleep quality",
+    "bullet2_title": "Healing Mind",
+    "bullet2_text": "Reduce stress & anxiety",
+    "bullet3_title": "Daily Growth",
+    "bullet3_text": "Build healthy habits"
   },
   "login_screen": {
     "sign_in": "Sign In",

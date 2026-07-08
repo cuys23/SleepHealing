@@ -33,6 +33,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final Box loginBox = Hive.box(
     AppHSC.loginInfoBox,
   );
+
+  void _submitLogin() {
+    if (_formkey.currentState!.saveAndValidate()) {
+      final formValue = _formkey.currentState!.value;
+
+      loginBox.putAll(formValue);
+
+      ref.watch(loginProvider.notifier).login(
+          email: formValue["email"], password: formValue["password"]);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AuthScreenWrapper(
@@ -42,7 +54,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         key: _formkey,
         child: ListView(
           children: [
-            AppSpacerH(59.h),
+            AppSpacerH(52.h),
             GestureDetector(
               onDoubleTap: () {
                 debugPrint(loginBox.toMap().toString());
@@ -52,118 +64,124 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 });
               },
               child: const Center(
-                child: BrandLogo(size: 72),
+                child: BrandLogo(size: 64),
               ),
             ),
-            AppSpacerH(40.h),
+            AppSpacerH(28.h),
             Text(
               "login_screen.sign_in".tr(),
+              textAlign: TextAlign.center,
               style: AppTextDecor.largeTitle28,
             ),
-            AppSpacerH(12.h),
+            AppSpacerH(10.h),
             Text(
               "login_screen.sign_in_text".tr(),
+              textAlign: TextAlign.center,
               style: AppTextDecor.caption13,
             ),
-            AppSpacerH(56.h),
-            FormBuilderTextField(
-              name: "email",
-              decoration: AppInputDecor.dgBordered.copyWith(
-                labelText: "signup_screen.email".tr(),
-                hintText: "signup_screen.hint_email".tr(),
-              ),
-              style: AppTextDecor.bodyTitle16,
-              validator: FormBuilderValidators.required(),
-            ),
-            AppSpacerH(16.h),
-            FormBuilderTextField(
-              name: "password",
-              decoration: AppInputDecor.dgBordered.copyWith(
-                labelText: "signup_screen.password".tr(),
-                hintText: "signup_screen.hint_pass".tr(),
-                suffixIcon: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      obsecureText = !obsecureText;
+            AppSpacerH(32.h),
+            _AuthCard(
+              child: Column(
+                children: [
+                  FormBuilderTextField(
+                    name: "email",
+                    decoration: AppInputDecor.dgBordered.copyWith(
+                      labelText: "signup_screen.email".tr(),
+                      hintText: "signup_screen.hint_email".tr(),
+                    ),
+                    style: AppTextDecor.bodyTitle16,
+                    validator: FormBuilderValidators.required(),
+                  ),
+                  AppSpacerH(16.h),
+                  FormBuilderTextField(
+                    name: "password",
+                    decoration: AppInputDecor.dgBordered.copyWith(
+                      labelText: "signup_screen.password".tr(),
+                      hintText: "signup_screen.hint_pass".tr(),
+                      suffixIcon: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            obsecureText = !obsecureText;
+                          });
+                        },
+                        child: Icon(
+                          obsecureText
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility,
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
+                    ),
+                    style: AppTextDecor.bodyTitle16,
+                    obscureText: obsecureText,
+                    validator: FormBuilderValidators.required(),
+                  ),
+                  AppSpacerH(12.h),
+                  Row(
+                    children: [
+                      const Expanded(child: SizedBox()),
+                      GestureDetector(
+                        onTap: () {
+                          context.nav
+                              .pushNamed(Routes.resetPassPhaseOneScreen);
+                        },
+                        child: Text(
+                          "login_screen.forgot_pass".tr(),
+                          style: AppTextDecor.caption13
+                              .copyWith(color: AppColors.accentPrimary),
+                        ),
+                      ),
+                    ],
+                  ),
+                  AppSpacerH(24.h),
+                  ref.watch(loginProvider).map(initial: (_) {
+                    return AppTextButton(
+                      title: "login_screen.login".tr(),
+                      onTap: _submitLogin,
+                    );
+                  }, error: (_) {
+                    Future.delayed(2000.milisec).then((e) {
+                      ref.invalidate(loginProvider);
                     });
-                  },
-                  child: Icon(
-                    obsecureText
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility,
-                    color: AppColors.textTertiary,
-                  ),
-                ),
+                    return Column(
+                      children: [
+                        ErrorTextWidget(error: _.error),
+                        AppSpacerH(16.h),
+                        AppTextButton(
+                          title: "login_screen.login".tr(),
+                          onTap: _submitLogin,
+                        ),
+                      ],
+                    );
+                  }, loading: (_) {
+                    return const LoadingWidget();
+                  }, loaded: (_) {
+                    Future.delayed(50.milisec).then((e) {
+                      final Box authBox = Hive.box(
+                        AppHSC.authBox,
+                      ); //Stores Auth Data
+                      final Box userBox = Hive.box(
+                        AppHSC.userBox,
+                      );
+                      authBox.putAll(_.data.data!.access!.toMap());
+                      userBox.putAll(_.data.data!.user!.toMap());
+                      ref.invalidate(loginProvider);
+                      ref.refresh(categoriessProvider);
+                      ref.refresh(dashboardcategoryalbumListProvider(
+                          AppGLF.getTimeOfDay().toLowerCase()));
+                      ref.refresh(dashboardcategoryalbumListProvider(
+                          'Most Recomanded'));
+                      context.nav.pushNamedAndRemoveUntil(
+                          Routes.homeScreen, (route) => false);
+                    });
+                    return const AppTextButton(
+                      title: "Success",
+                    );
+                  }),
+                ],
               ),
-              style: AppTextDecor.bodyTitle16,
-              obscureText: obsecureText,
-              validator: FormBuilderValidators.required(),
             ),
-            AppSpacerH(16.h),
-            Row(
-              children: [
-                const Expanded(child: SizedBox()),
-                GestureDetector(
-                  onTap: () {
-                    context.nav.pushNamed(Routes.resetPassPhaseOneScreen);
-                  },
-                  child: Text(
-                    "login_screen.forgot_pass".tr(),
-                    style: AppTextDecor.caption13
-                        .copyWith(color: AppColors.accentPrimary),
-                  ),
-                ),
-              ],
-            ),
-            AppSpacerH(40.h),
-            ref.watch(loginProvider).map(initial: (_) {
-              return AppTextButton(
-                title: "login_screen.login".tr(),
-                onTap: () {
-                  if (_formkey.currentState!.saveAndValidate()) {
-                    final formValue = _formkey.currentState!.value;
-
-                    loginBox.putAll(formValue);
-
-                    ref.watch(loginProvider.notifier).login(
-                        email: formValue["email"],
-                        password: formValue["password"]);
-                  }
-                },
-              );
-            }, error: (_) {
-              Future.delayed(2000.milisec).then((e) {
-                ref.invalidate(loginProvider);
-              });
-              print("=====error ${_.error} ");
-              return AppTextButton(title: _.error);
-            }, loading: (_) {
-              return const LoadingWidget();
-            }, loaded: (_) {
-              Future.delayed(50.milisec).then((e) {
-                final Box authBox = Hive.box(
-                  AppHSC.authBox,
-                ); //Stores Auth Data
-                final Box userBox = Hive.box(
-                  AppHSC.userBox,
-                );
-                authBox.putAll(_.data.data!.access!.toMap());
-                userBox.putAll(_.data.data!.user!.toMap());
-                ref.invalidate(loginProvider);
-                ref.invalidate(loginProvider);
-                ref.refresh(categoriessProvider);
-                ref.refresh(dashboardcategoryalbumListProvider(
-                    AppGLF.getTimeOfDay().toLowerCase()));
-                ref.refresh(
-                    dashboardcategoryalbumListProvider('Most Recomanded'));
-                context.nav.pushNamedAndRemoveUntil(
-                    Routes.homeScreen, (route) => false);
-              });
-              return const AppTextButton(
-                title: "Success",
-              );
-            }),
-            const AppSpacerH(20),
+            AppSpacerH(24.h),
             // AppTextButton(
             //   title: "Facebook Login",
             //   onTap: () async {
@@ -182,7 +200,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             //     }
             //   },
             // ),
-            AppSpacerH(120.h),
+            AppSpacerH(80.h),
             Center(
               child: GestureDetector(
                   onTap: () {
@@ -212,5 +230,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
       ),
     ));
+  }
+}
+
+/// Rounded glassy container for the auth form fields, matching the design's
+/// card style (translucent surface fill, soft border, generous radius).
+class _AuthCard extends StatelessWidget {
+  const _AuthCard({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: AppColors.surface.withOpacity(0.55),
+        borderRadius: BorderRadius.circular(24.r),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: child,
+    );
   }
 }
