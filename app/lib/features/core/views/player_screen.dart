@@ -415,8 +415,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                                                     BoxShadow(
                                                       color: AppColors
                                                           .accentPrimary
-                                                          .withOpacity(0.35),
-                                                      blurRadius: 16,
+                                                          .withOpacity(0.45),
+                                                      blurRadius: 28,
+                                                      spreadRadius: 2,
                                                       offset:
                                                           const Offset(0, 4),
                                                     ),
@@ -778,7 +779,7 @@ class PlayerIconsSmall extends StatelessWidget {
 class SleepTimerButton extends ConsumerWidget {
   const SleepTimerButton({super.key});
 
-  static const List<int> options = [15, 30, 45, 60];
+  static const List<int> options = [10, 20, 30, 45, 60];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

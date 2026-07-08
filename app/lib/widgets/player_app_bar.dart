@@ -146,7 +146,7 @@ class PLayerAppBar extends ConsumerWidget {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5.r),
                                 ),
-                                foregroundColor: Colors.black,
+                                foregroundColor: AppColors.textPrimary,
                               ),
                               onPressed: () {
                                 Navigator.push(
@@ -163,7 +163,7 @@ class PLayerAppBar extends ConsumerWidget {
                               child: SvgPicture.asset(
                                 "assets/svgs/read more.svg",
                                 width: 30,
-                                color: Colors.white,
+                                color: AppColors.textPrimary,
                               )
                               // Text(
                               //   "see more",

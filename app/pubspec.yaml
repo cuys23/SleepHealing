@@ -49,6 +49,12 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  # Test-only: easy_localization reads/writes the saved locale via
+  # shared_preferences, so widget tests need SharedPreferences.setMockInitialValues.
+  # Version pinned to what's already resolved transitively (pubspec.lock) - no
+  # actual version change for the app itself.
+  shared_preferences: 2.3.2
+
   flutter_lints: ^4.0.0
   freezed: ^2.5.7
   flutter_launcher_icons: ^0.13.1
