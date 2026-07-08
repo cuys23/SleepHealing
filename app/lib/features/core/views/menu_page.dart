@@ -25,6 +25,31 @@ import 'package:medyo/utils/global_function.dart';
 import 'package:medyo/utils/routes.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
 
+/// Honorifics that sometimes precede a full name in the `firstName` field
+/// (e.g. seeded dev data returning "Miss Luella Emmerich DVM"). Skipped so
+/// the greeting shows an actual first name instead of a title.
+const _honorifics = {
+  'mr', 'mr.', 'mrs', 'mrs.', 'ms', 'ms.', 'miss', 'dr', 'dr.', 'prof',
+  'prof.',
+};
+
+/// First-name-only greeting. Some backends (incl. the seeded dev data) put a
+/// full name/title into the `firstName` field, so only the first non-title
+/// token is shown to keep the greeting on one line.
+String _greetingName(Box authBox, Box userBox) {
+  final rawName = userBox.get(AppHSC.firstName);
+  final loggedIn = authBox.get(AppHSC.authToken) != null &&
+      rawName != null &&
+      rawName.toString().trim().isNotEmpty;
+  if (!loggedIn) return 'Guest';
+  final tokens = rawName.toString().trim().split(RegExp(r'\s+'));
+  final firstReal = tokens.firstWhere(
+    (t) => !_honorifics.contains(t.toLowerCase()),
+    orElse: () => tokens.first,
+  );
+  return firstReal;
+}
+
 class MenuPage extends ConsumerStatefulWidget {
   const MenuPage({super.key});
 
@@ -276,19 +301,13 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                               ),
                                               AppSpacerH(4.h),
                                               Text(
-                                                (authBox.get(AppHSC.authToken) !=
-                                                            null &&
-                                                        userBox.get(AppHSC
-                                                                .firstName) !=
-                                                            null &&
-                                                        userBox.get(AppHSC
-                                                                .firstName) !=
-                                                            '')
-                                                    ? userBox
-                                                        .get(AppHSC.firstName)
-                                                    : 'Guest',
+                                                _greetingName(
+                                                    authBox, userBox),
                                                 style:
                                                     AppTextDecor.largeTitle28,
+                                                maxLines: 1,
+                                                overflow:
+                                                    TextOverflow.ellipsis,
                                               ),
                                               AppSpacerH(16.h),
                                               const ContinueListeningSection(),
@@ -644,6 +663,7 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                               ),
                                               AppSpacerH(16.h),
                                               const NewFeaturedSection(),
+                                              AppSpacerH(120.h),
                                             ],
                                           ),
                                         ),

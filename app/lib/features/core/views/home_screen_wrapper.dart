@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -77,7 +76,7 @@ class _HomeScreenWrapperState extends ConsumerState<HomeScreenWrapper> {
                           });
                         },
                         isSelected: selcetedIndex == 0,
-                        iconData: CupertinoIcons.home,
+                        iconData: Icons.home_rounded,
                         label: "Home",
                       ),
                       HomePageBottomBarItem(

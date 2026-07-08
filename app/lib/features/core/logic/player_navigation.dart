@@ -8,6 +8,14 @@ import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/global_function.dart';
 import 'package:medyo/utils/routes.dart';
 
+/// Formats stored millisecond duration back into the "h:mm:ss"/"m:ss" string
+/// that [MusicTrack.duration] expects (matches [AppGLF.parseDuration]).
+String? _durationStringFromMs(dynamic storedMs) {
+  final ms = storedMs is int ? storedMs : int.tryParse(storedMs?.toString() ?? '');
+  if (ms == null || ms <= 0) return null;
+  return AppGLF.format(Duration(milliseconds: ms));
+}
+
 /// Opens the player screen and plays a track reconstructed from data saved
 /// locally by Recently Played / Continue Listening. Bypasses the "Sub"/"Home"
 /// auto-play watchers in PlayerScreen entirely (resets their providers to
@@ -31,6 +39,7 @@ Future<void> openStoredTrack(
     isPaid: false,
     hasReadMore: storedData['hasReadMore'] as bool?,
     albam: albumId != null ? Albam(id: int.tryParse(albumId.toString())) : null,
+    duration: _durationStringFromMs(storedData['duration']),
   );
 
   ref.read(selectedAlbumProvider.notifier).state = null;

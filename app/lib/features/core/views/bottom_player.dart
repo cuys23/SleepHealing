@@ -1,5 +1,5 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,6 +11,7 @@ import 'package:medyo/services/audio_service.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/global_function.dart';
 import 'package:medyo/utils/routes.dart';
+import 'package:medyo/widgets/artwork_image.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
 
 class BottomPlayerControl extends ConsumerStatefulWidget {
@@ -82,16 +83,16 @@ class _BottomPlayerControlState extends ConsumerState<BottomPlayerControl> {
                                   builder: (context, snapshot) {
                                     if (snapshot.hasData &&
                                         snapshot.data != null) {
+                                      final album = snapshot.data!.album;
                                       return Row(
                                         children: [
-                                          CachedNetworkImage(
+                                          ArtworkImage(
                                             imageUrl: snapshot.data!.artUri
                                                 .toString(),
-                                            fit: BoxFit.fitHeight,
-                                            alignment: Alignment.topLeft,
-                                            errorWidget: (context, url, error) {
-                                              return const SizedBox();
-                                            },
+                                            width: 48.h,
+                                            height: 48.h,
+                                            borderRadius:
+                                                BorderRadius.circular(10.r),
                                           ),
                                           AppSpacerW(10.w),
                                           Expanded(
@@ -108,7 +109,11 @@ class _BottomPlayerControlState extends ConsumerState<BottomPlayerControl> {
                                                       TextOverflow.ellipsis,
                                                 ),
                                                 Text(
-                                                  snapshot.data!.album ?? '',
+                                                  album != null &&
+                                                          album.isNotEmpty
+                                                      ? album
+                                                      : 'player_screen.now_playing'
+                                                          .tr(),
                                                   style:
                                                       AppTextDecor.caption12,
                                                   maxLines: 1,

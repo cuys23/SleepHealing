@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +16,7 @@ import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/dialouges.dart';
 import 'package:medyo/utils/global_function.dart';
 import 'package:medyo/utils/routes.dart';
+import 'package:medyo/widgets/artwork_image.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
 
 /// Shows the in-progress track saved by [LocalStorageService], if any.
@@ -53,19 +53,11 @@ class ContinueListeningSection extends ConsumerWidget {
               ),
               child: Row(
                 children: [
-                  ClipRRect(
+                  ArtworkImage(
+                    imageUrl: data['thumbnail']?.toString(),
+                    width: 56.w,
+                    height: 56.h,
                     borderRadius: BorderRadius.circular(10.r),
-                    child: CachedNetworkImage(
-                      imageUrl: data['thumbnail']?.toString() ?? '',
-                      width: 56.w,
-                      height: 56.h,
-                      fit: BoxFit.cover,
-                      errorWidget: (context, url, error) => Container(
-                        width: 56.w,
-                        height: 56.h,
-                        color: AppColors.surface,
-                      ),
-                    ),
                   ),
                   AppSpacerW(12.w),
                   Expanded(
@@ -145,19 +137,11 @@ class RecentlyPlayedSection extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ClipRRect(
+                          ArtworkImage(
+                            imageUrl: item['thumbnail']?.toString(),
+                            width: 140.w,
+                            height: 120.h,
                             borderRadius: BorderRadius.circular(10.r),
-                            child: CachedNetworkImage(
-                              imageUrl: item['thumbnail']?.toString() ?? '',
-                              width: 140.w,
-                              height: 120.h,
-                              fit: BoxFit.cover,
-                              errorWidget: (context, url, error) => Container(
-                                width: 140.w,
-                                height: 120.h,
-                                color: AppColors.surface,
-                              ),
-                            ),
                           ),
                           AppSpacerH(8.h),
                           Text(
@@ -246,19 +230,12 @@ class NewFeaturedSection extends ConsumerWidget {
                     children: [
                       Stack(
                         children: [
-                          ClipRRect(
+                          ArtworkImage(
+                            imageUrl: data.thumbnail,
+                            width: 160.w,
+                            height: 160.h,
                             borderRadius: BorderRadius.circular(15),
-                            child: CachedNetworkImage(
-                              imageUrl: data.thumbnail ?? '',
-                              width: 160.w,
-                              height: 160.h,
-                              fit: BoxFit.cover,
-                              errorWidget: (context, url, error) => Container(
-                                width: 160.w,
-                                height: 160.h,
-                                color: AppColors.surface,
-                              ),
-                            ),
+                            category: data.name,
                           ),
                           if (isPaid)
                             Positioned(
