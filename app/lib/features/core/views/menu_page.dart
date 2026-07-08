@@ -23,6 +23,7 @@ import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/dialouges.dart';
 import 'package:medyo/utils/global_function.dart';
 import 'package:medyo/utils/routes.dart';
+import 'package:medyo/widgets/artwork_image.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
 
 /// Honorifics that sometimes precede a full name in the `firstName` field
@@ -310,7 +311,9 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                                                     TextOverflow.ellipsis,
                                               ),
                                               AppSpacerH(16.h),
+                                              const TonightRecommendationSection(),
                                               const ContinueListeningSection(),
+                                              const QuickActionsSection(),
                                               const RecentlyPlayedSection(),
                                               ref
                                                   .watch(categoriessProvider)
@@ -974,15 +977,16 @@ class AllCatagoriesCard extends ConsumerWidget {
                 color: tint.withOpacity(0.18),
                 shape: BoxShape.circle,
               ),
-              child: data!.icon != null
-                  ? Padding(
-                      padding: EdgeInsets.all(10.w),
-                      child: Image.network(
-                        data!.icon.toString(),
-                        fit: BoxFit.contain,
-                      ),
-                    )
-                  : Icon(Icons.spa_outlined, color: tint),
+              padding: EdgeInsets.all(10.w),
+              child: ArtworkImage(
+                imageUrl: data?.icon,
+                width: 24.w,
+                height: 24.h,
+                borderRadius: BorderRadius.circular(6.r),
+                category: data?.name,
+                iconSize: 14.sp,
+                fit: BoxFit.contain,
+              ),
             ),
             AppSpacerH(8.h),
             Text(

@@ -79,7 +79,15 @@
     "tamara_lev": "Tamara Levitt",
     "continue_listening": "Dinlemeye Devam Et",
     "recently_played": "Son Çalınanlar",
-    "new": "Yeni"
+    "new": "Yeni",
+    "tonight_recommendation": "Bu Geceki Önerimiz",
+    "quick_actions": "Hızlı İşlemler",
+    "quick_sleep_music": "Uyku Müziği",
+    "quick_meditation": "Meditasyon",
+    "quick_breathing": "Nefes",
+    "quick_sleep_timer": "Uyku Zamanlayıcısı",
+    "sleep_timer_no_track": "Zamanlayıcı ayarlamak için önce bir parça çalın",
+    "no_sleep_category": "Uyku müziği şu anda kullanılamıyor"
   },
   "player_screen": {
     "sleep_timer": "Uyku Zamanlayıcısı",

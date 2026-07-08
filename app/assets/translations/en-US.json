@@ -79,7 +79,15 @@
     "tamara_lev": "Tamara Levitt",
     "continue_listening": "Continue Listening",
     "recently_played": "Recently Played",
-    "new": "New"
+    "new": "New",
+    "tonight_recommendation": "Tonight's Recommendation",
+    "quick_actions": "Quick Actions",
+    "quick_sleep_music": "Sleep Music",
+    "quick_meditation": "Meditation",
+    "quick_breathing": "Breathing",
+    "quick_sleep_timer": "Sleep Timer",
+    "sleep_timer_no_track": "Play something first to set a sleep timer",
+    "no_sleep_category": "Sleep music isn't available right now"
   },
   "player_screen": {
     "sleep_timer": "Sleep Timer",
