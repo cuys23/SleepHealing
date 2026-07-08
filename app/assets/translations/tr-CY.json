@@ -1,8 +1,17 @@
 {
+  "common": {
+    "pro": "PRO"
+  },
   "onboarding_screen": {
     "welcome": "Hoş geldin",
     "text": "Meditasyon nihai mobil cihazdır; her yerde, her zaman, göze batmadan kullanabilirsiniz.",
-    "btn_text": "Başlamak"
+    "btn_text": "Başlamak",
+    "page1_title": "Daha İyi Uyku,\nDaha İyi Yaşam",
+    "page1_text": "Daha derin ve dinlendirici uyku için kişiselleştirilmiş iyileştirici sesler ve rehberli meditasyon",
+    "page2_title": "TODO: İlerlemenizi Takip Edin",
+    "page2_text": "TODO placeholder metni — gerçek sayfa 2 içeriğiyle değiştirin",
+    "page3_title": "TODO: Topluluğa Katılın",
+    "page3_text": "TODO placeholder metni — gerçek sayfa 3 içeriğiyle değiştirin"
   },
   "login_screen": {
     "sign_in": "Sign In",
@@ -69,12 +78,19 @@
   "player_screen": {
     "sleep_timer": "Uyku Zamanlayıcısı",
     "sleep_timer_off": "Kapalı",
-    "minutes": "dakika"
+    "minutes": "dakika",
+    "saved": "Kaydedildi",
+    "download": "İndir",
+    "download_soon": "İndirmeler yakında",
+    "share": "Paylaş"
   },
   "search_screen": {
     "title": "Ara",
     "hint": "İsim veya açıklamaya göre ara",
-    "no_results": "Sonuç bulunamadı"
+    "no_results": "Sonuç bulunamadı",
+    "filter_all": "Tümü",
+    "filter_categories": "Kategoriler",
+    "filter_sounds": "Sesler"
   },
   "profile_screen": {
     "send_mail": "Posta göndermek",
@@ -85,6 +101,122 @@
     "change_pass": "Şifre değiştir",
     "delete_acc": "Hesabı sil",
     "log_out": "Çıkış Yap",
-    "subscription_plans": "Abonelik Planları"
+    "subscription_plans": "Abonelik Planları",
+    "stat_nights": "Gece",
+    "stat_listened": "Dinlendi",
+    "stat_streak": "Seri",
+    "achievements": "Başarılar",
+    "badge_streak": "Seri",
+    "badge_sleep": "Uykucu",
+    "badge_fan": "Hayran",
+    "badge_meditate": "Zen"
+  },
+  "settings_screen": {
+    "title": "Ayarlar",
+    "account": "Hesap",
+    "edit_profile": "Profili Düzenle",
+    "preferences": "Tercihler",
+    "dark_mode": "Karanlık Mod",
+    "notifications": "Bildirimler",
+    "about": "Hakkında",
+    "help_center": "Yardım Merkezi",
+    "about_app": "Hakkında"
+  },
+  "sleep_tracker_screen": {
+    "title": "Uyku Takibi",
+    "last_night": "Dün Gece",
+    "good_sleep": "İyi Uyku",
+    "above_average": "Ortalamanın üstünde",
+    "time_asleep": "Uyku Süresi",
+    "fall_asleep": "Uykuya Dalma",
+    "wake_ups": "Uyanmalar",
+    "this_week": "Bu Hafta",
+    "statistics": "İstatistikler",
+    "programs": "Programlar",
+    "mood_checkin": "Ruh Hali Kontrolü",
+    "wellness_tools": "Sağlık Araçları",
+    "meditation": "Meditasyon",
+    "breathing": "Nefes Egzersizi"
+  },
+  "statistics_screen": {
+    "title": "İstatistikler",
+    "period_week": "Hafta",
+    "period_month": "Ay",
+    "period_year": "Yıl",
+    "avg_score": "Ort. Uyku Skoru",
+    "avg_duration": "Ort. Süre",
+    "insights": "İçgörüler",
+    "insight_improving": "İyileşiyor",
+    "insight_improving_msg": "Uyku süreniz son zamanlarda iyileşti",
+    "insight_tip": "İpucu",
+    "insight_tip_msg": "Daha iyi derin uyku için 30 dakika erken yatmayı deneyin",
+    "day_streak": "Günlük Seri",
+    "keep_it_going": "Devam edin!"
+  },
+  "mood_checkin_screen": {
+    "title": "Ruh Hali Kontrolü",
+    "headline": "Nasıl hissediyorsun?",
+    "subtitle": "Ruh haliniz deneyiminizi kişiselleştirmemize yardımcı olur",
+    "mood_calm": "Sakin",
+    "mood_happy": "Mutlu",
+    "mood_neutral": "Nötr",
+    "mood_anxious": "Endişeli",
+    "mood_tired": "Yorgun",
+    "note_label": "Aklında ne var?",
+    "note_hint": "Bir not yaz...",
+    "concerns_label": "Uyku endişeleri",
+    "concern_insomnia": "Uykusuzluk",
+    "concern_stress": "Stres",
+    "concern_racing_mind": "Zihin karmaşası",
+    "concern_pain": "Ağrı",
+    "save": "Kontrolü Kaydet",
+    "saved_toast": "Kayıt tamamlandı"
+  },
+  "meditation_screen": {
+    "title": "Rehberli Meditasyon",
+    "remaining": "kaldı",
+    "session_title": "Vücut Tarama Rahatlaması",
+    "session_subtitle": "Baştan ayağa gerginliği serbest bırakın",
+    "session_benefits": "Seans Faydaları",
+    "benefits": "Stresi azaltır · Odaklanmayı artırır · Daha iyi uyku"
+  },
+  "breathing_screen": {
+    "title": "Nefes Egzersizi",
+    "technique": "4-7-8 Tekniği",
+    "breathe_in": "Nefes Al",
+    "hold": "Tut",
+    "breathe_out": "Nefes Ver",
+    "inhale": "Alma",
+    "exhale": "Verme",
+    "round": "Tur {n}/{total}",
+    "end_session": "Seansı Bitir"
+  },
+  "sleep_programs_screen": {
+    "title": "Uyku Programları",
+    "in_progress": "Devam Ediyor",
+    "day_x_of_y": "Gün {day}/{total}",
+    "all_programs": "Tüm Programlar",
+    "program_reset_title": "7 Günlük Uyku Sıfırlama",
+    "program_reset_subtitle": "Uyku rutininizi bir haftada yeniden kurun",
+    "program_calm_title": "21 Günlük Sakin Zihin",
+    "program_calm_subtitle": "Günlük meditasyon pratiği",
+    "program_stress_title": "Stres Giderme",
+    "program_stress_subtitle": "5 günlük rehberli rahatlama"
+  },
+  "notifications_screen": {
+    "title": "Bildirimler",
+    "n1_title": "Sakinleşme zamanı",
+    "n1_body": "Bu gece daha iyi uyku için yatma rutininize başlayın",
+    "n2_title": "Yeni başarı!",
+    "n2_body": "7 günlük meditasyonu tamamladınız",
+    "n3_title": "Yeni içerik mevcut",
+    "n3_body": "En yeni iyileştirici seslerimize göz atın",
+    "time_2m": "2dk önce",
+    "time_1h": "1sa önce",
+    "time_yesterday": "Dün",
+    "group_today": "Bugün",
+    "group_earlier": "Daha Önce",
+    "empty_title": "Henüz Bildirim Yok",
+    "empty_subtitle": "Dikkat gerektiren bir şey olduğunda size haber vereceğiz"
   }
 }

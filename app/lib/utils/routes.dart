@@ -18,10 +18,17 @@ import 'package:medyo/features/core/views/search_screen.dart';
 import 'package:medyo/features/core/views/splash_screen.dart';
 import 'package:medyo/features/core/views/sub_category_page.dart';
 import 'package:medyo/features/other/views/contact_us.dart';
+import 'package:medyo/features/other/views/notifications_screen.dart';
 import 'package:medyo/features/other/views/privacy_policy.dart';
 import 'package:medyo/features/profile/views/downloads_page.dart';
 import 'package:medyo/features/profile/views/my_subscription_screen.dart';
+import 'package:medyo/features/profile/views/settings_screen.dart';
 import 'package:medyo/features/theme/theme_change.dart';
+import 'package:medyo/features/wellness/views/breathing_screen.dart';
+import 'package:medyo/features/wellness/views/meditation_screen.dart';
+import 'package:medyo/features/wellness/views/mood_checkin_screen.dart';
+import 'package:medyo/features/wellness/views/sleep_programs_screen.dart';
+import 'package:medyo/features/wellness/views/statistics_screen.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -55,6 +62,13 @@ class Routes {
   static const themechange = '/themechange';
   static const menupage = '/menupage';
   static const searchScreen = '/searchScreen';
+  static const settingsScreen = '/settingsScreen';
+  static const statisticsScreen = '/statisticsScreen';
+  static const moodCheckinScreen = '/moodCheckinScreen';
+  static const meditationScreen = '/meditationScreen';
+  static const breathingScreen = '/breathingScreen';
+  static const sleepProgramsScreen = '/sleepProgramsScreen';
+  static const notificationsScreen = '/notificationsScreen';
 }
 
 Route generatedRoutes(RouteSettings settings) {
@@ -133,6 +147,27 @@ Route generatedRoutes(RouteSettings settings) {
       break;
     case Routes.searchScreen:
       child = const SearchScreen();
+      break;
+    case Routes.settingsScreen:
+      child = const SettingsScreen();
+      break;
+    case Routes.statisticsScreen:
+      child = const StatisticsScreen();
+      break;
+    case Routes.moodCheckinScreen:
+      child = const MoodCheckinScreen();
+      break;
+    case Routes.meditationScreen:
+      child = const MeditationScreen();
+      break;
+    case Routes.breathingScreen:
+      child = const BreathingScreen();
+      break;
+    case Routes.sleepProgramsScreen:
+      child = const SleepProgramsScreen();
+      break;
+    case Routes.notificationsScreen:
+      child = const NotificationsScreen();
       break;
 
     default:

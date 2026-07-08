@@ -84,9 +84,28 @@ class ErrorTextWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(
-        error.toString().tr(),
-        style: AppTextDecor.medium14Red,
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 24.w),
+        padding: EdgeInsets.all(14.w),
+        decoration: BoxDecoration(
+          color: AppColors.danger.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: AppColors.danger.withOpacity(0.15)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 16.sp, color: AppColors.danger),
+            AppSpacerW(8.w),
+            Flexible(
+              child: Text(
+                error.toString().tr(),
+                style: AppTextDecor.tagBadge11
+                    .copyWith(color: AppColors.danger),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -101,36 +120,79 @@ class MessageTextWidget extends StatelessWidget {
     return Center(
       child: Text(
         msg.toString().tr(),
+        style: AppTextDecor.caption13Muted,
       ),
     );
   }
 }
 
-class LoadingWidget extends StatelessWidget {
+/// Small inline spinner by default; a shimmering skeleton bar when [showBG]
+/// is true (for full-width list/section loading placeholders).
+class LoadingWidget extends StatefulWidget {
   const LoadingWidget({Key? key, this.showBG = false}) : super(key: key);
   final bool showBG;
 
   @override
+  State<LoadingWidget> createState() => _LoadingWidgetState();
+}
+
+class _LoadingWidgetState extends State<LoadingWidget>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: CircularProgressIndicator(
-        color: AppColors.lightGeay,
-      ),
+    if (!widget.showBG) {
+      return const Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            color: AppColors.accentPrimary,
+          ),
+        ),
+      );
+    }
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        return Container(
+          height: 64.h,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14.r),
+            gradient: LinearGradient(
+              begin: Alignment(-1 - _controller.value * 2, 0),
+              end: Alignment(1 - _controller.value * 2, 0),
+              colors: const [
+                AppColors.surface,
+                AppColors.twilight,
+                AppColors.surface,
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
-
-// class LoadingWidget extends StatelessWidget {
-//   const LoadingWidget({Key? key, this.showBG = false}) : super(key: key);
-//   final bool showBG;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Center(
-//       child: BusyLoader(showbackground: showBG),
-//     );
-//   }
-// }
 
 class HorizontalDivider extends StatelessWidget {
   const HorizontalDivider({Key? key, this.color}) : super(key: key);

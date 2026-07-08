@@ -1,8 +1,17 @@
 {
+  "common": {
+    "pro": "PRO"
+  },
   "onboarding_screen": {
     "welcome": "Welcome",
     "text": "Meditation is the ultimate mobile device; you can use it anywhere, anytime, unobtrusively.",
-    "btn_text": "Get Started"
+    "btn_text": "Get Started",
+    "page1_title": "Better Sleep,\nBetter Life",
+    "page1_text": "Personalized healing sounds and guided meditation for deeper, more restful sleep",
+    "page2_title": "TODO: Track Your Progress",
+    "page2_text": "TODO placeholder copy — replace with real page 2 content",
+    "page3_title": "TODO: Join the Community",
+    "page3_text": "TODO placeholder copy — replace with real page 3 content"
   },
   "login_screen": {
     "sign_in": "Sign In",
@@ -69,12 +78,19 @@
   "player_screen": {
     "sleep_timer": "Sleep Timer",
     "sleep_timer_off": "Off",
-    "minutes": "minutes"
+    "minutes": "minutes",
+    "saved": "Saved",
+    "download": "Download",
+    "download_soon": "Downloads coming soon",
+    "share": "Share"
   },
   "search_screen": {
     "title": "Search",
     "hint": "Search by name or description",
-    "no_results": "No results found"
+    "no_results": "No results found",
+    "filter_all": "All",
+    "filter_categories": "Categories",
+    "filter_sounds": "Sounds"
   },
   "profile_screen": {
     "send_mail": "Send Mail",
@@ -85,6 +101,122 @@
     "change_pass": "Change Password",
     "delete_acc": "Delete Account",
     "log_out": "Logout",
-    "subscription_plans": "Subscription Plans"
+    "subscription_plans": "Subscription Plans",
+    "stat_nights": "Nights",
+    "stat_listened": "Listened",
+    "stat_streak": "Streak",
+    "achievements": "Achievements",
+    "badge_streak": "Streak",
+    "badge_sleep": "Sleeper",
+    "badge_fan": "Fan",
+    "badge_meditate": "Zen"
+  },
+  "settings_screen": {
+    "title": "Settings",
+    "account": "Account",
+    "edit_profile": "Edit Profile",
+    "preferences": "Preferences",
+    "dark_mode": "Dark Mode",
+    "notifications": "Notifications",
+    "about": "About",
+    "help_center": "Help Center",
+    "about_app": "About"
+  },
+  "sleep_tracker_screen": {
+    "title": "Sleep Tracker",
+    "last_night": "Last Night",
+    "good_sleep": "Good Sleep",
+    "above_average": "Above average",
+    "time_asleep": "Time Asleep",
+    "fall_asleep": "Fall Asleep",
+    "wake_ups": "Wake Ups",
+    "this_week": "This Week",
+    "statistics": "Statistics",
+    "programs": "Programs",
+    "mood_checkin": "Mood Check-in",
+    "wellness_tools": "Wellness Tools",
+    "meditation": "Meditation",
+    "breathing": "Breathing"
+  },
+  "statistics_screen": {
+    "title": "Statistics",
+    "period_week": "Week",
+    "period_month": "Month",
+    "period_year": "Year",
+    "avg_score": "Avg Sleep Score",
+    "avg_duration": "Avg Duration",
+    "insights": "Insights",
+    "insight_improving": "Improving",
+    "insight_improving_msg": "Your sleep duration improved recently",
+    "insight_tip": "Tip",
+    "insight_tip_msg": "Try going to bed 30 min earlier for better deep sleep",
+    "day_streak": "Day Streak",
+    "keep_it_going": "Keep it going!"
+  },
+  "mood_checkin_screen": {
+    "title": "Mood Check-in",
+    "headline": "How are you feeling?",
+    "subtitle": "Your mood helps us personalize your experience",
+    "mood_calm": "Calm",
+    "mood_happy": "Happy",
+    "mood_neutral": "Neutral",
+    "mood_anxious": "Anxious",
+    "mood_tired": "Tired",
+    "note_label": "What's on your mind?",
+    "note_hint": "Write a note...",
+    "concerns_label": "Sleep concerns",
+    "concern_insomnia": "Insomnia",
+    "concern_stress": "Stress",
+    "concern_racing_mind": "Racing mind",
+    "concern_pain": "Pain",
+    "save": "Save Check-in",
+    "saved_toast": "Check-in saved"
+  },
+  "meditation_screen": {
+    "title": "Guided Meditation",
+    "remaining": "remaining",
+    "session_title": "Body Scan Relaxation",
+    "session_subtitle": "Release tension from head to toe",
+    "session_benefits": "Session Benefits",
+    "benefits": "Reduces stress · Improves focus · Better sleep"
+  },
+  "breathing_screen": {
+    "title": "Breathing Exercise",
+    "technique": "4-7-8 Technique",
+    "breathe_in": "Breathe In",
+    "hold": "Hold",
+    "breathe_out": "Breathe Out",
+    "inhale": "Inhale",
+    "exhale": "Exhale",
+    "round": "Round {n} of {total}",
+    "end_session": "End Session"
+  },
+  "sleep_programs_screen": {
+    "title": "Sleep Programs",
+    "in_progress": "In Progress",
+    "day_x_of_y": "Day {day}/{total}",
+    "all_programs": "All Programs",
+    "program_reset_title": "7-Day Sleep Reset",
+    "program_reset_subtitle": "Rebuild your sleep routine in one week",
+    "program_calm_title": "21-Day Calm Mind",
+    "program_calm_subtitle": "Daily meditation practice",
+    "program_stress_title": "Stress Relief",
+    "program_stress_subtitle": "5-day guided relaxation"
+  },
+  "notifications_screen": {
+    "title": "Notifications",
+    "n1_title": "Time to wind down",
+    "n1_body": "Start your bedtime routine for better sleep tonight",
+    "n2_title": "New achievement!",
+    "n2_body": "You've completed 7 days of meditation",
+    "n3_title": "New content available",
+    "n3_body": "Check out our latest healing sounds",
+    "time_2m": "2m ago",
+    "time_1h": "1h ago",
+    "time_yesterday": "Yesterday",
+    "group_today": "Today",
+    "group_earlier": "Earlier",
+    "empty_title": "No Notifications Yet",
+    "empty_subtitle": "We'll let you know when something needs your attention"
   }
 }

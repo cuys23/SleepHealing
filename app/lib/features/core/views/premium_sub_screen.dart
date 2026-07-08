@@ -56,8 +56,9 @@ class _PremiumSubScreenState extends ConsumerState<PremiumSubScreen> {
                         padding: EdgeInsets.all(16.r),
                         margin: EdgeInsets.all(16.r),
                         decoration: BoxDecoration(
-                          color: AppColors.slidePanel,
-                          borderRadius: BorderRadius.circular(12.r),
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(20.r),
+                          border: Border.all(color: AppColors.divider),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

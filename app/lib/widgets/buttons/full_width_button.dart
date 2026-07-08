@@ -15,6 +15,9 @@ class AppTextButton extends StatefulWidget {
   }) : super(key: key);
   final double? width;
   final double? height;
+
+  /// Explicit solid background color. When null, the primary gradient
+  /// (Soft Purple → Sky Blue) from the design system is used instead.
   final Color? buttonColor;
   final String title;
   final Color? titleColor;
@@ -29,7 +32,8 @@ class _AppTextButtonState extends State<AppTextButton> {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = widget.buttonColor ?? AppColors.accentPrimary;
+    final useGradient = widget.buttonColor == null;
+    final shadowColor = widget.buttonColor ?? AppColors.accentPrimary;
     return GestureDetector(
       onTap: widget.onTap,
       onTapDown: (_) => setState(() => _scale = 0.97),
@@ -42,13 +46,23 @@ class _AppTextButtonState extends State<AppTextButton> {
           height: widget.height ?? 54.h,
           width: widget.width,
           decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(16.r),
+            color: useGradient ? null : widget.buttonColor,
+            gradient: useGradient
+                ? const LinearGradient(
+                    colors: [
+                      AppColors.accentPrimary,
+                      AppColors.accentSecondary,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            borderRadius: BorderRadius.circular(14.r),
             boxShadow: [
               BoxShadow(
-                color: bgColor.withOpacity(0.25),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
+                color: shadowColor.withOpacity(0.3),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
               ),
             ],
           ),

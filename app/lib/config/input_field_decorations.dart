@@ -10,14 +10,14 @@ class AppInputDecor {
     hintStyle: TextStyle(
         color: AppColors.textTertiary,
         fontSize: 13,
-        fontFamily: 'Outfit',
+        fontFamily: 'Plus Jakarta Sans',
         fontWeight: FontWeight.w400),
     filled: true,
     fillColor: AppColors.inputBg,
     labelStyle: TextStyle(
         color: AppColors.textSecondary,
         fontSize: 13,
-        fontFamily: 'Outfit',
+        fontFamily: 'Plus Jakarta Sans',
         fontWeight: FontWeight.w500),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
