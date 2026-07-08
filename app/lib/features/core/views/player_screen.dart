@@ -24,7 +24,6 @@ import 'package:medyo/widgets/misc_widgets.dart';
 import 'package:medyo/widgets/player_app_bar.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:text_scroll/text_scroll.dart';
 
 import '../../../widgets/playerLoader.dart';
 
@@ -172,23 +171,36 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                       onPanelSlide: (position) {
                         print('Print position $position');
                       },
-                      header: Container(
-                        width: 390.w,
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 20.w, vertical: 10.h),
-                        child: Center(
-                            child: SizedBox(
-                          height: 20.h,
-                          width: 20.h,
-                          child: AnimatedRotation(
-                            turns: isSliderOpen ? 0 : 0.5,
-                            duration: 200.milisec,
-                            child: const Icon(
-                              Icons.arrow_drop_down,
-                              color: AppColors.textPrimary,
-                            ),
+                      header: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(24.r),
+                            topRight: Radius.circular(24.r)),
+                        child: Container(
+                          width: 390.w,
+                          color: AppColors.surface,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 20.w, vertical: 12.h),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                playList.isNotEmpty
+                                    ? '${'player_screen.up_next'.tr()} · ${playList.length}'
+                                    : 'player_screen.up_next'.tr(),
+                                style: AppTextDecor.caption13Muted,
+                              ),
+                              AnimatedRotation(
+                                turns: isSliderOpen ? 0.5 : 0,
+                                duration: 200.milisec,
+                                child: Icon(
+                                  Icons.keyboard_arrow_up,
+                                  size: 20.h,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
                           ),
-                        )),
+                        ),
                       ),
                       onPanelOpened: () {
                         debugPrint('Slider Opened');
@@ -203,7 +215,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                         });
                       },
                       color: Colors.transparent,
-                      minHeight: 270.h,
+                      minHeight: 52.h,
                       maxHeight: 600.h,
                       panelBuilder: (controller) => ClipRRect(
                         borderRadius: BorderRadius.only(
@@ -290,6 +302,11 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                                         height: 240.h,
                                         width: 240.h,
                                         fit: BoxFit.cover,
+                                        placeholder: (context, url) =>
+                                            Image.asset(
+                                          'assets/images/cdlabel.png',
+                                          fit: BoxFit.cover,
+                                        ),
                                         errorWidget: (context, url, error) =>
                                             Image.asset(
                                           'assets/images/cdlabel.png',
@@ -301,8 +318,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                               AppSpacerH(16.h),
                               const _PlayerWaveform(),
                               AppSpacerH(16.h),
-                              SizedBox(
-                                width: 340.w,
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 24.w),
                                 child: Text(
                                   media.data != null ? media.data!.title : "",
                                   style: AppTextDecor.bodyTitle16,
@@ -311,18 +328,19 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                                   textAlign: TextAlign.center,
                                 ),
                               ),
-                              Center(
-                                child: SizedBox(
-                                  width: 340.w,
-                                  child: Center(
-                                    child: TextScroll(
-                                      media.data?.extras?['desc'] ?? "",
-                                      style: AppTextDecor.caption13,
-                                      textAlign: TextAlign.center,
-                                      velocity: const Velocity(
-                                          pixelsPerSecond: Offset(30, 0)),
-                                    ),
-                                  ),
+                              AppSpacerH(4.h),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                                child: Text(
+                                  (media.data?.extras?['desc'] as String?)
+                                              ?.isNotEmpty ==
+                                          true
+                                      ? media.data!.extras!['desc'] as String
+                                      : 'player_screen.no_description'.tr(),
+                                  style: AppTextDecor.caption13,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               AppSpacerH(26.h),
@@ -661,7 +679,13 @@ class _PlayerBottomActions extends ConsumerWidget {
           label: 'player_screen.share'.tr(),
           onTap: trackTitle == null
               ? null
-              : () => Share.share(trackTitle!),
+              : () {
+                  final box = context.findRenderObject() as RenderBox?;
+                  final origin = box != null
+                      ? box.localToGlobal(Offset.zero) & box.size
+                      : const Rect.fromLTWH(0, 0, 1, 1);
+                  Share.share(trackTitle!, sharePositionOrigin: origin);
+                },
         ),
       ],
     );
@@ -793,6 +817,7 @@ class SleepTimerButton extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surface,
+      isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
@@ -800,46 +825,63 @@ class SleepTimerButton extends ConsumerWidget {
         return Consumer(
           builder: (context, ref, _) {
             final activeMinutes = ref.watch(sleepTimerMinutesProvider);
+            final maxSheetHeight =
+                MediaQuery.of(sheetContext).size.height * 0.6;
             return SafeArea(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('player_screen.sleep_timer'.tr(),
-                        style: AppTextDecor.bold18White),
-                    AppSpacerH(16.h),
-                    ...options.map((minutes) => ListTile(
-                          onTap: () {
-                            ref
-                                .read(sleepTimerMinutesProvider.notifier)
-                                .start(minutes);
-                            Navigator.of(sheetContext).pop();
-                          },
-                          title: Text(
-                            '$minutes ${'player_screen.minutes'.tr()}',
-                            style: AppTextDecor.regular16White,
-                          ),
-                          trailing: activeMinutes == minutes
-                              ? const Icon(Icons.check, color: AppColors.textPrimary)
-                              : null,
-                        )),
-                    ListTile(
-                      onTap: () {
-                        ref
-                            .read(sleepTimerMinutesProvider.notifier)
-                            .cancelTimer();
-                        Navigator.of(sheetContext).pop();
-                      },
-                      title: Text(
-                        'player_screen.sleep_timer_off'.tr(),
-                        style: AppTextDecor.regular16White,
+              top: false,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: maxSheetHeight),
+                child: Padding(
+                  padding:
+                      EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('player_screen.sleep_timer'.tr(),
+                          style: AppTextDecor.bold18White),
+                      AppSpacerH(16.h),
+                      Flexible(
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: [
+                            ...options.map((minutes) => ListTile(
+                                  onTap: () {
+                                    ref
+                                        .read(sleepTimerMinutesProvider
+                                            .notifier)
+                                        .start(minutes);
+                                    Navigator.of(sheetContext).pop();
+                                  },
+                                  title: Text(
+                                    '$minutes ${'player_screen.minutes'.tr()}',
+                                    style: AppTextDecor.regular16White,
+                                  ),
+                                  trailing: activeMinutes == minutes
+                                      ? const Icon(Icons.check,
+                                          color: AppColors.textPrimary)
+                                      : null,
+                                )),
+                            ListTile(
+                              onTap: () {
+                                ref
+                                    .read(sleepTimerMinutesProvider.notifier)
+                                    .cancelTimer();
+                                Navigator.of(sheetContext).pop();
+                              },
+                              title: Text(
+                                'player_screen.sleep_timer_off'.tr(),
+                                style: AppTextDecor.regular16White,
+                              ),
+                              trailing: activeMinutes == null
+                                  ? const Icon(Icons.check,
+                                      color: AppColors.textPrimary)
+                                  : null,
+                            ),
+                          ],
+                        ),
                       ),
-                      trailing: activeMinutes == null
-                          ? const Icon(Icons.check, color: AppColors.textPrimary)
-                          : null,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );

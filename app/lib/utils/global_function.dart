@@ -84,7 +84,7 @@ class AppGLF {
     }
     final item = MediaItem(
       id: track.audio.toString(),
-      album: '${track.albam?.name}',
+      album: track.albam?.name ?? '',
       title: track.name ?? '',
       extras: {
         'isFav': track.isfavorite,

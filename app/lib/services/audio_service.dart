@@ -223,7 +223,7 @@ class MyAudioHandler extends BaseAudioHandler {
     final audioUrl = music.audio?.toString() ?? '';
     mediaItem.add(MediaItem(
       id: audioUrl,
-      album: '${music.albam?.name}',
+      album: music.albam?.name ?? '',
       title: music.name ?? '',
       extras: {
         'isFav': music.isfavorite,

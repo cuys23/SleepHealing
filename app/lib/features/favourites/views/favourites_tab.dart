@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -15,6 +14,7 @@ import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/dialouges.dart';
 import 'package:medyo/utils/global_function.dart';
 import 'package:medyo/utils/routes.dart';
+import 'package:medyo/widgets/artwork_image.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
 import 'package:medyo/widgets/playerLoader.dart';
 
@@ -140,18 +140,11 @@ class SongTile extends ConsumerWidget {
                       padding: EdgeInsets.all(8.r),
                       child: Row(
                         children: [
-                          ClipRRect(
+                          ArtworkImage(
+                            imageUrl: track.thumbnail,
+                            width: 56.w,
+                            height: 56.h,
                             borderRadius: BorderRadius.circular(16.r),
-                            child: CachedNetworkImage(
-                              imageUrl: track.thumbnail ?? '',
-                              width: 56.w,
-                              height: 56.h,
-                              fit: BoxFit.cover,
-                              errorWidget: (context, url, error) =>
-                                  const Center(
-                                child: Icon(Icons.error),
-                              ),
-                            ),
                           ),
                           AppSpacerW(10.w),
                           Expanded(

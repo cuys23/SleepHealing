@@ -15,7 +15,7 @@
   },
   "login_screen": {
     "sign_in": "Sign In",
-    "sign_in_text": "Sing in now to access your meditation and save music",
+    "sign_in_text": "Sign in now to access your meditation and save music",
     "email": "Email",
     "password": "Password",
     "login": "Login",
@@ -82,7 +82,10 @@
     "saved": "Kaydedildi",
     "download": "İndir",
     "download_soon": "İndirmeler yakında",
-    "share": "Paylaş"
+    "share": "Paylaş",
+    "up_next": "Sıradaki",
+    "no_description": "Açıklama yok",
+    "now_playing": "Şimdi Çalıyor"
   },
   "search_screen": {
     "title": "Ara",
