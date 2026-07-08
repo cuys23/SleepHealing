@@ -99,7 +99,9 @@
     "share": "Share",
     "up_next": "Up Next",
     "no_description": "No description available",
-    "now_playing": "Now Playing"
+    "now_playing": "Now Playing",
+    "history": "History",
+    "no_history": "No listening history yet"
   },
   "search_screen": {
     "title": "Search",

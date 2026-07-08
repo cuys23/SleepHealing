@@ -99,7 +99,9 @@
     "share": "Paylaş",
     "up_next": "Sıradaki",
     "no_description": "Açıklama yok",
-    "now_playing": "Şimdi Çalıyor"
+    "now_playing": "Şimdi Çalıyor",
+    "history": "Geçmiş",
+    "no_history": "Henüz dinleme geçmişi yok"
   },
   "search_screen": {
     "title": "Ara",

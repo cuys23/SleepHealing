@@ -10,6 +10,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:medyo/config/app_colors.dart';
 import 'package:medyo/config/app_text_decor.dart';
 import 'package:medyo/features/core/logic/core_provider.dart';
+import 'package:medyo/features/core/logic/player_navigation.dart';
 import 'package:medyo/features/core/logic/player_prefs_provider.dart';
 import 'package:medyo/features/core/logic/sleep_timer_provider.dart';
 import 'package:medyo/features/core/models/play_list_model/albam.dart';
@@ -20,6 +21,7 @@ import 'package:medyo/services/audio_service.dart';
 import 'package:medyo/services/local_storage_service.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/global_function.dart';
+import 'package:medyo/widgets/artwork_image.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
 import 'package:medyo/widgets/player_app_bar.dart';
 import 'package:share_plus/share_plus.dart';
@@ -45,6 +47,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
   bool _isDragging = false;
   double _dragValue = 0.0;
   String? _initializedFor;
+  bool _showHistoryTab = false;
   late final AnimationController _breatheController;
   @override
   void initState() {
@@ -237,23 +240,32 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                                 ),
                               ),
                               AppSpacerH(16.h),
+                              _QueueTabToggle(
+                                showHistory: _showHistoryTab,
+                                onChanged: (showHistory) => setState(
+                                    () => _showHistoryTab = showHistory),
+                              ),
+                              AppSpacerH(12.h),
                               Expanded(
-                                child: playList.isNotEmpty
-                                    ? ListView.builder(
-                                        controller: controller,
-                                        padding: EdgeInsets.zero,
-                                        itemCount: playList.length,
-                                        itemBuilder: (context, index) {
-                                          final song = playList[index];
-                                          return SongTile(
-                                            track: song,
-                                            index: index,
-                                            isSelected:
-                                                media.data?.title == song.name,
-                                            isPaid: playList[index].isPaid!,
-                                          );
-                                        })
-                                    : const SizedBox(),
+                                child: _showHistoryTab
+                                    ? const _HistoryList()
+                                    : (playList.isNotEmpty
+                                        ? ListView.builder(
+                                            controller: controller,
+                                            padding: EdgeInsets.zero,
+                                            itemCount: playList.length,
+                                            itemBuilder: (context, index) {
+                                              final song = playList[index];
+                                              return SongTile(
+                                                track: song,
+                                                index: index,
+                                                isSelected: media.data?.title ==
+                                                    song.name,
+                                                isPaid:
+                                                    playList[index].isPaid!,
+                                              );
+                                            })
+                                        : const SizedBox()),
                               ),
                             ],
                           ),
@@ -887,6 +899,148 @@ class SleepTimerButton extends ConsumerWidget {
               ),
             );
           },
+        );
+      },
+    );
+  }
+}
+
+/// Up Next / History tab toggle shown at the top of the queue panel,
+/// matching design 11's tab header. Purely local UI state - switching tabs
+/// never mutates `currentPlayListProvider`.
+class _QueueTabToggle extends StatelessWidget {
+  const _QueueTabToggle({required this.showHistory, required this.onChanged});
+
+  final bool showHistory;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: AppColors.inputBg,
+        borderRadius: BorderRadius.circular(14.r),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _QueueTab(
+              label: 'player_screen.up_next'.tr(),
+              selected: !showHistory,
+              onTap: () => onChanged(false),
+            ),
+          ),
+          Expanded(
+            child: _QueueTab(
+              label: 'player_screen.history'.tr(),
+              selected: showHistory,
+              onTap: () => onChanged(true),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QueueTab extends StatelessWidget {
+  const _QueueTab({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 8.h),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.accentPrimary.withOpacity(0.18) : null,
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: AppTextDecor.caption13.copyWith(
+            color:
+                selected ? AppColors.textPrimary : AppColors.textMuted,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Read-only History list backed by the same
+/// `LocalStorageService.getRecentlyPlayed()` data Home's Recently Played
+/// section already uses. Tapping an item resumes it via the existing
+/// `openStoredTrack` path - never mutates the current queue.
+class _HistoryList extends ConsumerWidget {
+  const _HistoryList();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = LocalStorageService.getRecentlyPlayed();
+    if (items.isEmpty) {
+      return Center(
+        child: Text(
+          'player_screen.no_history'.tr(),
+          style: AppTextDecor.caption13Muted,
+        ),
+      );
+    }
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return GestureDetector(
+          onTap: () => openStoredTrack(context, ref, storedData: item),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 12.h),
+            child: Row(
+              children: [
+                ArtworkImage(
+                  imageUrl: item['thumbnail']?.toString(),
+                  width: 44.w,
+                  height: 44.w,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                AppSpacerW(12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item['title']?.toString() ?? '',
+                        style: AppTextDecor.bodyTitle15,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if ((item['albumName']?.toString() ?? '').isNotEmpty)
+                        Text(
+                          item['albumName'].toString(),
+                          style: AppTextDecor.caption13Muted,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.play_circle_outline,
+                    color: AppColors.textMuted, size: 22.h),
+              ],
+            ),
+          ),
         );
       },
     );
