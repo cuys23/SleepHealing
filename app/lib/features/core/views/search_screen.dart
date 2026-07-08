@@ -13,6 +13,7 @@ import 'package:medyo/utils/dialouges.dart';
 import 'package:medyo/utils/global_function.dart';
 import 'package:medyo/utils/routes.dart';
 import 'package:medyo/widgets/artwork_image.dart';
+import 'package:medyo/widgets/empty_state.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
 
 /// Local search over catalog data already fetched by Home (categories +
@@ -149,15 +150,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
               AppSpacerH(16.h),
               if (_query.isNotEmpty && !hasResults)
-                Padding(
-                  padding: EdgeInsets.only(top: 40.h),
-                  child: Center(
-                    child: Text('search_screen.no_results'.tr(),
-                        style: AppTextDecor.caption13Muted),
+                Expanded(
+                  child: EmptyState(
+                    icon: Icons.nightlight_round,
+                    titleKey: 'search_screen.nothing_found',
+                    subtitleKey: 'search_screen.nothing_found_subtitle',
+                    ctaLabelKey: 'search_screen.explore_collections',
+                    onCtaTap: () =>
+                        context.nav.pushNamed(Routes.allcatagories),
                   ),
-                ),
-              Expanded(
-                child: ListView(
+                )
+              else
+                Expanded(
+                  child: ListView(
                   children: [
                     if (matchedCategories.isNotEmpty) ...[
                       Text('menu_screen.view_all'.tr(),

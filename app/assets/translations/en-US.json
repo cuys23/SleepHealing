@@ -59,7 +59,8 @@
     "search_hint": "Search sounds, sessions...",
     "no_results": "No results found",
     "collection_of_the_day": "Collection of the Day",
-    "collection_default_desc": "Drift into peaceful moments with curated sounds and gentle narration."
+    "collection_default_desc": "Drift into peaceful moments with curated sounds and gentle narration.",
+    "filter_all": "All"
   },
   "menu_screen": {
     "good": "Good",
@@ -109,7 +110,13 @@
     "no_results": "No results found",
     "filter_all": "All",
     "filter_categories": "Categories",
-    "filter_sounds": "Sounds"
+    "filter_sounds": "Sounds",
+    "nothing_found": "Nothing found",
+    "nothing_found_subtitle": "Try different keywords or explore our collections.",
+    "explore_collections": "Explore Collections"
+  },
+  "all_categories_screen": {
+    "title": "All Categories"
   },
   "profile_screen": {
     "send_mail": "Send Mail",

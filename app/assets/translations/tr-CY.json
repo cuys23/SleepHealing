@@ -59,7 +59,8 @@
     "search_hint": "Sesler, seanslar ara...",
     "no_results": "Sonuç bulunamadı",
     "collection_of_the_day": "Günün Koleksiyonu",
-    "collection_default_desc": "Özenle seçilmiş sesler ve nazik anlatımla huzurlu anlara sürüklenin."
+    "collection_default_desc": "Özenle seçilmiş sesler ve nazik anlatımla huzurlu anlara sürüklenin.",
+    "filter_all": "Tümü"
   },
   "menu_screen": {
     "good": "İyi",
@@ -109,7 +110,13 @@
     "no_results": "Sonuç bulunamadı",
     "filter_all": "Tümü",
     "filter_categories": "Kategoriler",
-    "filter_sounds": "Sesler"
+    "filter_sounds": "Sesler",
+    "nothing_found": "Hiçbir şey bulunamadı",
+    "nothing_found_subtitle": "Farklı anahtar kelimeler deneyin veya koleksiyonlarımızı keşfedin.",
+    "explore_collections": "Koleksiyonları Keşfet"
+  },
+  "all_categories_screen": {
+    "title": "Tüm Kategoriler"
   },
   "profile_screen": {
     "send_mail": "Posta göndermek",

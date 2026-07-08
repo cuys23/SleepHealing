@@ -8,6 +8,8 @@ import 'package:medyo/features/core/logic/core_provider.dart';
 import 'package:medyo/features/core/models/category_list_model/category.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/routes.dart';
+import 'package:medyo/widgets/artwork_image.dart';
+import 'package:medyo/widgets/chips/app_chip.dart';
 import 'package:medyo/widgets/collection/collection_carousel.dart';
 import 'package:medyo/widgets/collection/collection_data.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
@@ -22,6 +24,7 @@ class ExploreTab extends ConsumerStatefulWidget {
 class _ExploreTabState extends ConsumerState<ExploreTab> {
   final TextEditingController _searchController = TextEditingController();
   String _query = '';
+  String? _selectedFilter;
 
   @override
   void dispose() {
@@ -52,8 +55,14 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
                   _query = '';
                 }),
               ),
-              AppSpacerH(24.h),
+              AppSpacerH(16.h),
               if (_query.isEmpty) ...[
+                _FilterChipRow(
+                  selected: _selectedFilter,
+                  onSelected: (filter) =>
+                      setState(() => _selectedFilter = filter),
+                ),
+                AppSpacerH(20.h),
                 Text('explore_screen.featured'.tr(),
                     style: AppTextDecor.sectionHeader20),
                 AppSpacerH(12.h),
@@ -62,7 +71,7 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
                 Text('explore_screen.collections'.tr(),
                     style: AppTextDecor.sectionHeader20),
                 AppSpacerH(12.h),
-                const _CollectionsGrid(),
+                _CollectionsGrid(filter: _selectedFilter),
                 AppSpacerH(24.h),
               ] else ...[
                 _SearchResults(query: _query),
@@ -206,12 +215,16 @@ class _SearchResultRow extends StatelessWidget {
                 color: tint.withOpacity(0.18),
                 shape: BoxShape.circle,
               ),
-              child: category.icon != null
-                  ? Padding(
-                      padding: EdgeInsets.all(10.w),
-                      child: Image.network(category.icon.toString()),
-                    )
-                  : Icon(Icons.spa_outlined, color: tint),
+              padding: EdgeInsets.all(10.w),
+              child: ArtworkImage(
+                imageUrl: category.icon,
+                width: 24.w,
+                height: 24.h,
+                borderRadius: BorderRadius.circular(6.r),
+                category: name,
+                iconSize: 14.sp,
+                fit: BoxFit.contain,
+              ),
             ),
             AppSpacerW(12.w),
             Expanded(
@@ -231,8 +244,52 @@ class _SearchResultRow extends StatelessWidget {
   }
 }
 
+/// Horizontally scrollable filter chips built from the same
+/// categoriessProvider data already loaded for the Collections grid below -
+/// no new data source. "All" (selected == null) clears the filter.
+class _FilterChipRow extends ConsumerWidget {
+  const _FilterChipRow({required this.selected, required this.onSelected});
+
+  final String? selected;
+  final ValueChanged<String?> onSelected;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ref.watch(categoriessProvider).maybeWhen(
+          loaded: (data) {
+            final categories = data.data?.category ?? [];
+            if (categories.isEmpty) return const SizedBox();
+            return SizedBox(
+              height: 34.h,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  AppChip(
+                    label: 'explore_screen.filter_all'.tr(),
+                    selected: selected == null,
+                    onTap: () => onSelected(null),
+                  ),
+                  for (final category in categories) ...[
+                    AppSpacerW(8.w),
+                    AppChip(
+                      label: (category.name ?? '').tr(),
+                      selected: selected == category.name,
+                      onTap: () => onSelected(category.name),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+          orElse: () => const SizedBox(),
+        );
+  }
+}
+
 class _CollectionsGrid extends ConsumerWidget {
-  const _CollectionsGrid();
+  const _CollectionsGrid({required this.filter});
+
+  final String? filter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -240,7 +297,10 @@ class _CollectionsGrid extends ConsumerWidget {
           initial: (_) => const LoadingWidget(),
           loading: (_) => const LoadingWidget(),
           loaded: (state) {
-            final categories = state.data.data?.category ?? [];
+            final allCategories = state.data.data?.category ?? [];
+            final categories = filter == null
+                ? allCategories
+                : allCategories.where((c) => c.name == filter).toList();
             if (categories.isEmpty) return const SizedBox();
             return GridView.count(
               shrinkWrap: true,
