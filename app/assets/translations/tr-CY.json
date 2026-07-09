@@ -209,7 +209,14 @@
     "session_title": "Vücut Tarama Rahatlaması",
     "session_subtitle": "Baştan ayağa gerginliği serbest bırakın",
     "session_benefits": "Seans Faydaları",
-    "benefits": "Stresi azaltır · Odaklanmayı artırır · Daha iyi uyku"
+    "benefits": "Stresi azaltır · Odaklanmayı artırır · Daha iyi uyku",
+    "take_a_moment": "Kendinize zaman ayırın",
+    "popular": "Popüler"
+  },
+  "meditation_detail_screen": {
+    "about": "Hakkında",
+    "start": "Meditasyona Başla",
+    "unlock": "Meditasyonun Kilidini Aç"
   },
   "breathing_screen": {
     "title": "Nefes Egzersizi",

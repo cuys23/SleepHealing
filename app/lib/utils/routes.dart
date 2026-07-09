@@ -24,7 +24,9 @@ import 'package:medyo/features/profile/views/downloads_page.dart';
 import 'package:medyo/features/profile/views/my_subscription_screen.dart';
 import 'package:medyo/features/profile/views/settings_screen.dart';
 import 'package:medyo/features/theme/theme_change.dart';
+import 'package:medyo/features/core/models/album_list_model/albam.dart';
 import 'package:medyo/features/wellness/views/breathing_screen.dart';
+import 'package:medyo/features/wellness/views/meditation_detail_screen.dart';
 import 'package:medyo/features/wellness/views/meditation_screen.dart';
 import 'package:medyo/features/wellness/views/mood_checkin_screen.dart';
 import 'package:medyo/features/wellness/views/sleep_programs_screen.dart';
@@ -66,6 +68,7 @@ class Routes {
   static const statisticsScreen = '/statisticsScreen';
   static const moodCheckinScreen = '/moodCheckinScreen';
   static const meditationScreen = '/meditationScreen';
+  static const meditationDetailScreen = '/meditationDetailScreen';
   static const breathingScreen = '/breathingScreen';
   static const sleepProgramsScreen = '/sleepProgramsScreen';
   static const notificationsScreen = '/notificationsScreen';
@@ -159,6 +162,11 @@ Route generatedRoutes(RouteSettings settings) {
       break;
     case Routes.meditationScreen:
       child = const MeditationScreen();
+      break;
+    case Routes.meditationDetailScreen:
+      child = MeditationDetailScreen(
+        album: settings.arguments as Albam,
+      );
       break;
     case Routes.breathingScreen:
       child = const BreathingScreen();

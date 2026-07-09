@@ -209,7 +209,14 @@
     "session_title": "Body Scan Relaxation",
     "session_subtitle": "Release tension from head to toe",
     "session_benefits": "Session Benefits",
-    "benefits": "Reduces stress · Improves focus · Better sleep"
+    "benefits": "Reduces stress · Improves focus · Better sleep",
+    "take_a_moment": "Take a moment for yourself",
+    "popular": "Popular"
+  },
+  "meditation_detail_screen": {
+    "about": "About",
+    "start": "Start Meditation",
+    "unlock": "Unlock Meditation"
   },
   "breathing_screen": {
     "title": "Breathing Exercise",
