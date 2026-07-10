@@ -163,6 +163,16 @@
         </script>
     @endif
 
+    @if (session('warning'))
+        <script>
+            Toast.fire({
+                position: 'bottom-right',
+                icon: 'warning',
+                title: '{{ session('warning') }}'
+            })
+        </script>
+    @endif
+
     @if (session('error'))
         <script>
             Toast.fire({

@@ -44,12 +44,23 @@ class PlaylistController extends Controller
     public function create()
     {
         $categories = (new CategoryRepository())->getByActive();
-        return view('playlist.create', compact('categories'));
+        $albams = (new AlbamRepository())->getAll();
+        return view('playlist.create', compact('categories', 'albams'));
     }
     public function store(PlayListRequest $request)
     {
-        (new PlayListRepository())->storeByRequest($request);
-        return redirect()->route('playlist.index')->with('success', 'Create successfully');
+        $playlist = (new PlayListRepository())->storeByRequest($request);
+
+        $response = redirect()->route('playlist.index')->with('success', 'Create successfully');
+
+        if ($playlist->albams()->doesntExist()) {
+            $response->with(
+                'warning',
+                'This song has no album attached, so it will not appear in the app yet. Open an Album and use its Albums screen to attach this song.'
+            );
+        }
+
+        return $response;
     }
 
     public function edit(PlayList $playlist)

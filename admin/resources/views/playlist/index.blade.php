@@ -63,8 +63,9 @@
                                 </label>
                             </td>
                             <td class="text-center" style="width: 110px">
-                               <button class="btn btn-primary btn-sm" data-toggle="modal"
-                               data-target="#albamId{{ $playlist->id }}">Albums</button>
+                               @php $hasAlbums = $playlist->albams->isNotEmpty(); @endphp
+                               <button id="albamsBtn{{ $playlist->id }}" class="btn btn-sm {{ $hasAlbums ? 'btn-primary' : 'btn-warning' }}" data-toggle="modal"
+                               data-target="#albamId{{ $playlist->id }}">{{ $hasAlbums ? 'Albums' : 'No Album' }}</button>
                             </td>
                             <td style="width: 220px">
                                 <div class="d-flex flex-wrap justify-content-between gap-4">
