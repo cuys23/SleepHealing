@@ -1,6 +1,7 @@
 {
   "common": {
-    "pro": "PRO"
+    "pro": "PRO",
+    "coming_soon": "Yakında"
   },
   "onboarding_screen": {
     "welcome": "Hoş geldin",
@@ -133,6 +134,7 @@
     "delete_acc": "Hesabı sil",
     "log_out": "Çıkış Yap",
     "subscription_plans": "Abonelik Planları",
+    "upgrade": "Yükselt",
     "stat_nights": "Gece",
     "stat_listened": "Dinlendi",
     "stat_streak": "Seri",
@@ -151,7 +153,8 @@
     "notifications": "Bildirimler",
     "about": "Hakkında",
     "help_center": "Yardım Merkezi",
-    "about_app": "Hakkında"
+    "about_app": "Hakkında",
+    "audio_quality": "Ses Kalitesi"
   },
   "sleep_tracker_screen": {
     "title": "Uyku Takibi",

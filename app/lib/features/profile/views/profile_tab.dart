@@ -11,12 +11,12 @@ import 'package:medyo/config/app_colors.dart';
 import 'package:medyo/config/app_text_decor.dart';
 import 'package:medyo/config/config.dart';
 import 'package:medyo/config/hive_contants.dart';
-import 'package:medyo/features/auth/logic/auth_provider.dart';
 import 'package:medyo/features/wellness/mock/achievements_mock_data.dart';
 import 'package:medyo/features/wellness/mock/profile_stats_mock_data.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/dialouges.dart';
 import 'package:medyo/utils/routes.dart';
+import 'package:medyo/widgets/chips/pro_badge.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -35,321 +35,172 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
     return ValueListenableBuilder(
         valueListenable: Hive.box(AppHSC.userBox).listenable(),
         builder: (BuildContext context, Box userBox, Widget? child) {
-          // final bool isPremium = userBox.get(AppHSC.premium);
+          final bool isPremium = userBox.get(AppHSC.premium) == true;
           return ValueListenableBuilder(
               valueListenable: Hive.box(AppHSC.authBox).listenable(),
               builder: (BuildContext context, Box authbox, Widget? child) {
-                return Column(
-                  children: [
-                    AppSpacerH(60.h),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w),
-                      child: Row(
-                        children: [
-                          authbox.get(AppHSC.authToken) != null
-                              ? SizedBox(
-                                  height: 64.h,
-                                  width: 64.h,
-                                  child: Stack(
-                                    children: [
-                                      ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(32.h),
-                                          child: CachedNetworkImage(
-                                            imageUrl:
-                                                userBox.get(AppHSC.thumbnail),
-                                            height: 64.h,
-                                            width: 64.h,
-                                            fit: BoxFit.cover,
-                                            errorWidget: (context, url,
-                                                    error) =>
-                                                const Center(
-                                                    child: Icon(Icons.error)),
-                                          )),
-                                      Container(
-                                        decoration: BoxDecoration(
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      AppSpacerH(60.h),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        child: Row(
+                          children: [
+                            authbox.get(AppHSC.authToken) != null
+                                ? SizedBox(
+                                    height: 64.h,
+                                    width: 64.h,
+                                    child: Stack(
+                                      children: [
+                                        ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(32.h),
+                                            child: CachedNetworkImage(
+                                              imageUrl:
+                                                  userBox.get(AppHSC.thumbnail),
+                                              height: 64.h,
+                                              width: 64.h,
+                                              fit: BoxFit.cover,
+                                              errorWidget: (context, url,
+                                                      error) =>
+                                                  const Center(
+                                                      child: Icon(Icons.error)),
+                                            )),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(32.h),
+                                              border: Border.all(
+                                                  color: AppColors.textPrimary,
+                                                  width: 1.w)),
+                                          height: 64.h,
+                                          width: 64.h,
+                                        ),
+                                        Positioned(
+                                          bottom: 0,
+                                          right: 0,
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              showProfilePictureDialuge(
+                                                  context);
+                                            },
+                                            child: Container(
+                                              height: 24.h,
+                                              width: 24.h,
+                                              decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          12.h),
+                                                  color: AppColors.textPrimary),
+                                              child: Center(
+                                                  child: Icon(
+                                                Icons.camera_alt,
+                                                color: AppColors.black,
+                                                size: 18.h,
+                                              )),
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ))
+                                : SizedBox(
+                                    height: 64.h,
+                                    width: 64.h,
+                                    child: Stack(
+                                      children: [
+                                        ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(32.h),
+                                            child: Icon(
+                                              Icons.person,
+                                              size: 64.h,
+                                              color: AppColors.textPrimary,
+                                            )),
+                                        Container(
+                                          decoration: BoxDecoration(
                                             borderRadius:
                                                 BorderRadius.circular(32.h),
                                             border: Border.all(
-                                                color: AppColors.textPrimary,
-                                                width: 1.w)),
-                                        height: 64.h,
-                                        width: 64.h,
-                                      ),
-                                      Positioned(
-                                        bottom: 0,
-                                        right: 0,
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            showProfilePictureDialuge(context);
-                                          },
-                                          child: Container(
-                                            height: 24.h,
-                                            width: 24.h,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(12.h),
-                                                color: AppColors.textPrimary),
-                                            child: Center(
-                                                child: Icon(
-                                              Icons.camera_alt,
-                                              color: AppColors.black,
-                                              size: 18.h,
-                                            )),
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ))
-                              : SizedBox(
-                                  height: 64.h,
-                                  width: 64.h,
-                                  child: Stack(
-                                    children: [
-                                      ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(32.h),
-                                          child: Icon(
-                                            Icons.person,
-                                            size: 64.h,
-                                            color: AppColors.textPrimary,
-                                          )),
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(32.h),
-                                          border: Border.all(
-                                            color: AppColors.textPrimary,
-                                            width: 1.w,
-                                          ),
-                                        ),
-                                        height: 64.h,
-                                        width: 64.h,
-                                      ),
-                                      //
-                                    ],
-                                  ),
-                                ),
-                          AppSpacerW(16.w),
-                          authbox.get(AppHSC.authToken) != null
-                              ? Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "${userBox.get(AppHSC.firstName)}",
-                                        style: AppTextDecor.heading3_17,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              "${userBox.get(AppHSC.email)}",
-                                              style:
-                                                  AppTextDecor.caption13Muted,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
+                                              color: AppColors.textPrimary,
+                                              width: 1.w,
                                             ),
                                           ),
-                                          if (userBox.get(AppHSC.verified) !=
-                                              true) ...[
-                                            AppSpacerW(8.w),
-                                            Container(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 8.w,
-                                                  vertical: 4.h),
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(8.r),
-                                                color: AppColors.inputBg,
-                                              ),
-                                              child: ref
-                                                  .watch(
-                                                      verificationMailProvider)
-                                                  .map(
-                                                    initial: (_) =>
-                                                        GestureDetector(
-                                                      onTap: () {
-                                                        ref
-                                                            .watch(
-                                                                verificationMailProvider
-                                                                    .notifier)
-                                                            .verificationMail();
-                                                      },
-                                                      child: Text(
-                                                        'profile_screen.send_mail'
-                                                            .tr(),
-                                                        style: AppTextDecor
-                                                            .caption12,
-                                                      ),
-                                                    ),
-                                                    loading: (_) =>
-                                                        const LoadingWidget(),
-                                                    loaded: (_) {
-                                                      return Text(
-                                                        'profile_screen.send_code'
-                                                            .tr(),
-                                                        style: AppTextDecor
-                                                            .caption12,
-                                                      );
-                                                    },
-                                                    error: (_) =>
-                                                        const ErrorTextWidget(
-                                                            error: 'Error'),
-                                                  ),
-                                            ),
-                                          ],
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                )
-                              : TextButton(
-                                  onPressed: () {
-                                    context.nav.pushNamed(Routes.loginScreen);
-                                  },
-                                  style: TextButton.styleFrom(
-                                    padding: EdgeInsets.zero,
-                                    shape: RoundedRectangleBorder(
-                                      side: const BorderSide(
-                                        color: AppColors.accentPrimary,
-                                        width: 1,
-                                      ),
-                                      borderRadius: BorderRadius.circular(14.r),
+                                          height: 64.h,
+                                          width: 64.h,
+                                        ),
+                                        //
+                                      ],
                                     ),
-                                    minimumSize: Size(150.w, 50.h),
-                                    alignment: Alignment.center,
                                   ),
-                                  child: Text(
-                                    "login_screen.login".tr(),
-                                    style: AppTextDecor.bodyTitle16,
+                            AppSpacerW(16.w),
+                            authbox.get(AppHSC.authToken) != null
+                                ? Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "${userBox.get(AppHSC.firstName)}",
+                                          style: AppTextDecor.heading3_17,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        Text(
+                                          "${userBox.get(AppHSC.email)}",
+                                          style: AppTextDecor.caption13Muted,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : TextButton(
+                                    onPressed: () {
+                                      context.nav.pushNamed(Routes.loginScreen);
+                                    },
+                                    style: TextButton.styleFrom(
+                                      padding: EdgeInsets.zero,
+                                      shape: RoundedRectangleBorder(
+                                        side: const BorderSide(
+                                          color: AppColors.accentPrimary,
+                                          width: 1,
+                                        ),
+                                        borderRadius:
+                                            BorderRadius.circular(14.r),
+                                      ),
+                                      minimumSize: Size(150.w, 50.h),
+                                      alignment: Alignment.center,
+                                    ),
+                                    child: Text(
+                                      "login_screen.login".tr(),
+                                      style: AppTextDecor.bodyTitle16,
+                                    ),
                                   ),
-                                ),
-                        ],
+                            if (authbox.get(AppHSC.authToken) != null) ...[
+                              AppSpacerW(8.w),
+                              _PlanBadge(isPremium: isPremium),
+                            ],
+                          ],
+                        ),
                       ),
-                    ),
-                    if (authbox.get(AppHSC.authToken) != null) ...[
-                      AppSpacerH(20.h),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: _ProfileStatsRow(),
-                      ),
-                      AppSpacerH(20.h),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: _AchievementsRow(),
-                      ),
-                    ],
-                    AppSpacerH(24.h),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w),
-                      child: Column(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(20.r),
-                            ),
-                            padding: EdgeInsets.symmetric(horizontal: 12.w),
-                            child: Column(
-                              children: [
-                                if (userBox.get(AppHSC.premium) == false)
-                                  ProfileTabWidget(
-                                    svgPath: "assets/svgs/icon_star.svg",
-                                    title: "My Subscription",
-                                    onTap: () {
-                                      context.nav
-                                          .pushNamed(Routes.mySubScreen);
-                                    },
-                                  ),
-                                if (userBox.get(AppHSC.premium) == false)
-                                  ProfileTabWidget(
-                                    svgPath: "assets/svgs/crown.svg",
-                                    title: 'profile_screen.subscription_plans'
-                                        .tr(),
-                                    onTap: () {
-                                      context.nav.pushNamed(
-                                          Routes.premiumSubScreen);
-                                    },
-                                  ),
-                                if (authbox.get(AppHSC.authToken) != null)
-                                  ProfileTabWidget(
-                                    svgPath: "assets/svgs/icon_herat.svg",
-                                    title: "Favourites".tr(),
-                                    onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const FavouritesTab()));
-                                    },
-                                  ),
-                                ProfileTabWidget(
-                                  iconOverride: Icons.settings_outlined,
-                                  svgPath: "",
-                                  title: "settings_screen.title".tr(),
-                                  onTap: () {
-                                    context.nav
-                                        .pushNamed(Routes.settingsScreen);
-                                  },
-                                ),
-                                ProfileTabWidget(
-                                  svgPath: "assets/svgs/icon_share.svg",
-                                  title: "profile_screen.invite_friend".tr(),
-                                  onTap: () async {
-                                    final box =
-                                        context.findRenderObject() as RenderBox?;
-                                    try {
-                                      await Share.share(
-                                        Platform.isIOS
-                                            ? AppConfig.iosStoreUrl
-                                            : AppConfig.androidStoreUrl,
-                                        sharePositionOrigin: box != null
-                                            ? box.localToGlobal(Offset.zero) &
-                                                box.size
-                                            : null,
-                                      );
-                                    } catch (e) {
-                                      debugPrint('Share failed: $e');
-                                    }
-                                  },
-                                ),
-                                ProfileTabWidget(
-                                  svgPath:
-                                      "assets/svgs/icon_privacy_policy.svg",
-                                  title: "profile_screen.privacy_policy".tr(),
-                                  onTap: () {
-                                    context.nav
-                                        .pushNamed(Routes.privacyPolicy);
-                                  },
-                                ),
-                                ProfileTabWidget(
-                                  svgPath: "assets/svgs/icon_contact_us.svg",
-                                  title: "profile_screen.contact_us".tr(),
-                                  onTap: () {
-                                    context.nav.pushNamed(Routes.contactUs);
-                                  },
-                                  isLast:
-                                      authbox.get(AppHSC.authToken) == null,
-                                ),
-                                if (authbox.get(AppHSC.authToken) != null)
-                                  ProfileTabWidget(
-                                    svgPath:
-                                        "assets/svgs/icon_change_pass.svg",
-                                    title: "profile_screen.change_pass".tr(),
-                                    onTap: () {
-                                      context.nav.pushNamed(Routes.changePass);
-                                    },
-                                    isLast: true,
-                                  ),
-                              ],
-                            ),
-                          ),
-                          if (authbox.get(AppHSC.authToken) != null) ...[
-                            AppSpacerH(16.h),
+                      if (authbox.get(AppHSC.authToken) != null) ...[
+                        AppSpacerH(20.h),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: _ProfileStatsRow(),
+                        ),
+                        AppSpacerH(20.h),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: _AchievementsRow(),
+                        ),
+                      ],
+                      AppSpacerH(24.h),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        child: Column(
+                          children: [
                             Container(
                               decoration: BoxDecoration(
                                 color: AppColors.surface,
@@ -358,33 +209,137 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                               padding: EdgeInsets.symmetric(horizontal: 12.w),
                               child: Column(
                                 children: [
+                                  if (userBox.get(AppHSC.premium) == false)
+                                    ProfileTabWidget(
+                                      svgPath: "assets/svgs/icon_star.svg",
+                                      title: "My Subscription",
+                                      onTap: () {
+                                        context.nav
+                                            .pushNamed(Routes.mySubScreen);
+                                      },
+                                    ),
+                                  if (userBox.get(AppHSC.premium) == false)
+                                    ProfileTabWidget(
+                                      svgPath: "assets/svgs/crown.svg",
+                                      title: 'profile_screen.subscription_plans'
+                                          .tr(),
+                                      onTap: () {
+                                        context.nav
+                                            .pushNamed(Routes.premiumSubScreen);
+                                      },
+                                    ),
+                                  if (authbox.get(AppHSC.authToken) != null)
+                                    ProfileTabWidget(
+                                      svgPath: "assets/svgs/icon_herat.svg",
+                                      title: "Favourites".tr(),
+                                      onTap: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const FavouritesTab()));
+                                      },
+                                    ),
+                                  ProfileTabWidget(
+                                    iconOverride: Icons.settings_outlined,
+                                    svgPath: "",
+                                    title: "settings_screen.title".tr(),
+                                    onTap: () {
+                                      context.nav
+                                          .pushNamed(Routes.settingsScreen);
+                                    },
+                                  ),
+                                  ProfileTabWidget(
+                                    svgPath: "assets/svgs/icon_share.svg",
+                                    title: "profile_screen.invite_friend".tr(),
+                                    onTap: () async {
+                                      final box = context.findRenderObject()
+                                          as RenderBox?;
+                                      try {
+                                        await Share.share(
+                                          Platform.isIOS
+                                              ? AppConfig.iosStoreUrl
+                                              : AppConfig.androidStoreUrl,
+                                          sharePositionOrigin: box != null
+                                              ? box.localToGlobal(Offset.zero) &
+                                                  box.size
+                                              : null,
+                                        );
+                                      } catch (e) {
+                                        debugPrint('Share failed: $e');
+                                      }
+                                    },
+                                  ),
                                   ProfileTabWidget(
                                     svgPath:
-                                        "assets/svgs/icon_delete_account.svg",
-                                    title: "profile_screen.delete_acc".tr(),
+                                        "assets/svgs/icon_privacy_policy.svg",
+                                    title: "profile_screen.privacy_policy".tr(),
                                     onTap: () {
-                                      showDeleteDialouge(context);
+                                      context.nav
+                                          .pushNamed(Routes.privacyPolicy);
                                     },
-                                    isDanger: true,
                                   ),
                                   ProfileTabWidget(
-                                    svgPath: "assets/svgs/icon_logout.svg",
-                                    title: "profile_screen.log_out".tr(),
+                                    svgPath: "assets/svgs/icon_contact_us.svg",
+                                    title: "profile_screen.contact_us".tr(),
                                     onTap: () {
-                                      showLogoutDialouge(context);
+                                      context.nav.pushNamed(Routes.contactUs);
                                     },
-                                    isDanger: true,
-                                    isLast: true,
+                                    isLast:
+                                        authbox.get(AppHSC.authToken) == null,
                                   ),
+                                  if (authbox.get(AppHSC.authToken) != null)
+                                    ProfileTabWidget(
+                                      svgPath:
+                                          "assets/svgs/icon_change_pass.svg",
+                                      title: "profile_screen.change_pass".tr(),
+                                      onTap: () {
+                                        context.nav
+                                            .pushNamed(Routes.changePass);
+                                      },
+                                      isLast: true,
+                                    ),
                                 ],
                               ),
                             ),
+                            if (authbox.get(AppHSC.authToken) != null) ...[
+                              AppSpacerH(16.h),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: AppColors.surface,
+                                  borderRadius: BorderRadius.circular(20.r),
+                                ),
+                                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                                child: Column(
+                                  children: [
+                                    ProfileTabWidget(
+                                      svgPath:
+                                          "assets/svgs/icon_delete_account.svg",
+                                      title: "profile_screen.delete_acc".tr(),
+                                      onTap: () {
+                                        showDeleteDialouge(context);
+                                      },
+                                      isDanger: true,
+                                    ),
+                                    ProfileTabWidget(
+                                      svgPath: "assets/svgs/icon_logout.svg",
+                                      title: "profile_screen.log_out".tr(),
+                                      onTap: () {
+                                        showLogoutDialouge(context);
+                                      },
+                                      isDanger: true,
+                                      isLast: true,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                            AppSpacerH(24.h),
                           ],
-                          AppSpacerH(24.h),
-                        ],
-                      ),
-                    )
-                  ],
+                        ),
+                      )
+                    ],
+                  ),
                 );
               });
         });
@@ -460,6 +415,42 @@ class _AchievementsRow extends StatelessWidget {
               .toList(),
         ),
       ],
+    );
+  }
+}
+
+/// Real-data plan indicator next to the user's name: a PRO tag for premium
+/// accounts (reuses the existing ProBadge shown elsewhere for premium-gated
+/// content), or a tappable Upgrade pill for free accounts that opens the
+/// existing Premium Plans screen. Backed by the same `AppHSC.premium` flag
+/// already used to gate the subscription menu rows below.
+class _PlanBadge extends StatelessWidget {
+  const _PlanBadge({required this.isPremium});
+  final bool isPremium;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isPremium) {
+      return const ProBadge();
+    }
+    return GestureDetector(
+      onTap: () => context.nav.pushNamed(Routes.premiumSubScreen),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.r),
+          gradient: const LinearGradient(
+            colors: [AppColors.accentPrimary, AppColors.accentSecondary],
+          ),
+        ),
+        child: Text(
+          'profile_screen.upgrade'.tr(),
+          style: AppTextDecor.tagBadge11.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
     );
   }
 }

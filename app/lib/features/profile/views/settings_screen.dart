@@ -8,6 +8,7 @@ import 'package:medyo/config/app_text_decor.dart';
 import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/dialouges.dart';
 import 'package:medyo/utils/routes.dart';
+import 'package:medyo/widgets/chips/coming_soon_badge.dart';
 import 'package:medyo/widgets/misc_widgets.dart';
 import 'package:medyo/widgets/regular_app_bar.dart';
 import 'package:medyo/widgets/screen_wrapper.dart';
@@ -70,8 +71,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     label: 'settings_screen.notifications'.tr(),
                     value: _notifications,
                     onChanged: (v) => setState(() => _notifications = v),
-                    isLast: true,
                   ),
+                  const _SettingsAudioQualityRow(),
                 ]),
                 AppSpacerH(20.h),
                 _SettingsGroupLabel('settings_screen.about'.tr()),
@@ -189,26 +190,46 @@ class _SettingsToggleRow extends StatelessWidget {
     required this.label,
     required this.value,
     required this.onChanged,
-    this.isLast = false,
   });
 
   final IconData icon;
   final String label;
   final bool value;
   final ValueChanged<bool> onChanged;
-  final bool isLast;
 
   @override
   Widget build(BuildContext context) {
     return _SettingsRow(
       icon: icon,
       label: label,
-      isLast: isLast,
       onTap: () => onChanged(!value),
       trailing: CupertinoSwitch(
         value: value,
         activeTrackColor: AppColors.accentPrimary,
         onChanged: onChanged,
+      ),
+    );
+  }
+}
+
+/// Audio Quality selector shown in the design but with no backing engine
+/// support today (the audio pipeline has no bitrate/quality switch) — kept
+/// visible per the design but dimmed and non-interactive so it doesn't
+/// read as a working control.
+class _SettingsAudioQualityRow extends StatelessWidget {
+  const _SettingsAudioQualityRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: 0.5,
+      child: IgnorePointer(
+        child: _SettingsRow(
+          icon: Icons.graphic_eq,
+          label: 'settings_screen.audio_quality'.tr(),
+          isLast: true,
+          trailing: const ComingSoonBadge(),
+        ),
       ),
     );
   }

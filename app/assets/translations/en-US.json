@@ -1,6 +1,7 @@
 {
   "common": {
-    "pro": "PRO"
+    "pro": "PRO",
+    "coming_soon": "Coming Soon"
   },
   "onboarding_screen": {
     "welcome": "Welcome",
@@ -133,6 +134,7 @@
     "delete_acc": "Delete Account",
     "log_out": "Logout",
     "subscription_plans": "Subscription Plans",
+    "upgrade": "Upgrade",
     "stat_nights": "Nights",
     "stat_listened": "Listened",
     "stat_streak": "Streak",
@@ -151,7 +153,8 @@
     "notifications": "Notifications",
     "about": "About",
     "help_center": "Help Center",
-    "about_app": "About"
+    "about_app": "About",
+    "audio_quality": "Audio Quality"
   },
   "sleep_tracker_screen": {
     "title": "Sleep Tracker",
