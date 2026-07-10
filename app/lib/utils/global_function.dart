@@ -5,6 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:medyo/config/hive_contants.dart';
 import 'package:medyo/features/core/models/play_list_model/albam.dart';
 import 'package:medyo/features/core/models/user_model/data.dart' as us;
+import 'package:medyo/utils/media_url.dart';
 
 class AppGLF {
   AppGLF._();
@@ -82,8 +83,10 @@ class AppGLF {
         debugPrint('[Audio] parseDuration failed for "${track.duration}": $e');
       }
     }
+    final audioUrl = normalizeMediaUrl(track.audio) ?? '';
+    final thumbnailUrl = normalizeMediaUrl(track.thumbnail);
     final item = MediaItem(
-      id: track.audio.toString(),
+      id: audioUrl,
       album: track.albam?.name ?? '',
       title: track.name ?? '',
       extras: {
@@ -92,9 +95,9 @@ class AppGLF {
         'album': track.albam?.id.toString(),
         'desc': track.description,
         'hasReadMore': track.hasReadMore,
-        'thumbnail': track.thumbnail,
+        'thumbnail': thumbnailUrl,
       },
-      artUri: Uri.parse(track.thumbnail ?? ''),
+      artUri: thumbnailUrl != null ? Uri.parse(thumbnailUrl) : null,
       duration: apiDuration,
     );
 

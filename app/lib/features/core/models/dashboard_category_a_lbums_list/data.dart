@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:medyo/utils/safe_parse.dart';
+
 import 'albam.dart';
 
 class Data {
@@ -10,9 +12,11 @@ class Data {
 
   factory Data.fromMap(Map<String, dynamic> data) => Data(
         total: data['total'] as int?,
-        albams: (data['albams'] as List<dynamic>?)
-            ?.map((e) => Albam.fromMap(e as Map<String, dynamic>))
-            .toList(),
+        albams: parseListSafely(
+          data['albams'] as List<dynamic>?,
+          Albam.fromMap,
+          debugLabel: 'DashboardCategoryALbumsList.albams',
+        ),
       );
 
   Map<String, dynamic> toMap() => {

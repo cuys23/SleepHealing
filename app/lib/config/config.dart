@@ -3,6 +3,12 @@ class AppConfig {
   static const String baseUrl = 'http://localhost:9080/api';
   static const String uatbaseUrl = 'http://maditam.razinsoft.com/api';
 
+  /// The API host without the `/api` suffix, e.g. `http://localhost:9080`.
+  /// Media (image/audio) URLs live under this host's `/storage` path, not
+  /// under `/api`, so this is what [normalizeMediaUrl] anchors relative
+  /// paths to.
+  static String get hostUrl => baseUrl.replaceFirst(RegExp(r'/api/?$'), '');
+
   //Store links (Invite Friend)
   static const String androidStoreUrl =
       'https://play.google.com/store/apps/details?id=com.maditam';

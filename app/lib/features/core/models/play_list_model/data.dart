@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:medyo/utils/safe_parse.dart';
+
 import 'albam.dart';
 
 class PlayList {
@@ -8,9 +10,11 @@ class PlayList {
   PlayList({this.albams});
 
   factory PlayList.fromMap(Map<String, dynamic> data) => PlayList(
-        albams: (data['albams'] as List<dynamic>?)
-            ?.map((e) => MusicTrack.fromMap(e as Map<String, dynamic>))
-            .toList(),
+        albams: parseListSafely(
+          data['albams'] as List<dynamic>?,
+          MusicTrack.fromMap,
+          debugLabel: 'PlayList.albams',
+        ),
       );
 
   Map<String, dynamic> toMap() => {

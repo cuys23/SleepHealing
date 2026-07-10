@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:medyo/utils/safe_parse.dart';
+
 import 'category.dart';
 
 class Data {
@@ -8,9 +10,11 @@ class Data {
   Data({this.category});
 
   factory Data.fromMap(Map<String, dynamic> data) => Data(
-        category: (data['category'] as List<dynamic>?)
-            ?.map((e) => Category.fromMap(e as Map<String, dynamic>))
-            .toList(),
+        category: parseListSafely(
+          data['category'] as List<dynamic>?,
+          Category.fromMap,
+          debugLabel: 'CategoryListModel.category',
+        ),
       );
 
   Map<String, dynamic> toMap() => {

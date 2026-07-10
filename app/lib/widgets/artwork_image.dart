@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medyo/config/app_colors.dart';
+import 'package:medyo/utils/media_url.dart';
 
 /// Shared track/album artwork widget. When [imageUrl] is empty or fails to
 /// load, shows a category-tinted gradient with a music note instead of a
@@ -37,14 +38,15 @@ class ArtworkImage extends StatelessWidget {
       iconSize: iconSize,
     );
 
-    if (imageUrl == null || imageUrl!.isEmpty) {
+    final resolvedUrl = normalizeMediaUrl(imageUrl);
+    if (resolvedUrl == null) {
       return fallback;
     }
 
     return ClipRRect(
       borderRadius: radius,
       child: CachedNetworkImage(
-        imageUrl: imageUrl!,
+        imageUrl: resolvedUrl,
         width: width,
         height: height,
         fit: fit,

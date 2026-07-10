@@ -11,6 +11,7 @@ import 'package:medyo/features/core/models/play_list_model/albam.dart';
 import 'package:medyo/features/theme/misc_provider.dart';
 import 'package:medyo/services/local_storage_service.dart';
 import 'package:medyo/utils/global_function.dart';
+import 'package:medyo/utils/media_url.dart';
 
 final isAudioPaused = StateProvider<bool>((ref) => false);
 final playBackDurationProvider =
@@ -220,7 +221,8 @@ class MyAudioHandler extends BaseAudioHandler {
     ref.read(currentDurationProvider.notifier).state = apiDuration;
     ref.read(playBackDurationProvider.notifier).state = Duration.zero;
 
-    final audioUrl = music.audio?.toString() ?? '';
+    final audioUrl = normalizeMediaUrl(music.audio) ?? '';
+    final thumbnailUrl = normalizeMediaUrl(music.thumbnail);
     mediaItem.add(MediaItem(
       id: audioUrl,
       album: music.albam?.name ?? '',
@@ -231,9 +233,9 @@ class MyAudioHandler extends BaseAudioHandler {
         'album': music.albam?.id.toString(),
         'desc': music.description,
         'hasReadMore': music.hasReadMore,
-        'thumbnail': music.thumbnail,
+        'thumbnail': thumbnailUrl,
       },
-      artUri: Uri.parse(music.thumbnail ?? ''),
+      artUri: thumbnailUrl != null ? Uri.parse(thumbnailUrl) : null,
       duration: apiDuration,
     ));
 
