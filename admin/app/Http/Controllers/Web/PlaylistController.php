@@ -53,11 +53,8 @@ class PlaylistController extends Controller
 
         $response = redirect()->route('playlist.index')->with('success', 'Create successfully');
 
-        if ($playlist->albams()->doesntExist()) {
-            $response->with(
-                'warning',
-                'This song has no album attached, so it will not appear in the app yet. Open an Album and use its Albums screen to attach this song.'
-            );
+        if ($warning = $this->buildPlaylistWarning($playlist)) {
+            $response->with('warning', $warning);
         }
 
         return $response;
@@ -72,8 +69,30 @@ class PlaylistController extends Controller
 
     public function update(PlayListRequest $request, PlayList $playlist)
     {
-        (new PlayListRepository())->updateByRequest($request, $playlist);
-        return redirect()->route('playlist.index')->with('success', 'Update Successfully');
+        $playlist = (new PlayListRepository())->updateByRequest($request, $playlist);
+
+        $response = redirect()->route('playlist.index')->with('success', 'Update Successfully');
+
+        if ($warning = $this->buildPlaylistWarning($playlist)) {
+            $response->with('warning', $warning);
+        }
+
+        return $response;
+    }
+
+    /**
+     * A duration-detection failure is now a hard validation error (see
+     * PlayListRequest / ValidAudioDuration), so the only remaining
+     * "succeeded but not fully visible" state is a song with no album
+     * attached.
+     */
+    private function buildPlaylistWarning(PlayList $playlist): ?string
+    {
+        if ($playlist->albams()->doesntExist()) {
+            return 'This song has no album attached, so it will not appear in the app yet. Open an Album and use its Albums screen to attach this song.';
+        }
+
+        return null;
     }
 
     public function delete(PlayList $playlist)

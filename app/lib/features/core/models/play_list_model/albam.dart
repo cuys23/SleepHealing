@@ -1,12 +1,13 @@
 import 'dart:convert';
 
 import 'package:medyo/features/core/models/album_list_model/albam.dart';
+import 'package:medyo/utils/safe_parse.dart';
 
 class MusicTrack {
   int? id;
   String? name;
   String? description;
-  String? duration;
+  int? duration;
   String? thumbnail;
   String? audio;
   bool? isfavorite;
@@ -31,7 +32,7 @@ class MusicTrack {
         id: data['id'] as int?,
         name: data['name'] as String?,
         description: data['description'] as String?,
-        duration: data['duration'] as String?,
+        duration: parseIntSafely(data['duration']),
         thumbnail: data['thumbnail'] as String?,
         audio: data['audio'] as String?,
         isfavorite: data['is_favorite'] as bool?,

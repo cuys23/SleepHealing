@@ -19,3 +19,19 @@ List<T> parseListSafely<T>(
   }
   return items;
 }
+
+/// Coerces a JSON value into an int, accepting the canonical native number
+/// as well as a numeric string (e.g. a stale cached response) so a backend
+/// transition doesn't crash on mixed data. Returns null for null/empty/
+/// unparseable input rather than throwing.
+int? parseIntSafely(dynamic raw) {
+  if (raw == null) return null;
+  if (raw is int) return raw;
+  if (raw is double) return raw.round();
+  if (raw is String) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return null;
+    return int.tryParse(trimmed) ?? double.tryParse(trimmed)?.round();
+  }
+  return null;
+}

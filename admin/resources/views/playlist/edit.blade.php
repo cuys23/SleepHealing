@@ -25,24 +25,33 @@
                             <div class="col-lg-8 border-right">
                                 <x-input name="name" type="text" placeholder="Name" value="{{ $playlist->name }}">
                                 </x-input>
-                                <x-input name="duration" type="text" placeholder="Duration"
-                                    value="{{ $playlist->duration }}">
-                                </x-input>
+                                <div class="form-group">
+                                    <label class="mb-1">Duration</label>
+                                    <input type="text" class="form-control" value="{{ $playlist->formatted_duration ?? 'Not detected yet' }}" disabled readonly>
+                                    <small class="form-text text-muted d-block">Detected automatically from the audio file. Upload a new audio file below to recalculate.</small>
+                                </div>
                                 <x-textarea name="description" placeholder="Description"
                                     value="{{ $playlist->description }}" rows="4"></x-textarea>
                             </div>
                             <div class="col-lg-4">
                                 <div class="form-group">
                                     <label class="mb-1">Thumbnail</label>
-                                    <input type="file" class="form-control-file" name="thumbnail"
+                                    <input type="file" class="form-control-file @error('thumbnail') is-invalid @enderror" name="thumbnail"
                                         onchange="previewLogoFile(event)" />
+                                    @error('thumbnail')
+                                        <small class="text-danger d-block">{{ $message }}</small>
+                                    @enderror
                                     <img src="{{ $playlist->thumbnail }}" alt="" id="logoPreview" width="160"
                                         height="160" class="mt-1">
                                 </div>
                                 <div class="form-group">
                                     <label class="mb-1">Audio File</label>
-                                    <input type="file" class="form-control-file" name="audio"
+                                    <input type="file" class="form-control-file @error('audio') is-invalid @enderror" name="audio"
                                         onchange="previewAudio(event)" />
+                                    @error('audio')
+                                        <small class="text-danger d-block">{{ $message }}</small>
+                                    @enderror
+                                    <small class="form-text text-muted d-block">Leave empty to keep the current audio file and duration.</small>
                                 </div>
                             </div>
                         </div>

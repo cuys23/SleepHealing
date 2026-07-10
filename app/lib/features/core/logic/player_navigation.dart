@@ -8,12 +8,13 @@ import 'package:medyo/utils/context_less_nav.dart';
 import 'package:medyo/utils/global_function.dart';
 import 'package:medyo/utils/routes.dart';
 
-/// Formats stored millisecond duration back into the "h:mm:ss"/"m:ss" string
-/// that [MusicTrack.duration] expects (matches [AppGLF.parseDuration]).
-String? _durationStringFromMs(dynamic storedMs) {
+/// Converts stored millisecond duration (the player's own runtime
+/// measurement, saved by local_storage_service.dart) back into whole
+/// seconds for [MusicTrack.duration].
+int? _durationSecondsFromMs(dynamic storedMs) {
   final ms = storedMs is int ? storedMs : int.tryParse(storedMs?.toString() ?? '');
   if (ms == null || ms <= 0) return null;
-  return AppGLF.format(Duration(milliseconds: ms));
+  return (ms / 1000).round();
 }
 
 /// Opens the player screen and plays a track reconstructed from data saved
@@ -39,7 +40,7 @@ Future<void> openStoredTrack(
     isPaid: false,
     hasReadMore: storedData['hasReadMore'] as bool?,
     albam: albumId != null ? Albam(id: int.tryParse(albumId.toString())) : null,
-    duration: _durationStringFromMs(storedData['duration']),
+    duration: _durationSecondsFromMs(storedData['duration']),
   );
 
   ref.read(selectedAlbumProvider.notifier).state = null;

@@ -10,7 +10,6 @@ import 'package:medyo/features/core/logic/player_prefs_provider.dart';
 import 'package:medyo/features/core/models/play_list_model/albam.dart';
 import 'package:medyo/features/theme/misc_provider.dart';
 import 'package:medyo/services/local_storage_service.dart';
-import 'package:medyo/utils/global_function.dart';
 import 'package:medyo/utils/media_url.dart';
 
 final isAudioPaused = StateProvider<bool>((ref) => false);
@@ -212,12 +211,8 @@ class MyAudioHandler extends BaseAudioHandler {
   _playNewItem(MusicTrack music, bool stopPlay) async {
     _isSkippingToNext = false;
     _resetPosition();
-    Duration? apiDuration;
-    if (music.duration != null && music.duration!.isNotEmpty) {
-      try {
-        apiDuration = AppGLF.parseDuration(music.duration!);
-      } catch (_) {}
-    }
+    final apiDuration =
+        music.duration != null ? Duration(seconds: music.duration!) : null;
     ref.read(currentDurationProvider.notifier).state = apiDuration;
     ref.read(playBackDurationProvider.notifier).state = Duration.zero;
 

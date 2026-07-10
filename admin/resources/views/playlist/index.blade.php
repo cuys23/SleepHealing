@@ -37,7 +37,7 @@
                     @foreach ($playlists as $playlist)
                         <tr>
                             <td>{{ $playlist->name }}</td>
-                            <td>{{ $playlist->duration }}min</td>
+                            <td>{{ $playlist->formatted_duration ?? '--:--' }}</td>
                             <td class="text-center">
                                 <label class="switch">
                                     @role('root|admin')

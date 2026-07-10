@@ -29,4 +29,34 @@ void main() {
   test('empty input returns an empty list', () {
     expect(parseListSafely(const [], (m) => m['id'] as int), <int>[]);
   });
+
+  group('parseIntSafely', () {
+    test('a native JSON int passes through unchanged', () {
+      expect(parseIntSafely(242), 242);
+    });
+
+    test('zero passes through unchanged, not treated as absent', () {
+      expect(parseIntSafely(0), 0);
+    });
+
+    test('a numeric string is coerced to int', () {
+      expect(parseIntSafely('242'), 242);
+    });
+
+    test('a JSON double is rounded to int', () {
+      expect(parseIntSafely(242.0), 242);
+    });
+
+    test('null returns null', () {
+      expect(parseIntSafely(null), isNull);
+    });
+
+    test('an empty string returns null', () {
+      expect(parseIntSafely(''), isNull);
+    });
+
+    test('an unparseable string returns null, not a crash', () {
+      expect(parseIntSafely('not-a-number'), isNull);
+    });
+  });
 }

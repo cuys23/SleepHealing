@@ -38,7 +38,7 @@
                     </div>
                     <div class="col-lg-6 mt-3">
                         <label class="text-muted mb-1">Duration</label>
-                        <p>{{ $playlist->duration }}</p>
+                        <p>{{ $playlist->formatted_duration ?? '--:--' }}</p>
                     </div>
                     <div class="col-12 mt-3">
                         <label class="text-muted mb-1">Description</label>

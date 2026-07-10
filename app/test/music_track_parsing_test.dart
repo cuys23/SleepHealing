@@ -9,7 +9,7 @@ void main() {
         'id': 79,
         'name': 'E2E QA Song',
         'description': 'a test track',
-        'duration': '3:30',
+        'duration': 210,
         'thumbnail': 'http://localhost:9080/storage/images/playlist/x.png',
         'audio': 'http://localhost:9080/storage/audio/playlist/x.mp3',
         'is_favorite': false,
@@ -20,7 +20,7 @@ void main() {
 
       expect(track.id, 79);
       expect(track.name, 'E2E QA Song');
-      expect(track.duration, '3:30');
+      expect(track.duration, 210);
       expect(track.thumbnail, isNotNull);
       expect(track.audio, isNotNull);
     });
@@ -40,10 +40,15 @@ void main() {
       expect(track.duration, isNull);
     });
 
-    test('duration arrives as the API-native numeric string, e.g. "3:30"', () {
-      final track = MusicTrack.fromMap({'id': 1, 'duration': '3:30'});
-      expect(track.duration, isA<String>());
-      expect(track.duration, '3:30');
+    test('duration arrives as the API-native JSON integer', () {
+      final track = MusicTrack.fromMap({'id': 1, 'duration': 210});
+      expect(track.duration, isA<int>());
+      expect(track.duration, 210);
+    });
+
+    test('a legacy numeric-string duration is still tolerated', () {
+      final track = MusicTrack.fromMap({'id': 1, 'duration': '210'});
+      expect(track.duration, 210);
     });
   });
 

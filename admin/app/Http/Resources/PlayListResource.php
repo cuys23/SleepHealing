@@ -6,6 +6,7 @@ use App\Models\Subscription;
 use App\Models\WebSetting;
 use App\Repositories\AlbamRepository;
 use App\Repositories\UserRepository;
+use App\Services\DurationFormatter;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 
@@ -34,7 +35,10 @@ class PlayListResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'duration' => $this->duration,
+            // Canonical wire format: a real JSON integer, total seconds, so
+            // a legacy "3:30"-style row and a freshly detected one both
+            // arrive in the same shape.
+            'duration' => DurationFormatter::toSeconds($this->duration),
             'thumbnail' => $this->thumbnail,
             'audio' => $this->audioFile,
             'views' => $this->views,

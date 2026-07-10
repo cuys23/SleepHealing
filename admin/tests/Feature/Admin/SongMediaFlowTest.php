@@ -34,15 +34,31 @@ class SongMediaFlowTest extends TestCase
         return User::factory()->create();
     }
 
+    /**
+     * A real, short, decodable MP3 fixture - not UploadedFile::fake(), whose
+     * generated content is junk bytes that ffprobe correctly refuses to
+     * treat as audio, since AudioDurationService needs genuine audio data
+     * to detect a duration from.
+     */
+    private function realAudioFile(string $name = 'track.mp3'): UploadedFile
+    {
+        return new UploadedFile(
+            base_path('tests/Fixtures/audio/tiny-track.mp3'),
+            $name,
+            'audio/mpeg',
+            null,
+            true
+        );
+    }
+
     public function test_creating_a_song_stores_thumbnail_and_audio_on_the_public_disk(): void
     {
         Storage::fake('public');
 
         $response = $this->actingAs($this->admin())->post(route('playlist.store'), [
             'name' => 'QA Song',
-            'duration' => '3',
             'thumbnail' => UploadedFile::fake()->image('cover.png'),
-            'audio' => UploadedFile::fake()->create('track.mp3', 100, 'audio/mpeg'),
+            'audio' => $this->realAudioFile(),
             'active' => '1',
         ]);
 
@@ -72,8 +88,7 @@ class SongMediaFlowTest extends TestCase
 
         $response = $this->actingAs($this->admin())->post(route('playlist.update', $playlist), [
             'name' => $playlist->name,
-            'duration' => '3',
-            'audio' => UploadedFile::fake()->create('track.mp3', 100, 'audio/mpeg'),
+            'audio' => $this->realAudioFile(),
             'active' => '1',
         ]);
 
@@ -139,8 +154,7 @@ class SongMediaFlowTest extends TestCase
 
         $response = $this->actingAs($this->admin())->post(route('playlist.store'), [
             'name' => 'QA First Page Song',
-            'duration' => '3',
-            'audio' => UploadedFile::fake()->create('track.mp3', 100, 'audio/mpeg'),
+            'audio' => $this->realAudioFile(),
             'active' => '1',
         ]);
 
@@ -148,5 +162,68 @@ class SongMediaFlowTest extends TestCase
 
         $listResponse = $this->actingAs($this->admin())->get(route('playlist.index'));
         $listResponse->assertSee('QA First Page Song');
+    }
+
+    /**
+     * Root cause: the Audio File / Thumbnail inputs on playlist/create.blade.php were
+     * plain <input type="file"> tags with no @error() block, unlike every other field
+     * (which uses the x-input/x-select components that already render @error messages).
+     * A missing/invalid audio file failed validation exactly as intended, but the admin
+     * saw only the layout's generic "Something went wrong" toast with no indication of
+     * which field, or why - a false-negative-feeling failure for a correctly-rejected
+     * submission.
+     */
+    public function test_creating_a_song_without_audio_shows_a_specific_inline_error_not_just_a_generic_toast(): void
+    {
+        Storage::fake('public');
+        $admin = $this->admin();
+
+        $response = $this->actingAs($admin)->post(route('playlist.store'), [
+            'name' => 'No Audio Attempt',
+            'active' => '1',
+        ]);
+
+        $response->assertSessionHasErrors(['audio']);
+        $this->assertNull(
+            PlayList::where('name', 'No Audio Attempt')->first(),
+            'A song must not be created when the required audio file is missing.'
+        );
+
+        $createPage = $this->actingAs($admin)->get(route('playlist.create'));
+        $createPage->assertSee('The audio field is required.');
+    }
+
+    /**
+     * Root cause: components/input.blade.php built its old-input fallback as
+     * old('name') - a literal string, not the dynamic $name variable - so every
+     * x-input field except the one actually named "name" echoed the *name*
+     * field's old value after a failed submission instead of its own (or
+     * nothing). components/textarea.blade.php had the companion defect: no
+     * old() call at all, so it always reset to blank instead of preserving
+     * input. The audio-required validation failure below exercises both.
+     */
+    public function test_a_failed_song_submission_preserves_each_fields_own_old_value(): void
+    {
+        Storage::fake('public');
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->post(route('playlist.store'), [
+            'name' => 'Echo Regression Name',
+            'description' => 'Echo Regression Description',
+            'active' => '1',
+        ]);
+
+        $createPage = $this->actingAs($admin)->get(route('playlist.create'));
+        $content = $createPage->getContent();
+
+        preg_match('/id="name"[^>]*value="([^"]*)"/', $content, $nameMatch);
+        $this->assertSame('Echo Regression Name', $nameMatch[1] ?? null);
+
+        preg_match('/name="description"[^>]*>(.*?)<\/textarea>/s', $content, $descriptionMatch);
+        $this->assertSame(
+            'Echo Regression Description',
+            trim($descriptionMatch[1] ?? ''),
+            'The description textarea must preserve its own old value, not reset to blank.'
+        );
     }
 }

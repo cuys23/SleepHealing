@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\DurationFormatter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
@@ -75,6 +76,13 @@ class PlayList extends Model
 
         return new Attribute(
             get: fn() => $audio
+        );
+    }
+
+    public function formattedDuration(): Attribute
+    {
+        return new Attribute(
+            get: fn() => DurationFormatter::format($this->duration)
         );
     }
 

@@ -25,8 +25,6 @@
                         <div class="row">
                             <div class="col-lg-8 border-right">
                                 <x-input name="name" type="text" placeholder="Name" value=""></x-input>
-                                <x-input name="duration" type="text" placeholder="Duration (min)" value="">
-                                </x-input>
                                 <x-select name="albam" placeholder="Select Album (shown under this album's song list)" value="">
                                     @foreach ($albams as $albam)
                                         <option value="{{ $albam->id }}"> {{ $albam->name }} </option>
@@ -38,14 +36,21 @@
                             <div class="col-lg-4">
                                 <div class="form-group">
                                     <label class="mb-1">Thumbnail</label>
-                                    <input type="file" class="form-control-file" name="thumbnail"
+                                    <input type="file" class="form-control-file @error('thumbnail') is-invalid @enderror" name="thumbnail"
                                         onchange="previewLogoFile(event)" />
+                                    @error('thumbnail')
+                                        <small class="text-danger d-block">{{ $message }}</small>
+                                    @enderror
                                     <img src="" alt="" id="logoPreview" width="140" class="mt-1">
                                 </div>
                                 <div class="form-group">
                                     <label class="mb-1">Audio File</label>
-                                    <input type="file" class="form-control-file" name="audio"
+                                    <input type="file" class="form-control-file @error('audio') is-invalid @enderror" name="audio"
                                         onchange="previewAudio(event)" />
+                                    @error('audio')
+                                        <small class="text-danger d-block">{{ $message }}</small>
+                                    @enderror
+                                    <small class="form-text text-muted d-block">Duration is detected automatically from this file.</small>
                                 </div>
                             </div>
                         </div>

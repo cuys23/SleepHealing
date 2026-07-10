@@ -3,8 +3,11 @@
 namespace App\Repositories;
 
 use App\Http\Requests\PlayListRequest;
+use App\Models\Media;
 use App\Models\PlayList;
 use App\Models\PlaylistAlbam;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class PlayListRepository extends Repository
 {
@@ -31,6 +34,10 @@ class PlayListRepository extends Repository
 
     public function storeByRequest(PlayListRequest $request)
     {
+        // PlayListRequest's ValidAudioDuration rule already ran ffprobe
+        // against the upload during validation and rejected the request
+        // before we got here if no positive duration could be detected -
+        // so nothing below can be reached with an unusable audio file.
         $thumbnail = null;
         if ($request->hasFile('thumbnail')) {
             $thumbnail = (new MediaRepository())->storeByRequest(
@@ -41,46 +48,85 @@ class PlayListRepository extends Repository
         }
 
         $audioFile = null;
+        $duration = null;
         if ($request->hasFile('audio')) {
+            $duration = $request->detectedAudioDuration();
+            if ($duration === null) {
+                throw new \RuntimeException('Audio duration must be validated before repository processing.');
+            }
             $audioFile = (new MediaRepository())->storeByRequest(
                 $request->audio,
                 $this->audioPath,
                 'audio'
             );
         }
-        $playlist = $this->create([
-            'name' => $request->name,
-            'duration' => $request->duration,
-            'description' => $request->description,
-            'category_id' => $request->category,
-            'albam_id' => $request->albam,
-            'media_id' => $thumbnail ? $thumbnail->id : null,
-            'audio_id' => $audioFile ? $audioFile->id : null,
-            'status' => $request->active ? true : false,
-            'is_paid' => $request->paid ? true : false
-        ]);
 
-        // The public API lists songs via the playlist_albams many-to-many
-        // relation (Albam::playlists()), not the albam_id column above.
-        // Create-only: the Album "Playlist" tree screen remains the way to
-        // attach a song to additional albums afterwards.
-        if ($request->albam) {
-            PlaylistAlbam::firstOrCreate([
-                'play_list_id' => $playlist->id,
-                'albam_id' => $request->albam,
-            ]);
+        try {
+            return DB::transaction(function () use ($request, $thumbnail, $audioFile, $duration) {
+                $playlist = $this->create([
+                    'name' => $request->name,
+                    'duration' => $duration,
+                    'description' => $request->description,
+                    'category_id' => $request->category,
+                    'albam_id' => $request->albam,
+                    'media_id' => $thumbnail ? $thumbnail->id : null,
+                    'audio_id' => $audioFile ? $audioFile->id : null,
+                    'status' => $request->active ? true : false,
+                    'is_paid' => $request->paid ? true : false
+                ]);
+
+                // The public API lists songs via the playlist_albams many-to-many
+                // relation (Albam::playlists()), not the albam_id column above.
+                // Create-only: the Album "Playlist" tree screen remains the way to
+                // attach a song to additional albums afterwards.
+                if ($request->albam) {
+                    PlaylistAlbam::firstOrCreate([
+                        'play_list_id' => $playlist->id,
+                        'albam_id' => $request->albam,
+                    ]);
+                }
+
+                return $playlist;
+            });
+        } catch (\Throwable $e) {
+            // The DB transaction rolled back the PlayList/pivot rows, but a
+            // transaction can't roll back filesystem writes - remove any
+            // file we just stored so a DB failure can't leave an orphaned
+            // upload behind.
+            $this->deleteStoredMedia($thumbnail);
+            $this->deleteStoredMedia($audioFile);
+            throw $e;
         }
+    }
 
-        return $playlist;
+    private function deleteStoredMedia(?Media $media): void
+    {
+        if ($media && Storage::exists($media->src)) {
+            Storage::delete($media->src);
+        }
     }
 
     public function updateByRequest(PlayListRequest $request, PlayList $playlist): PlayList
     {
+        // As in storeByRequest, ValidAudioDuration already ran ffprobe
+        // during validation and rejected the request if a new audio upload
+        // had no detectable positive duration. So it's safe to resolve the
+        // new duration here, before audioFileUpdate() replaces the old
+        // file/Media row - the old file is only ever touched once we know
+        // the replacement is good.
+        $newDuration = null;
+        if ($request->hasFile('audio')) {
+            $newDuration = $request->detectedAudioDuration();
+            if ($newDuration === null) {
+                throw new \RuntimeException('Audio duration must be validated before repository processing.');
+            }
+        }
+
         $thumbnail = $this->thumbnailUpdate($request, $playlist);
         $audioFile = $this->audioFileUpdate($request, $playlist);
-        $playlist->update([
+
+        $attributes = [
             'name' => $request->name,
-            'duration' => $request->duration,
             'description' => $request->description,
             'category_id' => $request->category,
             'albam_id' => $request->albam,
@@ -88,7 +134,16 @@ class PlayListRepository extends Repository
             'audio_id' => $audioFile ? $audioFile->id : null,
             'status' => $request->active ? true : false,
             'is_paid' => $request->paid ? true : false
-        ]);
+        ];
+
+        // Only overwrite duration when the audio file actually changed - a
+        // save with no new upload must not wipe out a previously detected
+        // value.
+        if ($request->hasFile('audio')) {
+            $attributes['duration'] = $newDuration;
+        }
+
+        $playlist->update($attributes);
         return $playlist;
     }
 

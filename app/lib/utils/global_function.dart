@@ -32,19 +32,24 @@ class AppGLF {
     return h > 0 ? '$h:$m:$s' : '$m:$s';
   }
 
-  static Duration parseDuration(String s) {
-    int hours = 0;
-    int minutes = 0;
-    int micros;
-    List<String> parts = s.trim().split(':');
-    if (parts.length > 2) {
-      hours = int.parse(parts[parts.length - 3]);
-    }
-    if (parts.length > 1) {
-      minutes = int.parse(parts[parts.length - 2]);
-    }
-    micros = (double.parse(parts[parts.length - 1]) * 1000000).round();
-    return Duration(hours: hours, minutes: minutes, microseconds: micros);
+  /// Formats a track's total duration for display, e.g. 62 -> "01:02",
+  /// 3662 -> "01:01:02". Distinct from [format], which renders live
+  /// playback position from a [Duration] and must stay untouched.
+  static String formatSecondsDuration(int totalSeconds) {
+    final h = totalSeconds ~/ 3600;
+    final m = (totalSeconds % 3600) ~/ 60;
+    final s = totalSeconds % 60;
+    final mm = m.toString().padLeft(2, '0');
+    final ss = s.toString().padLeft(2, '0');
+    return h > 0 ? '${h.toString().padLeft(2, '0')}:$mm:$ss' : '$mm:$ss';
+  }
+
+  /// Formats the API's canonical duration field (whole seconds) for
+  /// display. Returns an empty string for a null/absent value rather than
+  /// throwing, so one track missing a duration never breaks its list row.
+  static String formatTrackDuration(int? totalSeconds) {
+    if (totalSeconds == null) return '';
+    return formatSecondsDuration(totalSeconds);
   }
 
   static void updateUserData(us.Data data) {
@@ -75,14 +80,8 @@ class AppGLF {
 
   static changeAndPlayMedia(AudioHandler audioHandler, MusicTrack track,
       {bool shouldPlay = false}) async {
-    Duration? apiDuration;
-    if (track.duration != null && track.duration!.isNotEmpty) {
-      try {
-        apiDuration = parseDuration(track.duration!);
-      } catch (e) {
-        debugPrint('[Audio] parseDuration failed for "${track.duration}": $e');
-      }
-    }
+    final apiDuration =
+        track.duration != null ? Duration(seconds: track.duration!) : null;
     final audioUrl = normalizeMediaUrl(track.audio) ?? '';
     final thumbnailUrl = normalizeMediaUrl(track.thumbnail);
     final item = MediaItem(
