@@ -8,6 +8,7 @@ use App\Models\Albam;
 use App\Repositories\AlbamRepository;
 use App\Repositories\CategoryRepository;
 use App\Repositories\PlayListRepository;
+use App\Repositories\ShiftRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -30,7 +31,8 @@ class AlbamController extends Controller
     public function create()
     {
         $categories = (new CategoryRepository())->getByActive();
-        return view('album.create', compact('categories'));
+        $shifts = (new ShiftRepository())->getAll();
+        return view('album.create', compact('categories', 'shifts'));
     }
 
     public function store(AlbamRequest $request)

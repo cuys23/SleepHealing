@@ -29,6 +29,16 @@
                                         <option value="{{ $badge->value }}"> {{ $badge->name }} </option>
                                     @endforeach
                                 </x-select>
+                                <x-select name="category" placeholder="Select Category (shown under Explore/Category browse)" value="">
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}"> {{ $category->name }} </option>
+                                    @endforeach
+                                </x-select>
+                                <x-select name="shift" placeholder="Select Time of Day (shown on Home)" value="">
+                                    @foreach ($shifts as $shift)
+                                        <option value="{{ $shift->id }}"> {{ $shift->type }} </option>
+                                    @endforeach
+                                </x-select>
 
                                 <div class="">
                                     <x-textarea name="description" placeholder="Description" value="" rows="4">

@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Http\Requests\PlayListRequest;
 use App\Models\PlayList;
+use App\Models\PlaylistAlbam;
 
 class PlayListRepository extends Repository
 {
@@ -25,7 +26,7 @@ class PlayListRepository extends Repository
         $search = request()->search;
         return $this->query()->when($search, function ($query) use ($search) {
             $query->where('name', 'like', "%$search%");
-        })->paginate(10);
+        })->latest('id')->paginate(10);
     }
 
     public function storeByRequest(PlayListRequest $request)
@@ -47,7 +48,7 @@ class PlayListRepository extends Repository
                 'audio'
             );
         }
-        return  $this->create([
+        $playlist = $this->create([
             'name' => $request->name,
             'duration' => $request->duration,
             'description' => $request->description,
@@ -58,6 +59,19 @@ class PlayListRepository extends Repository
             'status' => $request->active ? true : false,
             'is_paid' => $request->paid ? true : false
         ]);
+
+        // The public API lists songs via the playlist_albams many-to-many
+        // relation (Albam::playlists()), not the albam_id column above.
+        // Create-only: the Album "Playlist" tree screen remains the way to
+        // attach a song to additional albums afterwards.
+        if ($request->albam) {
+            PlaylistAlbam::firstOrCreate([
+                'play_list_id' => $playlist->id,
+                'albam_id' => $request->albam,
+            ]);
+        }
+
+        return $playlist;
     }
 
     public function updateByRequest(PlayListRequest $request, PlayList $playlist): PlayList
@@ -87,9 +101,7 @@ class PlayListRepository extends Repository
                 $this->audioPath,
                 'audio'
             );
-        }
-
-        if ($request->hasFile('audio') && $audioFile) {
+        } elseif ($request->hasFile('audio') && $audioFile) {
             $audioFile = (new MediaRepository())->updateByRequest(
                 $request->audio,
                 $audioFile,
@@ -110,9 +122,7 @@ class PlayListRepository extends Repository
                 $this->path,
                 'image'
             );
-        }
-
-        if ($request->hasFile('thumbnail') && $thumbnail) {
+        } elseif ($request->hasFile('thumbnail') && $thumbnail) {
             $thumbnail = (new MediaRepository())->updateByRequest(
                 $request->thumbnail,
                 $thumbnail,

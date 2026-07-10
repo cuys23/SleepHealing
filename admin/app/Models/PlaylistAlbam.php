@@ -9,9 +9,11 @@ class PlaylistAlbam extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     public function playlist()
     {
-        return $this->belongsTo(PlayList::class, 'playlist_id');
+        return $this->belongsTo(PlayList::class, 'play_list_id');
     }
 
     public function albam()

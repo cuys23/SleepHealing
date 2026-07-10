@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Http\Requests\AlbamRequest;
 use App\Models\Albam;
+use App\Models\AlbamCategory;
+use App\Models\AlbamShift;
 
 class AlbamRepository extends Repository {
 
@@ -26,7 +28,7 @@ class AlbamRepository extends Repository {
         $search = request()->search;
         return $this->query()->when($search, function ($query) use ($search) {
             $query->where('name', 'like', "%$search%");
-        })->paginate(10);
+        })->latest('id')->paginate(10);
     }
 
     public function findById($id)
@@ -44,7 +46,7 @@ class AlbamRepository extends Repository {
                 'image'
             );
         }
-        return $this->create([
+        $albam = $this->create([
             'name' => $request->name,
             'category_id' => $request->category,
             'description' => $request->description,
@@ -54,6 +56,26 @@ class AlbamRepository extends Repository {
             'is_featured' => $request->featured ? true : false,
             'is_paid' => $request->paid ? true : false
         ]);
+
+        // Attach the browse relationships the public API actually queries
+        // (category/shift are many-to-many; the direct category_id column
+        // above is not read by the customer-facing API). Create-only: the
+        // dedicated Category/Shift "tree" screens remain the way to manage
+        // these links afterwards, so an edit here never overwrites them.
+        if ($request->category) {
+            AlbamCategory::firstOrCreate([
+                'albam_id' => $albam->id,
+                'category_id' => $request->category,
+            ]);
+        }
+        if ($request->shift) {
+            AlbamShift::firstOrCreate([
+                'albam_id' => $albam->id,
+                'shift_id' => $request->shift,
+            ]);
+        }
+
+        return $albam;
     }
 
     public function updateByRequest(AlbamRequest $request, Albam $albam): Albam
@@ -81,9 +103,7 @@ class AlbamRepository extends Repository {
                 $this->path,
                 'image'
             );
-        }
-
-        if ($request->hasFile('thumbnail') && $thumbnail) {
+        } elseif ($request->hasFile('thumbnail') && $thumbnail) {
             $thumbnail = (new MediaRepository())->updateByRequest(
                 $request->thumbnail,
                 $thumbnail,

@@ -9,6 +9,7 @@ services:
       APP_ENV: local
       APP_KEY: base64:GGf7OhWfkv0s0a40QtDb+q23s0lSGjdSmmArv49aBhw=
       APP_URL: http://localhost:9080
+      FILESYSTEM_DISK: public
       DB_CONNECTION: mysql
       DB_HOST: db
       DB_PORT: 3306

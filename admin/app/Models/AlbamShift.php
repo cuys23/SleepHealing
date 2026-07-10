@@ -9,6 +9,8 @@ class AlbamShift extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     public function category()
     {
         return $this->belongsTo(Shift::class, 'shift_id');

@@ -27,6 +27,7 @@ class AlbamRequest extends FormRequest
         return [
             'name' => 'required|string',
             'category' => 'nullable|exists:'.(new Category())->getTable().',id',
+            'shift' => 'nullable|exists:shifts,id',
             'thumbnail' => 'nullable|file|mimes:png,jpg,jpeg,gif,svg',
             'description' => 'nullable|string',
             'active' => 'nullable'

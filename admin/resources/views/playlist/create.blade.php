@@ -27,6 +27,11 @@
                                 <x-input name="name" type="text" placeholder="Name" value=""></x-input>
                                 <x-input name="duration" type="text" placeholder="Duration (min)" value="">
                                 </x-input>
+                                <x-select name="albam" placeholder="Select Album (shown under this album's song list)" value="">
+                                    @foreach ($albams as $albam)
+                                        <option value="{{ $albam->id }}"> {{ $albam->name }} </option>
+                                    @endforeach
+                                </x-select>
                                 <x-textarea name="description" placeholder="Description" value="" rows="4">
                                 </x-textarea>
                             </div>
