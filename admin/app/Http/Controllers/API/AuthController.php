@@ -72,17 +72,22 @@ class AuthController extends Controller
     public function forgotPassword(ForgotPasswordRequest $request)
     {
         $user = (new UserRepository())->findByEmail($request->email);
-        $verification = (new VerificationRepository())->findOrCreate($user->email);
-        // return EmailVerificationEvent::dispatch($user);
-        return $verification;
 
-        // return $this->json('Please check you email, We send a OTP');
+        if ($user) {
+            EmailVerificationEvent::dispatch($user);
+        }
+
+        // Generic response whether or not the account exists: the OTP/reset
+        // token are never returned here, only delivered to the account's
+        // email address by EmailVerificationListener.
+        return $this->json('If the account exists, password reset instructions have been sent.');
     }
 
     public function otpVerify(VerifyOtpRequest $request)
     {
         $verification = (new VerificationRepository())->findByEmail($request->email);
-        if ($verification->otp == $request->otp) {
+
+        if ($verification && !$verification->isExpired() && $verification->otp == $request->otp) {
             return $this->json('This is your password reset token', [
                 'reset_token' => $verification->token
             ]);
@@ -95,7 +100,7 @@ class AuthController extends Controller
     {
         $verification = (new VerificationRepository())->findByToken($request->reset_token);
 
-        if ($verification) {
+        if ($verification && !$verification->isExpired()) {
             $user = (new UserRepository())->findByEmail($verification->email);
             $user->update([
                 'password' => Hash::make($request->password)
@@ -105,7 +110,12 @@ class AuthController extends Controller
             return $this->json('Password is reseted successfully');
         }
 
-        return $this->json('Invalid Request', Response::HTTP_BAD_REQUEST);
+        // Pre-existing bug fixed here: json()'s signature is
+        // (message, data, status, ...) - passing HTTP_BAD_REQUEST as the
+        // second argument silently set it as $data, leaving $status at its
+        // 200 default, so this branch always responded 200 despite the
+        // "Invalid Request" message.
+        return $this->json('Invalid Request', [], Response::HTTP_BAD_REQUEST);
     }
 
     public function tokenResend()

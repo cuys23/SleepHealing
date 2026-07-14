@@ -7,6 +7,11 @@ use App\Models\Verification;
 class VerificationRepository extends Repository {
 
     /**
+     * How long a freshly issued OTP/reset token remains valid.
+     */
+    public const TTL_MINUTES = 15;
+
+    /**
      * base method
      *
      * @method model()
@@ -22,7 +27,8 @@ class VerificationRepository extends Repository {
             'email' => $email
         ],[
             'otp' => $this->generateUniqueOtp(),
-            'token' => $this->generateUniqueToken()
+            'token' => $this->generateUniqueToken(),
+            'expires_at' => now()->addMinutes(self::TTL_MINUTES)
         ]);
     }
 

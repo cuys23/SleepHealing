@@ -22,7 +22,7 @@ Route::get('/general-settings', [SettingController::class, 'generalSettings']);
 // Auth (public)
 Route::post('/sign-in', [AuthController::class, 'signIn']);
 Route::post('/sign-up', [AuthController::class, 'signUp']);
-Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('forgot.password');
 Route::post('/verify-otp', [AuthController::class, 'otpVerify']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::post('/social-login', [AuthController::class, 'socialLogin']);

@@ -23,8 +23,11 @@ class ForgotPasswordRequest extends FormRequest
      */
     public function rules()
     {
+        // Deliberately no exists:users,email - the controller must respond
+        // identically whether or not the account exists, to avoid confirming
+        // account existence via a validation error.
         return [
-            'email' => 'required|email|string|exists:users,email'
+            'email' => 'required|email|string'
         ];
     }
 }

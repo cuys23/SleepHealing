@@ -161,7 +161,7 @@ No secrets were introduced by the handbook commit (grepped for key/password/toke
 | W1-1 | B1 | Externalize and rotate compromised secrets | BLOCKING | Repository/config remediation: `VERIFIED`. Live secret rotation: **PENDING** (operator decision — see "Pending Live Maintenance" below) |
 | W1-2 | B2 | Remove public MySQL exposure | BLOCKING | `CODE_COMPLETE`. Runtime application (container recreation): **PENDING** (operator decision — see "Pending Live Maintenance" below) |
 | W1-3 | B3 | Enforce Admin authorization | BLOCKING | `VERIFIED` (2026-07-14 — verified via isolated SQLite test run; real-DB/live-browser smoke test still recommended once containers are recreated) |
-| W1-4 | B4 | Fix forgot-password OTP/token leakage | BLOCKING | NOT_STARTED |
+| W1-4 | B4 | Fix forgot-password OTP/token leakage | BLOCKING | `VERIFIED` (2026-07-14 — verified via isolated SQLite; migration + real-inbox smoke test still pending live containers) |
 | W1-5 | B5 | Remove plaintext password cookie | BLOCKING | NOT_STARTED |
 
 ## Wave 2 — Mobile production networking and platform security
@@ -560,7 +560,8 @@ Sensitive actions authorize explicitly where necessary.
 ---
 
 ## W1-4 / B4 — Fix forgot-password OTP/token leakage
-**Status:** `NOT_STARTED`
+**Status:** `VERIFIED`
+**Started:** 2026-07-14
 
 ### Required flow
 ```text
@@ -597,12 +598,34 @@ request reset
 - API auth regression remains passing
 
 ### Completion record
-- Completed:
-- Classification:
+- Completed: 2026-07-14
+- Classification: **Still Present**, confirmed against current HEAD before editing (line numbers had drifted slightly from the original audit due to intervening commits, but the defect was identical in substance):
+  - `AuthController::forgotPassword()` returned the raw `Verification` Eloquent model directly as the JSON response (`return $verification;`) — this serializes every column, including `otp` and `token` (the actual reset token). `EmailVerificationEvent::dispatch($user)` was present in the method but commented out, so **no email was ever sent at all** — the "OTP delivered via email" security model was pure theater; the OTP/token were handed directly to whoever called the endpoint, with zero proof of email ownership required.
+  - Also found and fixed two related defects not separately numbered in the original audit but squarely inside this same finding's blast radius:
+    1. `ForgotPasswordRequest` validated `exists:users,email`, so an unregistered email 422'd instantly — a direct account-enumeration oracle, explicitly called out in this task's own "avoid unnecessary user enumeration" requirement.
+    2. `EmailVerificationListener::handle()` picks the forgot-password vs. signup-verification email template via `request()->routeIs('forgot.password')` — but no route was ever named `forgot.password` (`routes/api.php` had `Route::post('/forgot-password', ...)` with no `->name()`), so even with the event dispatch uncommented, the *wrong* email template would have been sent. This is why simply uncommenting the dispatch line would not have been a real fix.
+    3. **No expiration mechanism existed at all** — the `verifications` table had no `expires_at` column and no TTL concept anywhere in `VerificationRepository`.
+    4. `resetPassword()`'s rejection branch had a pre-existing, unrelated bug discovered via testing: `return $this->json('Invalid Request', Response::HTTP_BAD_REQUEST);` passed the status code as `$this->json()`'s **second** parameter (`$data`), not the third (`$status`), so every "invalid/expired reset" response was actually silently returning HTTP 200. Fixed in the same commit since it directly blocked verifying "expired token rejected" correctly, and left as a footnote finding for anyone reviewing this diff.
+  - `otpVerify()` returning `reset_token` in its response after checking a *correct, non-expired* OTP was deliberately left unchanged — this is the intended second step of the flow (OTP is the out-of-band proof of email ownership; the token is only surfaced once that proof is supplied), and is a different, legitimate mechanism from the forgot-password leak. Interpreted "never return OTP/reset token in JSON" (a W1-4 security requirement) as scoped to the *unauthenticated, no-proof-required* `forgot-password` step specifically, matching the "Required flow"/"Response pattern" sections above, which describe exactly that endpoint.
 - Files changed:
-- Tests:
-- Email delivery status:
+  - `admin/app/Http/Controllers/API/AuthController.php` — `forgotPassword()` rewritten to the required flow (find user → dispatch `EmailVerificationEvent` only if found → always return the generic message from the plan's exact "Response pattern"); `otpVerify()` and `resetPassword()` both gated on `!$verification->isExpired()`; fixed the `resetPassword()` status-code bug noted above.
+  - `admin/app/Http/Requests/ForgotPasswordRequest.php` — dropped `exists:users,email`.
+  - `admin/routes/api.php` — named the `/forgot-password` route `forgot.password`, completing the already-half-built template-selection logic in `EmailVerificationListener`.
+  - `admin/app/Models/Verification.php` — added `expires_at` to `$casts` (as `datetime`) and a new `isExpired(): bool` method, used by both `otpVerify()` and `resetPassword()` (single source of truth, not duplicated inline logic).
+  - `admin/app/Repositories/VerificationRepository.php` — added `public const TTL_MINUTES = 15;` and set `expires_at => now()->addMinutes(self::TTL_MINUTES)` in `findOrCreate()`.
+  - `admin/database/migrations/2026_07_14_090000_add_expires_at_to_verifications_table.php` (new) — additive, reversible (`nullable timestamp`, `down()` drops it). Not yet run against any real database (see "Remaining risk").
+  - `admin/database/factories/VerificationFactory.php` (new) — `Verification` had `HasFactory` but no factory existed; added one (with an `expired()` state) since it was needed to write the required tests at all.
+  - `admin/tests/Feature/Admin/PasswordResetTest.php` (new, 10 tests) — see "Tests" below.
+- Tests: same constraint as W1-1/W1-2/W1-3 — the real dev database and live containers are still off-limits per the standing deferral, so this was verified against an ephemeral, local-only SQLite database (fresh never-printed `APP_KEY`, `php artisan migrate`, deleted afterward):
+  - `php artisan test --filter=PasswordResetTest` → **10/10 passed**: response never contains `otp`/`token`/`reset_token`/`data` (raw string+path checks); the response message is byte-identical for a registered vs. unregistered email; `EmailVerificationEvent` dispatches only for a real account (`Event::fake`); the real (non-faked) email pipeline runs end-to-end without error and leaves a `Verification` row with a future, non-expired `expires_at`; an expired verification is rejected by both `otpVerify` (generic "Invalid OTP") and `resetPassword` (400, row NOT deleted — expiry must not consume the token); a valid token changes the password (`Hash::check` against the new value) and deletes the verification row (single-use); reusing an already-consumed token is rejected (422, via `exists:verifications,token` now failing post-deletion — documented in the test why 422 rather than 400 is correct here) and does **not** re-change the password.
+  - Full suite (`php artisan test`): 43 passed / 37 failed. The 37 failures are **the exact same pre-existing set** documented in W1-1/W1-2/W1-3's completion records (missing seeded reference rows in a fresh SQLite schema, missing `ffprobe` on this host, the already-broken stock `ExampleTest`) — confirmed via `grep` for "forbidden/does not have the right roles" across the full failure output → zero matches, and the `FAIL` suite list is identical to the W1-3 run plus nothing new.
+  - `php vendor/bin/pint --test` on every changed/new file: all pre-existing findings confirmed pre-existing via `git show HEAD:...` before/after comparison (identical fixer lists both times, meaning my edits introduced zero new style issues in any modified file); the one genuinely new finding (`new_with_parentheses` in the new `PasswordResetTest.php`) was fixed with `pint`.
+  - `git diff --check` clean.
+- Email delivery status: **not verified against a real inbox or real SMTP** — only confirmed the Blade view renders and the mail pipeline runs without throwing, using `MAIL_MAILER=array` in the isolated test environment (the same constraint noted in W1-3: no access to the real dev DB or a live browser/mailbox in this session). Recommend a manual smoke test (real forgot-password request, confirm the OTP actually arrives in the target inbox using the *forgot-password* template, not the signup-verification one) once the live containers are eventually recreated under the coordinated W1-1+W1-2 maintenance procedure.
 - Remaining risk:
+  - The new migration has not been run against the real dev database or any live container (still off-limits). It must be applied (`php artisan migrate`) before this fix is meaningful anywhere outside this session's throwaway SQLite database.
+  - Rate limiting on `/forgot-password`, `/verify-otp`, `/reset-password` is unchanged (still only the generic `throttle:api`) — deliberately left to W4-2 ("Add dedicated auth/reset rate limits"), per this task's own "dedicated rate limiting **or explicit follow-up task**" wording. Flagging explicitly here so it isn't lost: the OTP space (`mt_rand(123400, 999999)`, ~876k values) is brute-forceable without a dedicated limiter.
+  - `otpVerify`'s `$verification->otp == $request->otp` loose comparison and the OTP itself not being single-use (only the final reset token is deleted-on-use) were left unchanged — out of scope for this specific finding, not previously flagged as part of B4.
 
 ---
 
@@ -1521,3 +1544,39 @@ Do not delete previous changelog entries.
 ### Remaining actions
 - Recommend a real-database/live-browser smoke test (login as `user`-role fails, login as `admin`/`root` succeeds) once the containers are eventually recreated under the coordinated W1-1+W1-2 maintenance procedure — not performed here since that procedure is still pending.
 - Not started: W1-4 (Fix forgot-password OTP/token leakage) — stopping here per operator instruction.
+
+## 2026-07-14 — W1-4 / B4 — Fix forgot-password OTP/token leakage
+
+**Status:** VERIFIED
+
+### What changed
+- Re-verified B4 against current HEAD: `AuthController::forgotPassword()` still returned the raw `Verification` model (OTP + token) directly, with `EmailVerificationEvent::dispatch()` commented out — no email was ever actually sent. Also found, in the same blast radius: `ForgotPasswordRequest`'s `exists:users,email` (account-enumeration oracle), a never-actually-matching `routeIs('forgot.password')` check in `EmailVerificationListener` (no route was named that), a complete absence of any expiration mechanism (no `expires_at` column at all), and a pre-existing status-code bug in `resetPassword()`'s rejection branch (`json()`'s 2nd param is `$data`, not `$status` - "Invalid Request" was silently always HTTP 200).
+- Rewrote `forgotPassword()` to the plan's exact required flow/response pattern; named the `/forgot-password` route `forgot.password` so the existing (previously dead) template-selection logic in `EmailVerificationListener` finally does what it was written to do; removed the enumeration-enabling validation rule.
+- Added `verifications.expires_at` (new, reversible migration), a `VerificationRepository::TTL_MINUTES = 15` constant, and `Verification::isExpired()`; both `otpVerify()` and `resetPassword()` now reject an expired verification the same way they reject a wrong/missing one.
+- Fixed the pre-existing `resetPassword()` status-code bug in the same commit (it directly blocked verifying "expired token rejected" correctly).
+- Left `otpVerify()`'s `reset_token` response unchanged - that step requires proof of OTP possession first and is the intended, legitimate place for the token to surface; only the *unauthenticated* `forgot-password` step was leaking it.
+- Added `VerificationFactory` (didn't exist despite `HasFactory` on the model - needed to write the required tests) and `PasswordResetTest.php` (10 tests) covering every "Required tests" bullet.
+
+### Files
+- `admin/app/Http/Controllers/API/AuthController.php`
+- `admin/app/Http/Requests/ForgotPasswordRequest.php`
+- `admin/routes/api.php`
+- `admin/app/Models/Verification.php`
+- `admin/app/Repositories/VerificationRepository.php`
+- `admin/database/migrations/2026_07_14_090000_add_expires_at_to_verifications_table.php` (new)
+- `admin/database/factories/VerificationFactory.php` (new)
+- `admin/tests/Feature/Admin/PasswordResetTest.php` (new)
+- `docs/ai/PRODUCTION_READINESS_PLAN.md` (this file)
+
+### Verification
+- Same constraint as W1-1/W1-2/W1-3: real dev DB/live containers off-limits, so verified against an ephemeral local SQLite database (fresh never-printed `APP_KEY`, migrated, deleted afterward).
+- `php artisan test --filter=PasswordResetTest` → 10/10 passed.
+- Full suite → 43 passed / 37 failed - the exact same pre-existing 37 failures as W1-3's run (confirmed via `grep` for forbidden/role-related text → zero matches; identical `FAIL` suite list). Zero regressions introduced.
+- `php vendor/bin/pint --test`: all findings in modified files confirmed pre-existing (identical before/after `git show HEAD:...` comparison); the one new finding in the new test file fixed.
+- `git diff --check` clean.
+
+### Remaining actions
+- Migration not yet run against any real/live database - required before this fix has any effect outside this session's throwaway SQLite database.
+- Rate limiting on the three auth-reset endpoints deliberately deferred to W4-2, per this task's own "or explicit follow-up task" allowance - noted explicitly so it isn't lost.
+- Recommend a real-inbox smoke test (confirm the OTP email actually arrives, using the forgot-password template) once the live containers are eventually recreated under the coordinated W1-1+W1-2 maintenance procedure.
+- Not started: W1-5 - stopping here per operator instruction.
