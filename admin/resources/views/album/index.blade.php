@@ -72,7 +72,8 @@
                             </td>
                             <td style="min-width: 145px">
                                 <div class="d-flex flex-wrap justify-content-center gap-4">
-                                    <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#categoryId{{ $albam->id }}">Categories</button>
+                                    @php $hasCategories = $albam->categories->isNotEmpty(); @endphp
+                                    <button id="categoriesBtn{{ $albam->id }}" class="btn btn-sm {{ $hasCategories ? 'btn-info' : 'btn-warning' }}" data-toggle="modal" data-target="#categoryId{{ $albam->id }}">{{ $hasCategories ? 'Categories' : 'No Category' }}</button>
                                     <a href="{{ route('albam.edit', $albam->id) }}" class="btn btn-info btn-sm" data-toggle="tooltip"
                                     title="Edit">
                                         <i class="fa fa-edit"></i>

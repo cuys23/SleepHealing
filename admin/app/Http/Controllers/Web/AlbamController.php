@@ -38,7 +38,17 @@ class AlbamController extends Controller
     public function store(AlbamRequest $request)
     {
         $albam = (new AlbamRepository())->storeByRequest($request);
-        return redirect()->route('albam.index')->with('success', 'Create Successfully');
+
+        $response = redirect()->route('albam.index')->with('success', 'Create Successfully');
+
+        if ($albam->categories()->doesntExist()) {
+            $response->with(
+                'warning',
+                'This album has no category attached, so it will not appear in the app yet. Open a Category and use its Albums screen to attach this album.'
+            );
+        }
+
+        return $response;
     }
     public function edit(Albam $albam)
     {

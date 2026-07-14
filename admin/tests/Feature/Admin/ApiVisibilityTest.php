@@ -41,6 +41,23 @@ class ApiVisibilityTest extends TestCase
         return User::factory()->create();
     }
 
+    /**
+     * A real, short, decodable MP3 fixture - UploadedFile::fake()'s content
+     * is junk bytes that ffprobe correctly refuses to treat as audio, which
+     * would spuriously trigger the "duration could not be detected" warning
+     * in tests that aren't about duration detection at all.
+     */
+    private function realAudioFile(string $name = 'track.mp3'): UploadedFile
+    {
+        return new UploadedFile(
+            base_path('tests/Fixtures/audio/tiny-track.mp3'),
+            $name,
+            'audio/mpeg',
+            null,
+            true
+        );
+    }
+
     public function test_a_song_created_and_attached_to_an_album_appears_in_the_api(): void
     {
         Storage::fake('public');
@@ -49,9 +66,8 @@ class ApiVisibilityTest extends TestCase
 
         $response = $this->actingAs($this->admin())->post(route('playlist.store'), [
             'name' => 'API Visible Song',
-            'duration' => '3:30',
             'albam' => $albam->id,
-            'audio' => UploadedFile::fake()->create('track.mp3', 100, 'audio/mpeg'),
+            'audio' => $this->realAudioFile(),
             'active' => '1',
         ]);
         $response->assertRedirect(route('playlist.index'));
@@ -86,8 +102,7 @@ class ApiVisibilityTest extends TestCase
         // No 'albam' field submitted - a valid, supported input shape (see class docblock).
         $response = $this->actingAs($this->admin())->post(route('playlist.store'), [
             'name' => 'Unattached Song',
-            'duration' => '1:00',
-            'audio' => UploadedFile::fake()->create('track.mp3', 100, 'audio/mpeg'),
+            'audio' => $this->realAudioFile(),
             'active' => '1',
         ]);
         $response->assertRedirect(route('playlist.index'));
@@ -109,8 +124,7 @@ class ApiVisibilityTest extends TestCase
 
         $this->actingAs($this->admin())->post(route('playlist.store'), [
             'name' => 'List Flag Unattached Song',
-            'duration' => '1:00',
-            'audio' => UploadedFile::fake()->create('track.mp3', 100, 'audio/mpeg'),
+            'audio' => $this->realAudioFile(),
             'active' => '1',
         ]);
         $playlist = PlayList::where('name', 'List Flag Unattached Song')->firstOrFail();
@@ -132,9 +146,8 @@ class ApiVisibilityTest extends TestCase
 
         $this->actingAs($this->admin())->post(route('playlist.store'), [
             'name' => 'List Flag Attached Song',
-            'duration' => '1:00',
             'albam' => $albam->id,
-            'audio' => UploadedFile::fake()->create('track.mp3', 100, 'audio/mpeg'),
+            'audio' => $this->realAudioFile(),
             'active' => '1',
         ]);
         $playlist = PlayList::where('name', 'List Flag Attached Song')->firstOrFail();
@@ -184,6 +197,143 @@ class ApiVisibilityTest extends TestCase
         $api->assertJsonFragment(['name' => 'API Visible Album']);
     }
 
+    /**
+     * Standalone albums are an intentional part of the workflow: CategoryController@getAlbams
+     * ("tree" screen, route category.tree) lists every Albam, attached or not, so operators can
+     * create albums first and organize them into (potentially several) categories afterward via
+     * Category::albams()->sync(). Blocking creation without a category would break that screen -
+     * exact symmetric case to PlayList/Albam (see the test above this block for that root cause).
+     * So creation must still succeed - the fix is the same Admin-UX pattern: a flash warning and
+     * an Admin list indicator, not a hard validation error.
+     */
+    public function test_an_album_created_without_a_category_selection_is_not_silently_broken(): void
+    {
+        Storage::fake('public');
+
+        // No 'category' field submitted - a valid, supported input shape (see method docblock).
+        $response = $this->actingAs($this->admin())->post(route('albam.store'), [
+            'name' => 'Unattached Album',
+            'thumbnail' => UploadedFile::fake()->image('cover.png'),
+            'active' => '1',
+        ]);
+        $response->assertRedirect(route('albam.index'));
+
+        $albam = Albam::where('name', 'Unattached Album')->first();
+        $this->assertNotNull($albam, 'Admin must still report a real success and create the row.');
+        $this->assertFalse(
+            AlbamCategory::where('albam_id', $albam->id)->exists(),
+            'Sanity check: an unattached album has no pivot row until attached via the tree screen.'
+        );
+
+        // The operator must be told this album will not appear in the app yet.
+        $response->assertSessionHas('warning');
+    }
+
+    public function test_the_admin_album_list_flags_an_album_with_no_category_as_not_attached(): void
+    {
+        Storage::fake('public');
+
+        $this->actingAs($this->admin())->post(route('albam.store'), [
+            'name' => 'List Flag Unattached Album',
+            'thumbnail' => UploadedFile::fake()->image('cover.png'),
+            'active' => '1',
+        ]);
+        $albam = Albam::where('name', 'List Flag Unattached Album')->firstOrFail();
+
+        $listResponse = $this->actingAs($this->admin())->get(route('albam.index'));
+        $listResponse->assertOk();
+
+        $this->assertStringContainsString(
+            'No Category',
+            $this->extractCategoriesButton($listResponse->getContent(), $albam->id),
+            'The Admin album list must visibly flag an album that has no category attached.'
+        );
+    }
+
+    public function test_the_admin_album_list_does_not_flag_an_album_with_a_category_attached(): void
+    {
+        Storage::fake('public');
+        $category = Category::factory()->create(['status' => true]);
+
+        $this->actingAs($this->admin())->post(route('albam.store'), [
+            'name' => 'List Flag Attached Album',
+            'category' => $category->id,
+            'thumbnail' => UploadedFile::fake()->image('cover.png'),
+            'active' => '1',
+        ]);
+        $albam = Albam::where('name', 'List Flag Attached Album')->firstOrFail();
+
+        $listResponse = $this->actingAs($this->admin())->get(route('albam.index'));
+        $listResponse->assertOk();
+
+        $button = $this->extractCategoriesButton($listResponse->getContent(), $albam->id);
+        $this->assertStringContainsString('Categories', $button);
+        $this->assertStringNotContainsString('No Category', $button);
+    }
+
+    public function test_attaching_a_category_via_the_tree_screen_clears_the_unattached_list_flag(): void
+    {
+        Storage::fake('public');
+        $category = Category::factory()->create(['status' => true]);
+
+        $this->actingAs($this->admin())->post(route('albam.store'), [
+            'name' => 'Tree Attached Album',
+            'thumbnail' => UploadedFile::fake()->image('cover.png'),
+            'active' => '1',
+        ]);
+        $albam = Albam::where('name', 'Tree Attached Album')->firstOrFail();
+
+        $before = $this->actingAs($this->admin())->get(route('albam.index'));
+        $this->assertStringContainsString('No Category', $this->extractCategoriesButton($before->getContent(), $albam->id));
+
+        $treeResponse = $this->actingAs($this->admin())->post(route('category.tree.update', $category), [
+            'albams' => [$albam->id],
+        ]);
+        $treeResponse->assertRedirect(route('category.index'));
+
+        $after = $this->actingAs($this->admin())->get(route('albam.index'));
+        $button = $this->extractCategoriesButton($after->getContent(), $albam->id);
+        $this->assertStringContainsString('Categories', $button);
+        $this->assertStringNotContainsString('No Category', $button);
+    }
+
+    public function test_attaching_a_category_via_the_tree_screen_makes_the_album_visible_via_the_api(): void
+    {
+        Storage::fake('public');
+        $category = Category::factory()->create(['status' => true]);
+
+        $this->actingAs($this->admin())->post(route('albam.store'), [
+            'name' => 'Tree Visible Album',
+            'thumbnail' => UploadedFile::fake()->image('cover.png'),
+            'active' => '1',
+        ]);
+        $albam = Albam::where('name', 'Tree Visible Album')->firstOrFail();
+
+        $before = $this->getJson('/api/albams?category='.$category->id);
+        $before->assertOk();
+        $before->assertJsonMissing(['name' => 'Tree Visible Album']);
+
+        $this->actingAs($this->admin())->post(route('category.tree.update', $category), [
+            'albams' => [$albam->id],
+        ]);
+
+        $after = $this->getJson('/api/albams?category='.$category->id);
+        $after->assertOk();
+        $after->assertJsonFragment(['name' => 'Tree Visible Album']);
+    }
+
+    private function extractCategoriesButton(string $html, int $albamId): string
+    {
+        preg_match(
+            '/id="categoriesBtn'.$albamId.'"[^>]*>(.*?)<\/button>/s',
+            $html,
+            $matches
+        );
+        $this->assertNotEmpty($matches, "Could not locate the Categories button for album {$albamId}.");
+
+        return $matches[0];
+    }
+
     public function test_song_media_urls_are_absolute_and_use_the_configured_app_url(): void
     {
         // Storage::fake() does not inherit the real 'public' disk's 'url'
@@ -197,10 +347,9 @@ class ApiVisibilityTest extends TestCase
 
         $this->actingAs($this->admin())->post(route('playlist.store'), [
             'name' => 'Media URL Song',
-            'duration' => '2:00',
             'albam' => $albam->id,
             'thumbnail' => UploadedFile::fake()->image('cover.png'),
-            'audio' => UploadedFile::fake()->create('track.mp3', 100, 'audio/mpeg'),
+            'audio' => $this->realAudioFile(),
             'active' => '1',
         ]);
 
@@ -222,9 +371,8 @@ class ApiVisibilityTest extends TestCase
 
         $this->actingAs($this->admin())->post(route('playlist.store'), [
             'name' => 'No Media Song',
-            'duration' => '1:00',
             'albam' => $albam->id,
-            'audio' => UploadedFile::fake()->create('track.mp3', 100, 'audio/mpeg'),
+            'audio' => $this->realAudioFile(),
             'active' => '1',
         ]);
 
@@ -246,9 +394,8 @@ class ApiVisibilityTest extends TestCase
         foreach (['First', 'Second', 'Third'] as $name) {
             $this->actingAs($this->admin())->post(route('playlist.store'), [
                 'name' => "Order Test $name",
-                'duration' => '1:00',
                 'albam' => $albam->id,
-                'audio' => UploadedFile::fake()->create('track.mp3', 100, 'audio/mpeg'),
+                'audio' => $this->realAudioFile(),
                 'active' => '1',
             ]);
         }
