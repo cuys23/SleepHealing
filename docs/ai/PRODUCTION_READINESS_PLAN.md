@@ -117,10 +117,12 @@ Do not move on while an introduced regression remains unresolved.
 
 | ID | Task | Priority | Status |
 |---|---|---:|---|
-| W0-1 | Commit/close current duration work | P0 | CODE_COMPLETE (committed, unpushed — see 2026-07-14 reconciliation) |
-| W0-2 | Commit/close Album/Category work | P0 | CODE_COMPLETE (committed, unpushed — see 2026-07-14 reconciliation) |
-| W0-3 | Commit/close Engineering Handbook work | P0 | NOT_STARTED |
-| W0-4 | Confirm clean working tree and create recovery checkpoint | P0 | BLOCKED (branch decision required — see 2026-07-14 reconciliation) |
+| W0-1 | Commit/close current duration work | P0 | `VERIFIED` — pushed to `origin/redesign_v2` (see 2026-07-14 push verification) |
+| W0-2 | Commit/close Album/Category work | P0 | `VERIFIED` — pushed to `origin/redesign_v2` (see 2026-07-14 push verification) |
+| W0-3 | Commit/close Engineering Handbook work | P0 | `VERIFIED` — committed `e0e069a` and pushed to `origin/redesign_v2` |
+| W0-4 | Confirm clean working tree and create recovery checkpoint | P0 | `VERIFIED` — recovery branch `backup/pre-production-hardening-2026-07-14` created and pushed; remaining working-tree items documented below |
+
+**Wave 0 is now fully VERIFIED. Wave 1 may begin on the next task.**
 
 ### 2026-07-14 reconciliation — branch state is not what the plan assumes
 
@@ -137,6 +139,20 @@ This plan and the source audit were produced against `redesign_v2` HEAD (`0e29db
 - **Documentation mismatch:** `CLAUDE.md` references `docs/ai/PRODUCTION_READINESS_PLAN.md`, but this plan file actually lives at repo root as `SleepHealing_PRODUCTION_READINESS_PLAN.md`. Needs a decision: move the file or fix the reference.
 
 **Consequence:** W0-4 ("clean working tree / recovery checkpoint") cannot be completed until the user decides which branch is the actual base for production-hardening work (`redesign_v2`, which matches everything this plan was written against, or `main`, which is an older baseline missing all of it). Proceeding with Wave 1+ on the wrong branch would silently re-scope the entire plan.
+
+#### Resolution (2026-07-14, same day)
+
+Operator decision: **`redesign_v2` is the base branch.** Executed in order:
+
+1. `git checkout redesign_v2` (back from `main`), `git stash pop` restored the pending `docker-compose.yml` fix.
+2. `git push origin redesign_v2` → `8d845a2..0e29db2 redesign_v2 -> redesign_v2`. All 6 previously-local-only commits (`be2a574`, `3472579`, `d7acba0`, `4bd4dfb`, `5f00082`, `0e29db2`) confirmed present on `origin/redesign_v2` via `git merge-base --is-ancestor` for each, and `git log origin/redesign_v2..redesign_v2` returned empty.
+3. Engineering Handbook committed as its own unit: `CLAUDE.md` + all of `docs/ai/**`, including moving `SleepHealing_PRODUCTION_READINESS_PLAN.md` → `docs/ai/PRODUCTION_READINESS_PLAN.md` (resolves the path-mismatch note above) — commit `e0e069a docs(ai): add SleepHealing engineering handbook and production readiness plan`. Pushed and confirmed on `origin/redesign_v2`.
+4. Recovery branch `backup/pre-production-hardening-2026-07-14` created at `e0e069a` and pushed to origin (`https://github.com/cuys23/SleepHealing/tree/backup/pre-production-hardening-2026-07-14`). Not merged into `main`.
+5. `git status --short` after all of the above shows exactly two remaining items, both pre-existing and intentionally out of this scope:
+   - `M docker-compose.yml` — the `./Admin` → `./admin` build-path fix (unrelated to the handbook/security work; left uncommitted pending an explicit decision on that change).
+   - `?? HANDBOOK_MANIFEST.json` — a handbook file-index the operator did not include in the explicit W0-3 file list; left untracked.
+
+No secrets were introduced by the handbook commit (grepped for key/password/token-shaped strings in `CLAUDE.md` and `docs/ai/**` before committing — none found; the audit doc only references secret *locations*, never values).
 
 ## Wave 1 — Critical security blockers
 
@@ -226,7 +242,7 @@ This plan and the source audit were produced against `redesign_v2` HEAD (`0e29db
 # 3. Wave 0 — Repository Stabilization
 
 ## W0-1 — Close current duration work
-**Status:** `CODE_COMPLETE` (committed; not pushed; not on current HEAD)
+**Status:** `VERIFIED`
 
 ### Objective
 Commit the completed duration/media changes as an independently reviewable unit before security hardening.
@@ -250,13 +266,13 @@ feat(media): derive and validate track duration from uploaded audio
 - Files: per `git show --stat 4bd4dfb` (not re-listed here; inspect directly).
 - Tests: not re-run in this reconciliation pass (read-only classification).
 - Result: code-complete and already committed as an independent unit — the original intent of this task is satisfied.
-- Remaining risk: **unpushed**. Not reachable from `origin/redesign_v2`, `main`, or `origin/main`. Current checked-out branch (`main`) does not contain this commit at all. Cannot be marked `VERIFIED`/closed until (a) the branch strategy is decided and (b) it is pushed to a remote ref.
-- Notes: see "2026-07-14 reconciliation" note above Wave 0 dashboard for full branch-state evidence.
+- Remaining risk: none for this task's scope (repository durability). Pushed and confirmed present on `origin/redesign_v2` (`git merge-base --is-ancestor 4bd4dfb origin/redesign_v2` → yes). Note this verifies the commit is safely backed up on the remote — it does not re-verify the underlying duration/media *runtime* behavior (no tests were (re-)run in this session; that behavior was validated when the feature was originally built, per `docs/ai/PROJECT_MEMORY.md` PM-011).
+- Notes: see "2026-07-14 reconciliation" note and its "Resolution" subsection above Wave 0 dashboard for full branch-state evidence.
 
 ---
 
 ## W0-2 — Close Album/Category work
-**Status:** `CODE_COMPLETE` (committed; not pushed; not on current HEAD)
+**Status:** `VERIFIED`
 
 ### Objective
 Commit previous Album/Category unattached-state UX separately.
@@ -276,13 +292,13 @@ fix(admin): clarify unattached albums and songs
   - All present on local branch `redesign_v2` only.
 - Tests: not re-run in this reconciliation pass (read-only classification).
 - Result: code-complete and already committed — the original intent of this task is satisfied, split across a more granular commit history than the plan anticipated.
-- Remaining risk: **unpushed**, same as W0-1 — none of these commits are reachable from `origin/redesign_v2`, `main`, or `origin/main`.
-- Notes: see "2026-07-14 reconciliation" note above Wave 0 dashboard.
+- Remaining risk: none for this task's scope. All four commits confirmed present on `origin/redesign_v2` via `git merge-base --is-ancestor` (each returned yes) after the 2026-07-14 push.
+- Notes: see "2026-07-14 reconciliation" note and its "Resolution" subsection above Wave 0 dashboard.
 
 ---
 
 ## W0-3 — Close Engineering Handbook work
-**Status:** `NOT_STARTED`
+**Status:** `VERIFIED`
 
 ### Objective
 Commit root `CLAUDE.md` and `docs/ai/**` separately from application code.
@@ -293,17 +309,18 @@ docs(ai): add SleepHealing engineering handbook
 ```
 
 ### Completion record
-- Completed: — (not started)
-- Classification: **Not started.** `CLAUDE.md`, `HANDBOOK_MANIFEST.json`, `docs/ai/**`, and `SleepHealing_PRODUCTION_READINESS_PLAN.md` are all untracked (`git status --short` shows `??` for each) on every branch checked (`main`, `redesign_v2`) — untracked files aren't branch-scoped, so they show up regardless of checkout, but have never been committed anywhere.
-- Files: `CLAUDE.md`, `HANDBOOK_MANIFEST.json`, `docs/ai/` (all files), `docs/ai/adr/`, `docs/ai/playbooks/`, `docs/ai/prompts/`, `SleepHealing_PRODUCTION_READINESS_PLAN.md`.
-- Tests: n/a (docs only).
-- Result: pending — needs an explicit commit once the branch decision (see 2026-07-14 reconciliation note) is made, since which branch this lands on determines whether it's reviewed alongside `redesign_v2`'s app changes or in isolation on `main`.
-- Notes: also flagging a documentation defect while inspecting this: `CLAUDE.md`'s reading order points to `docs/ai/PRODUCTION_READINESS_PLAN.md`, but the actual file is `SleepHealing_PRODUCTION_READINESS_PLAN.md` at repo root. Should be reconciled (move the file into `docs/ai/` or fix the reference) as part of closing this task.
+- Completed: 2026-07-14
+- Classification: **Done.** Committed on `redesign_v2` as `e0e069a docs(ai): add SleepHealing engineering handbook and production readiness plan` (message per operator instruction, differs slightly from the originally-suggested message to also name the plan file). Pushed to `origin/redesign_v2` and confirmed via `git merge-base --is-ancestor e0e069a origin/redesign_v2` → yes.
+- Files (30 total, all new): `CLAUDE.md`; `docs/ai/API_CONTRACT.md`, `ARCHITECTURE.md`, `CODING_STANDARDS.md`, `DEPLOYMENT_RUNBOOK.md`, `DOCKER_VPS_GUIDELINES.md`, `DOCUMENTATION_MAINTENANCE.md`, `FLUTTER_GUIDELINES.md`, `GIT_WORKFLOW.md`, `KNOWN_ISSUES.md`, `LARAVEL_GUIDELINES.md`, `PRODUCTION_READINESS_AUDIT.md`, `PRODUCTION_READINESS_PLAN.md`, `PROJECT_CONTEXT.md`, `QA_CHECKLIST.md`, `README.md`, `RELEASE_AND_APP_STORE.md`, `SECURITY_AND_SECRETS.md`, `TESTING_STRATEGY.md`, `WORKFLOW.md`; `docs/ai/adr/ADR-001-MEDIA-PATH-CONTRACT.md`, `ADR_TEMPLATE.md`; `docs/ai/playbooks/*` (5 files); `docs/ai/prompts/*` (3 files).
+- Tests: n/a (docs only). Pre-commit secret scan run (`grep` for key/password/token-shaped strings) — no matches.
+- Result: the documentation-path mismatch flagged earlier is resolved as part of this commit — `SleepHealing_PRODUCTION_READINESS_PLAN.md` was relocated to `docs/ai/PRODUCTION_READINESS_PLAN.md`, matching `CLAUDE.md`'s reading-order reference exactly.
+- Deliberately excluded (operator's file list did not name them, left untracked, not part of this commit): `HANDBOOK_MANIFEST.json`, `design/` (contains a large local `.mov`/screenshots, unrelated to the handbook).
+- Notes: none remaining.
 
 ---
 
 ## W0-4 — Create clean recovery checkpoint
-**Status:** `BLOCKED` — depends on an operator decision, not on more investigation
+**Status:** `VERIFIED`
 
 ### Objective
 Before security hardening:
@@ -325,16 +342,17 @@ backup/pre-production-hardening-2026-07-14
 - no secret is introduced
 
 ### Completion record
-- Completed: — (blocked)
-- Result: **Working tree is not clean and current stable state is not yet safely recoverable:**
-  1. Checked-out branch is `main`, itself 2 commits behind `origin/main` (not pulled).
-  2. `main` contains none of the `redesign_v2` work this entire plan is about (see reconciliation note).
-  3. Local `redesign_v2` carries 6 commits (including W0-1/W0-2) that exist **only on this machine** — not pushed to `origin/redesign_v2`. This is the actual data-loss risk right now, not uncommitted edits.
-  4. One `git stash` entry is pending (`docker-compose.yml` `./Admin`→`./admin` fix, stashed from `redesign_v2`).
-  5. Untracked handbook/plan docs (W0-3) are not yet committed anywhere.
-- Recovery reference: none created yet — deliberately not creating one until the base branch is confirmed, since tagging/branching from the wrong HEAD (`main`, missing all redesign_v2 work) would produce a checkpoint that doesn't actually protect the current work.
-- Blocking decision needed from the user: **which branch is the base for Wave 1+ production-hardening work — `redesign_v2` (matches this plan and the source audit) or `main` (older baseline, missing the UI redesign, duration/album fixes, and the handbook)?**
-- Notes: once decided, the safe sequence is: (a) push the 6 unpushed `redesign_v2` commits to `origin/redesign_v2` so they're no longer local-only, (b) commit the handbook/plan docs (W0-3) on the confirmed base branch, (c) create the recovery branch/tag from that clean state, (d) re-run `git status --short` to confirm a clean tree before starting Wave 1.
+- Completed: 2026-07-14
+- Result: operator chose `redesign_v2` as the base branch. Executed: switched back to `redesign_v2`, restored the stashed `docker-compose.yml` fix, pushed the 6 previously-local-only commits, committed and pushed the Engineering Handbook (W0-3), then created and pushed the recovery branch.
+- Recovery reference: `backup/pre-production-hardening-2026-07-14`, created at `e0e069a` (handbook commit, which includes all Wave-0 work), pushed to `origin` — confirmed via `git log -1 --oneline origin/backup/pre-production-hardening-2026-07-14`. **Not merged into `main`**, per operator instruction.
+- `git status --short` after checkpoint creation:
+  ```text
+   M docker-compose.yml
+  ?? HANDBOOK_MANIFEST.json
+  ```
+  Both documented and intentionally out of scope (see W0-3 notes and the pre-existing `./Admin`→`./admin` path fix noted in the 2026-07-14 reconciliation section) — satisfies the acceptance criterion "working tree is clean **or all remaining changes are documented**."
+- No secret introduced: confirmed via pre-commit grep of the handbook content (see W0-3).
+- Remaining risk: none for repository-durability purposes. The `docker-compose.yml` change itself (`./Admin` → `./admin`) is still uncommitted pending an explicit operator decision on whether to fold it into Wave 1 (it touches the same file W1-1/W1-2 will modify) or commit it standalone first.
 
 ---
 
@@ -1295,3 +1313,34 @@ Do not delete previous changelog entries.
 - Push the 6 unpushed `redesign_v2` commits once the branch decision is confirmed.
 - Commit the Engineering Handbook (W0-3) on the confirmed base branch.
 - Resolve the `docs/ai/PRODUCTION_READINESS_PLAN.md` vs `SleepHealing_PRODUCTION_READINESS_PLAN.md` path mismatch.
+
+## 2026-07-14 — W0-1..W0-4 — Wave 0 closed out (push, handbook commit, recovery checkpoint)
+
+**Status:** VERIFIED
+
+### What changed
+- Operator confirmed `redesign_v2` as the base branch (see resolution note above the Wave 0 dashboard).
+- Switched back to `redesign_v2`, restored the stashed `docker-compose.yml` fix (`git stash pop`).
+- Pushed the 6 previously-local-only commits to `origin/redesign_v2`.
+- Relocated `SleepHealing_PRODUCTION_READINESS_PLAN.md` → `docs/ai/PRODUCTION_READINESS_PLAN.md`, resolving the `CLAUDE.md` path mismatch.
+- Committed the Engineering Handbook (`CLAUDE.md` + `docs/ai/**`) as `e0e069a`, pushed to `origin/redesign_v2`.
+- Created recovery branch `backup/pre-production-hardening-2026-07-14` at `e0e069a`, pushed to origin. Not merged into `main`.
+- Updated Wave 0 dashboard and all four task completion records to `VERIFIED` with evidence.
+
+### Files
+- `docs/ai/PRODUCTION_READINESS_PLAN.md` (this file — moved from repo root, statuses updated)
+- `CLAUDE.md`, `docs/ai/*` (29 other files) — new, via commit `e0e069a`
+- No application code changed.
+
+### Verification
+- `git push origin redesign_v2` → `8d845a2..0e29db2 redesign_v2 -> redesign_v2`
+- `git merge-base --is-ancestor <c> origin/redesign_v2` for all 6 commits → yes (all 6)
+- `git push origin redesign_v2` (handbook) → `0e29db2..e0e069a redesign_v2 -> redesign_v2`
+- `git merge-base --is-ancestor e0e069a origin/redesign_v2` → yes
+- `git push origin backup/pre-production-hardening-2026-07-14` → `* [new branch]`
+- `git log -1 --oneline origin/backup/pre-production-hardening-2026-07-14` → `e0e069a`
+- `git status --short` → only `M docker-compose.yml` (pre-existing, documented) and `?? HANDBOOK_MANIFEST.json` (deliberately excluded) remain
+
+### Remaining actions
+- None to close Wave 0. Wave 1 (Critical Security Blockers) may begin on explicit operator instruction.
+- Carried forward: decide standalone commit vs. folding the `docker-compose.yml` `./Admin`→`./admin` fix into Wave 1 (W1-1/W1-2 touch the same file).
