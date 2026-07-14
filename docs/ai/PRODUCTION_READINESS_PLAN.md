@@ -158,7 +158,7 @@ No secrets were introduced by the handbook commit (grepped for key/password/toke
 
 | ID | Audit ID | Task | Priority | Status |
 |---|---|---|---:|---|
-| W1-1 | B1 | Externalize and rotate compromised secrets | BLOCKING | NOT_STARTED |
+| W1-1 | B1 | Externalize and rotate compromised secrets | BLOCKING | `VERIFIED` (code/config level) — **live rotation still required on any real deployed environment**, see completion record |
 | W1-2 | B2 | Remove public MySQL exposure | BLOCKING | NOT_STARTED |
 | W1-3 | B3 | Enforce Admin authorization | BLOCKING | NOT_STARTED |
 | W1-4 | B4 | Fix forgot-password OTP/token leakage | BLOCKING | NOT_STARTED |
@@ -361,7 +361,7 @@ backup/pre-production-hardening-2026-07-14
 Wave 1 must be completed before any production deploy.
 
 ## W1-1 / B1 — Externalize and rotate compromised secrets
-**Status:** `NOT_STARTED`
+**Status:** `VERIFIED` (code/config level — live rotation is a separate, undone operator action, see below)
 
 ### Finding
 Tracked config contains real:
@@ -409,12 +409,19 @@ DB rotation must coordinate:
 - no secret is printed in logs/reports
 
 ### Completion record
-- Completed:
-- Classification:
+- Completed: 2026-07-14
+- Classification: **Still Present** at start of this task, confirmed against current HEAD before any edit (not stale) — `git grep` found the real values only in `docker-compose.yml` lines 10, 18, 33, 34, plus a fifth occurrence embedded in the `db` service's `healthcheck.test` (`-psecret123`), which the original audit had only footnoted. All five are now fixed.
 - Files changed:
+  - `docker-compose.yml` — `APP_KEY`, `DB_PASSWORD`, `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`, and the healthcheck's embedded password now resolve via `${APP_KEY}` / `${DB_PASSWORD}` / `${MYSQL_ROOT_PASSWORD}`. `DB_PASSWORD` (app) and `MYSQL_PASSWORD` (db) intentionally share the *same* variable so they cannot drift apart the way two independent hardcoded literals could. Committed as `8904602`, which also folds in an already-pending, unrelated fix (`./Admin` → `./admin` build path) — see "Notes" below for why these were combined into one commit instead of two.
+  - `.env.production.example` (new, root) — placeholder-only template for the three variables now referenced via `${...}`, matching the workflow already named in `.gitignore`'s comment (`.env.production.example -> .env`).
+  - `docs/ai/playbooks/SECRET_ROTATION_PLAYBOOK.md` (new) — the required live rotation procedure, including the important operational detail that changing `.env` alone does **not** change an already-initialized MySQL user's password inside the persistent `mysql_data` volume (the image only applies `MYSQL_PASSWORD`/`MYSQL_ROOT_PASSWORD` on first init) — rotation must go through `ALTER USER ... IDENTIFIED BY ...` against the running database first, then `.env` is updated to match.
 - Tests/checks:
-- Live operator action:
-- Remaining risk:
+  - `git grep -nE "base64:[A-Za-z0-9+/=]{20,}|secret123|rootsecret123" docker-compose.yml` → no matches (previously 5).
+  - `docker compose config` rendered the fully resolved config using a freshly generated, local-only `.env` (never committed) — confirmed via presence/absence checks (not by printing values): `APP_KEY`/`DB_PASSWORD`/`MYSQL_ROOT_PASSWORD`/the healthcheck `-p` argument all resolve to non-empty values, and none of the old compromised literals (`secret123`, `rootsecret123`, the old `APP_KEY` fragment) appear anywhere in the resolved output.
+  - Did **not** run `docker compose up`: `docker volume ls` showed `sleephealing_mysql_data` and `sleephealing_app_storage` already exist on this machine from before this session. Their actual contents/password state are unknown, and per the non-destructive policy (`KI-010`, `CLAUDE.md`) they were not touched, recreated, or inspected further — starting the `db` service against an unknown pre-existing volume with new `.env` values would either silently do nothing (if already initialized) or is simply unverifiable without knowing what's already in it. This is exactly the scenario the rotation playbook's "rotating `.env` alone is not enough" section documents.
+- Live operator action: **required, not performed.** If any real environment (VPS, staging, or this machine's own pre-existing `sleephealing_mysql_data` volume) is running with the old compromised values, it must be rotated using `docs/ai/playbooks/SECRET_ROTATION_PLAYBOOK.md`. This was not done automatically per the plan's own "Live boundary" rule (APP_KEY rotation invalidates sessions; DB rotation must be coordinated). Also not performed: any decision on rewriting git history to strip the old values from past commits — raised as a separate, larger decision in the playbook, requiring explicit operator authorization (it forces a coordinated force-push).
+- Remaining risk: old secret values remain permanently readable in this repository's git history (prior commits, unaffected by this fix) — mitigated only by treating them as compromised and rotating live usage, not by removing them retroactively.
+- **Process transparency note (self-reported):** while verifying the fix with `docker compose config`, an initial `sed`-based redaction pattern missed the array-style `healthcheck.test` YAML line (`- -p<password>`), and a locally-generated (non-production, non-committed) verification secret was printed in full to a tool-output shown in this session, twice, before the redaction approach was corrected to use presence/absence checks only. Both times the local `.env` was immediately regenerated with fresh values, so neither printed value remains valid anywhere. No real/production secret and no value from the actual audit (the original `docker-compose.yml` secrets) was ever printed — only values this session generated for its own local verification. Disclosed per the "no secret is printed in logs/reports" acceptance criterion, since the honest answer is "not cleanly on the first attempt," not "never happened."
 
 ---
 
@@ -1344,3 +1351,32 @@ Do not delete previous changelog entries.
 ### Remaining actions
 - None to close Wave 0. Wave 1 (Critical Security Blockers) may begin on explicit operator instruction.
 - Carried forward: decide standalone commit vs. folding the `docker-compose.yml` `./Admin`→`./admin` fix into Wave 1 (W1-1/W1-2 touch the same file).
+
+## 2026-07-14 — W1-1 / B1 — Externalize and rotate compromised secrets
+
+**Status:** VERIFIED (code/config level) — live rotation still required, not performed
+
+### What changed
+- Re-verified B1 against current HEAD before editing: real `APP_KEY`, `DB_PASSWORD`, `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD` confirmed still hardcoded in `docker-compose.yml` (plus a fifth spot: the `db` healthcheck's embedded `-psecret123`, not previously called out as its own line item).
+- `docker-compose.yml`: all five spots now use `${APP_KEY}` / `${DB_PASSWORD}` / `${MYSQL_ROOT_PASSWORD}` interpolation. `DB_PASSWORD` and `MYSQL_PASSWORD` intentionally share one variable.
+- Added `.env.production.example` (root, placeholder-only, matches the filename already referenced in `.gitignore`).
+- Added `docs/ai/playbooks/SECRET_ROTATION_PLAYBOOK.md` — full live rotation procedure, including the operational detail that `.env` changes don't retroactively change an already-initialized MySQL volume's password.
+- A pre-existing, already-pending, unrelated fix (`./Admin` → `./admin` build path) was on the same file. Attempted to isolate it into its own commit; the auto-mode permission classifier correctly blocked the intermediate step (it would have briefly re-committed the real secrets to git). Combined both into a single commit instead, rather than route around the block — documented as a deliberate scope exception, not silent scope creep.
+
+### Files
+- `docker-compose.yml`
+- `.env.production.example` (new)
+- `docs/ai/playbooks/SECRET_ROTATION_PLAYBOOK.md` (new)
+- `docs/ai/PRODUCTION_READINESS_PLAN.md` (this file)
+
+### Verification
+- `git grep` for the old secret literals in `docker-compose.yml` → 0 matches (previously 5).
+- `docker compose config` with a freshly generated, untracked local `.env` → all interpolated fields resolve to non-empty values; old compromised literals absent from resolved output. Checked via presence/absence grep, not by printing values.
+- `docker volume ls` → `sleephealing_mysql_data`/`sleephealing_app_storage` already exist from before this session; left untouched, not started/recreated, per the non-destructive volume policy — `docker compose up` was **not** run.
+- `git commit` → `8904602 fix(docker): externalize APP_KEY/DB/MySQL root secrets from docker-compose.yml`, pushed: see next entry.
+
+### Remaining actions
+- **Live operator action required:** rotate the actual DB/root passwords and APP_KEY on any real environment that used the old values, per `docs/ai/playbooks/SECRET_ROTATION_PLAYBOOK.md`. Not performed — no live VPS access in this session, and this machine's pre-existing Docker volumes were deliberately left untouched.
+- Separate, larger decision (not started): whether to rewrite git history to strip the old values from past commits. Requires explicit operator authorization.
+- Self-reported process incident: a locally-generated (non-production) verification secret was printed in full to tool output twice during this task, due to an incomplete redaction pattern for `docker compose config`'s array-style healthcheck line. Immediately remediated by regenerating the local `.env` each time; no real/production secret and no original audit-referenced value was ever printed. Full disclosure recorded above and in the completion record.
+- Not yet started: W1-2 (public MySQL exposure) — explicitly out of scope for this task per operator instruction.
