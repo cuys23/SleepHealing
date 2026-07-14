@@ -31,7 +31,10 @@ class SongMediaFlowTest extends TestCase
 
     private function admin(): User
     {
-        return User::factory()->create();
+        $user = User::factory()->create();
+        $user->assignRole(\Spatie\Permission\Models\Role::findOrCreate('admin', 'web'));
+
+        return $user;
     }
 
     /**

@@ -39,7 +39,7 @@ Route::middleware(['web', 'check_has_root'])->group(function () {
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('web')->name('logout');
 
 // Authenticated admin routes
-Route::middleware(['web', 'auth'])->group(function () {
+Route::middleware(['web', 'auth', 'role:root|admin'])->group(function () {
 
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('root');

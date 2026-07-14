@@ -45,7 +45,7 @@ class LoginController extends Controller
     private function isAuthenticate($loginRequest)
     {
         $user = (new UserRepository())->findByEmail($loginRequest->email);
-        if (!is_null($user) && Hash::check($loginRequest->password, $user->password)) {
+        if (!is_null($user) && Hash::check($loginRequest->password, $user->password) && $user->hasAnyRole(['root', 'admin'])) {
             return $user;
         }
         return false;

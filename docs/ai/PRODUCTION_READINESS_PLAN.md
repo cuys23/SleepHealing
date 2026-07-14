@@ -160,7 +160,7 @@ No secrets were introduced by the handbook commit (grepped for key/password/toke
 |---|---|---|---:|---|
 | W1-1 | B1 | Externalize and rotate compromised secrets | BLOCKING | Repository/config remediation: `VERIFIED`. Live secret rotation: **PENDING** (operator decision — see "Pending Live Maintenance" below) |
 | W1-2 | B2 | Remove public MySQL exposure | BLOCKING | `CODE_COMPLETE`. Runtime application (container recreation): **PENDING** (operator decision — see "Pending Live Maintenance" below) |
-| W1-3 | B3 | Enforce Admin authorization | BLOCKING | NOT_STARTED |
+| W1-3 | B3 | Enforce Admin authorization | BLOCKING | `VERIFIED` (2026-07-14 — verified via isolated SQLite test run; real-DB/live-browser smoke test still recommended once containers are recreated) |
 | W1-4 | B4 | Fix forgot-password OTP/token leakage | BLOCKING | NOT_STARTED |
 | W1-5 | B5 | Remove plaintext password cookie | BLOCKING | NOT_STARTED |
 
@@ -514,7 +514,8 @@ Never print: `APP_KEY` values, DB passwords, MySQL passwords, root passwords, or
 ---
 
 ## W1-3 / B3 — Enforce Admin authorization
-**Status:** `NOT_STARTED`
+**Status:** `VERIFIED`
+**Started:** 2026-07-14
 
 ### Required architecture
 Layer 1:
@@ -620,12 +621,21 @@ request reset
 - failed login does not persist credentials
 
 ### Completion record
-- Completed:
-- Classification:
+- Completed: 2026-07-14
+- Classification: **Still Present**, confirmed against current HEAD before editing — `LoginController::isAuthenticate()` (`admin/app/Http/Controllers/Web/LoginController.php:45-52`) checked only email+password; `routes/web.php`'s entire protected group used `['web', 'auth']` with zero role/permission middleware anywhere across `Web/*Controller.php`. Also confirmed the app already has everything needed to fix this without inventing new infrastructure: `User` model already uses Spatie's `HasRoles` trait, `config/acl.php` already defines the exact role set (`root`, `admin`, `user`, `visitor`), `RoleSeeder`/`AdminSeeder` already assign them, and `role`/`permission`/`role_or_permission` Spatie middleware are already registered in `app/Http/Kernel.php` (just never applied to this route group).
 - Files changed:
-- Tests:
-- Result:
-- Remaining risk:
+  - `admin/app/Http/Controllers/Web/LoginController.php` — **Layer 1**: `isAuthenticate()` now additionally requires `$user->hasAnyRole(['root', 'admin'])` before returning the user, so a credential-valid but wrong-role login attempt is rejected with the exact same generic "Invalid credentials" error as a wrong password (no role/permission-existence enumeration).
+  - `admin/routes/web.php` — **Layer 2**: the single protected route group's middleware changed from `['web', 'auth']` to `['web', 'auth', 'role:root|admin']` (Spatie's already-registered `RoleMiddleware`, pipe = OR), centrally covering every Admin route (dashboard, albums, categories, playlists, banners, shifts, users, subscription plans, notifications, settings, web-settings, mail/SMS/FCM config) in one place. The pre-existing `check_has_root` bootstrap group (create-superadmin) and the unauthenticated `/logout` route are untouched, since they're unrelated to this finding.
+  - Layer 3 ("sensitive actions authorize explicitly") intentionally not implemented — out of scope for closing this specific finding (root cause was "any authenticated user reaches every Admin route", which Layers 1+2 fully close); would be its own, separate, later hardening task if ever needed.
+  - `admin/tests/Feature/Admin/AdminAuthorizationTest.php` (new) — the required regression tests (see below).
+  - `admin/tests/Feature/Admin/{AlbamCategoryTest,ApiVisibilityTest,AudioDurationTest,ModelRelationshipTest,PlaylistAlbamTest,SongMediaFlowTest}.php` — each file's private `admin()` test helper previously did `User::factory()->create()` with **no role at all**; every one of these pre-existing tests would have started failing (403) the moment `role:root|admin` was added to the route group. Updated each to `assignRole(Role::findOrCreate('admin', 'web'))` before returning the user — a direct, necessary consequence of this fix, not unrelated scope creep. `Role::findOrCreate()` (not a plain `assignRole('admin')`) is used deliberately so these tests don't depend on `RoleSeeder` having already run against whatever database they execute against.
+  - `docs/ai/PRODUCTION_READINESS_PLAN.md` (this file)
+- Tests: **could not run against the real dev database or the live Docker containers** (both are off-limits right now per the standing W1-1/W1-2 deferral — the live `db` container's actual credentials are unknown, and the operator decision was to not touch it). Instead ran the full suite against a throwaway, ephemeral, local-only SQLite database (`php artisan migrate` + `php artisan test` with `DB_CONNECTION=sqlite`, a freshly generated never-printed `APP_KEY`, created in the session scratchpad and deleted afterward — never touched `sleephealing_mysql_data` or any tracked file):
+  - `php artisan test --filter=AdminAuthorizationTest` → **10/10 passed**, covering every "Required tests" bullet: standard `user`-role and `visitor`-role accounts cannot log in via the form (`assertGuest` + `assertSessionHasErrors`); wrong password is rejected identically to wrong role (no enumeration); an already-authenticated `user`-role session gets `assertForbidden()` (403) on both the dashboard and a nested route (`user.index`); `admin`-role and `root`-role accounts can both log in and reach the dashboard (`assertOk`); an unauthenticated guest is redirected to `/login`, not shown a 403.
+  - Full suite (`php artisan test`, all Feature+Unit): 33 passed / 37 failed. **Every one of the 37 failures was pre-existing and unrelated to this change** — confirmed via `grep` across full failure output for "forbidden/unauthorized/403/does not have the right roles": **zero matches**. The actual causes: (a) 22 "FOREIGN KEY constraint failed" errors from these tests' factories assuming reference rows (e.g. `category_id`/`albam_id` = 1) that only exist in the real, already-seeded dev database, not in a fresh empty SQLite schema; (b) 3 "audio file could not be processed" errors because `ffprobe`/`ffmpeg` are not installed on this host (only inside the app's Docker image); (c) the stock `ExampleTest` expects `GET /` to return 200 for a guest, but `/` already required `auth` *before* this change too (guest always got a 302) — this test was already wrong for this app, unaffected by W1-3. Verified this pattern is environment-wide, not scoped to the 6 files I touched, by confirming `CategoryIconForeignKeyTest.php` (a file I never edited) fails with the identical FK-constraint cause.
+  - `php vendor/bin/pint --test` on every changed/new PHP file: only `blank_line_before_statement` flagged, and only in the 6 test files, and only because of the 3 new lines each got — confirmed by running Pint against the original (`git show HEAD:...`) version of each file first (all 6 passed clean before my edit). Fixed with `pint` (whitespace-only). `LoginController.php`'s and `routes/web.php`'s pre-existing Pint findings (`new_with_parentheses`, `single_quote`, `ordered_imports`, etc.) were confirmed pre-existing via the same before/after comparison and deliberately left untouched, per "do not mix unrelated refactors into a security fix."
+- Result: `git diff --check` clean; final diff is 9 files / 29 insertions / 10 deletions, all directly attributable to this fix.
+- Remaining risk: mobile/API auth path (`routes/api.php`, `AuthController`) was not touched at all — confirmed unaffected both by inspection (separate file, separate guard) and by the API-guard `FavoriteTest` failing for the same pre-existing FK reason as the Admin tests, with zero auth-related errors. This has **not** been verified against the real dev database or a live browser session (both blocked by the standing W1-1/W1-2 deferral) — only via an isolated SQLite run. Recommend a quick manual smoke test (real login as a `user`-role account should fail; real login as `admin`/`root` should succeed) once the live containers are eventually recreated under the coordinated W1-1+W1-2 maintenance procedure.
 
 ---
 
@@ -1481,3 +1491,33 @@ Do not delete previous changelog entries.
 ### Remaining actions
 - Live maintenance procedure remains scheduled but not started; requires explicit operator go-ahead to execute.
 - Proceeding to W1-3 (Enforce Admin authorization), which the operator confirmed is independent of the pending W1-1/W1-2 live operations.
+
+## 2026-07-14 — W1-3 / B3 — Enforce Admin authorization
+
+**Status:** VERIFIED
+
+### What changed
+- Re-verified B3 against current HEAD: `LoginController::isAuthenticate()` checked only email+password; `routes/web.php`'s protected group had no role/permission middleware; confirmed Spatie roles/middleware were already fully wired (`HasRoles` trait, `config/acl.php` role set, `RoleSeeder`, `role`/`permission` middleware aliases already registered) — no new auth infrastructure needed.
+- **Layer 1**: `LoginController::isAuthenticate()` now requires `hasAnyRole(['root', 'admin'])` in addition to the existing password check, rejecting wrong-role logins with the same generic error as wrong-password.
+- **Layer 2**: `routes/web.php`'s protected group middleware changed from `['web', 'auth']` to `['web', 'auth', 'role:root|admin']`, covering every Admin route centrally.
+- Updated 6 pre-existing test files' `admin()` helpers (previously `User::factory()->create()` with no role at all) to assign the `admin` role via `Role::findOrCreate()`, since they would otherwise have started failing (403) the moment the route middleware changed — a direct, necessary consequence of this fix, not scope creep.
+- Added `tests/Feature/Admin/AdminAuthorizationTest.php` (10 tests) covering every "Required tests" bullet from the plan.
+- Fixed a Pint whitespace finding (`blank_line_before_statement`) introduced by the 3 new lines in each of the 6 updated test helpers; left pre-existing Pint findings in `LoginController.php`/`routes/web.php` untouched (confirmed pre-existing via before/after Pint comparison).
+
+### Files
+- `admin/app/Http/Controllers/Web/LoginController.php`
+- `admin/routes/web.php`
+- `admin/tests/Feature/Admin/AdminAuthorizationTest.php` (new)
+- `admin/tests/Feature/Admin/AlbamCategoryTest.php`, `ApiVisibilityTest.php`, `AudioDurationTest.php`, `ModelRelationshipTest.php`, `PlaylistAlbamTest.php`, `SongMediaFlowTest.php`
+- `docs/ai/PRODUCTION_READINESS_PLAN.md` (this file)
+
+### Verification
+- Could not use the real dev database or live containers (both off-limits per the standing W1-1/W1-2 deferral — live DB credentials unknown). Used an ephemeral, local-only SQLite database instead: fresh `APP_KEY` (generated, never printed), `php artisan migrate`, then tests; database file deleted afterward.
+- `php artisan test --filter=AdminAuthorizationTest` → 10/10 passed.
+- `php artisan test` (full suite) → 33 passed / 37 failed. Confirmed via `grep` across the full failure output for "forbidden/unauthorized/403/does not have the right roles" → **zero matches**. All 37 failures traced to pre-existing causes unrelated to this change: missing seeded reference rows in a fresh SQLite schema (22 FK-constraint failures), missing `ffprobe`/`ffmpeg` on this host (3 failures), and one already-broken stock `ExampleTest` (guest `GET /` already required `auth` before this change too). Cross-checked against `CategoryIconForeignKeyTest.php`, a file this task never touched, which fails for the identical FK reason — confirming the pattern is environment-wide, not introduced by W1-3.
+- `php vendor/bin/pint --test` on every changed/new file; fixed the one finding attributable to new lines, left pre-existing findings alone (verified pre-existing via Pint against `git show HEAD:...` of each file).
+- `git diff --check` clean.
+
+### Remaining actions
+- Recommend a real-database/live-browser smoke test (login as `user`-role fails, login as `admin`/`root` succeeds) once the containers are eventually recreated under the coordinated W1-1+W1-2 maintenance procedure — not performed here since that procedure is still pending.
+- Not started: W1-4 (Fix forgot-password OTP/token leakage) — stopping here per operator instruction.

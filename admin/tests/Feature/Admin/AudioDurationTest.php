@@ -36,7 +36,10 @@ class AudioDurationTest extends TestCase
 
     private function admin(): User
     {
-        return User::factory()->create();
+        $user = User::factory()->create();
+        $user->assignRole(\Spatie\Permission\Models\Role::findOrCreate('admin', 'web'));
+
+        return $user;
     }
 
     private function realAudioFile(string $name = 'track.mp3'): UploadedFile
