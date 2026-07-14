@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\FavoriteRequest;
 use App\Http\Resources\PlayListResource;
 use App\Repositories\PlayListRepository;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Response;
 
 class FavoriteConstroller extends Controller
@@ -22,18 +23,27 @@ class FavoriteConstroller extends Controller
     {
         $playList = (new PlayListRepository())->find($request->play_list_id);
         $user = auth()->user();
-        $favorites = $user->favorites->pluck('id')->toArray();
 
-        if(in_array($playList->id, $favorites)){
+        if ($user->favorites()->where('play_list_id', $playList->id)->exists()) {
             $user->favorites()->detach($playList->id);
 
             return $this->json('Audio is removed successfully from favorites');
-        }else{
-            $user->favorites()->attach($request->play_list_id);
-
-            return $this->json('Audio is addedd successfully.', [
-                'playList' => PlayListResource::make($playList)
-            ]);
         }
+
+        try {
+            $user->favorites()->attach($playList->id);
+        } catch (QueryException $e) {
+            // SQLSTATE 23000: a concurrent request already favorited this
+            // track first (favorites_user_playlist_unique). The desired end
+            // state - favorited - is already true, so this is a success,
+            // not a 500.
+            if ($e->getCode() !== '23000') {
+                throw $e;
+            }
+        }
+
+        return $this->json('Audio is addedd successfully.', [
+            'playList' => PlayListResource::make($playList)
+        ]);
     }
 }

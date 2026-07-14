@@ -53,7 +53,7 @@ class SubscriptionPlanController extends Controller
 
     public function delete(SubscriptionPlan $subscriptionPlan)
     {
-        if ($subscriptionPlan->subscriptions) {
+        if ($subscriptionPlan->subscriptions()->exists()) {
             return back()->with('errors', 'Sorry already has supcription users');
         }
 

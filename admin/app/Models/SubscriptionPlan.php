@@ -21,7 +21,7 @@ class SubscriptionPlan extends Model
 
     public function subscriptions()
     {
-        return $this->hasOne(Subscription::class);
+        return $this->hasMany(Subscription::class);
     }
 
     //=========================================> Attributes
