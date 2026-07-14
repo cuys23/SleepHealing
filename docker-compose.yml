@@ -2,12 +2,12 @@
 
 services:
   app:
-    build: ./Admin
+    build: ./admin
     ports:
       - "9080:8000"
     environment:
       APP_ENV: local
-      APP_KEY: base64:GGf7OhWfkv0s0a40QtDb+q23s0lSGjdSmmArv49aBhw=
+      APP_KEY: ${APP_KEY}
       APP_URL: http://localhost:9080
       FILESYSTEM_DISK: public
       DB_CONNECTION: mysql
@@ -15,7 +15,7 @@ services:
       DB_PORT: 3306
       DB_DATABASE: maditam
       DB_USERNAME: maditam
-      DB_PASSWORD: secret123
+      DB_PASSWORD: ${DB_PASSWORD}
       DEMO_USER: admin@example.com
       DEMO_PASS: secret
     depends_on:
@@ -30,14 +30,14 @@ services:
     environment:
       MYSQL_DATABASE: maditam
       MYSQL_USER: maditam
-      MYSQL_PASSWORD: secret123
-      MYSQL_ROOT_PASSWORD: rootsecret123
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
       - "3308:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "maditam", "-psecret123"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "maditam", "-p${DB_PASSWORD}"]
       timeout: 10s
       retries: 10
       start_period: 30s
