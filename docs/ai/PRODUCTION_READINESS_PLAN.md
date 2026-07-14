@@ -159,7 +159,7 @@ No secrets were introduced by the handbook commit (grepped for key/password/toke
 | ID | Audit ID | Task | Priority | Status |
 |---|---|---|---:|---|
 | W1-1 | B1 | Externalize and rotate compromised secrets | BLOCKING | `VERIFIED` (code/config level) — **live rotation still required on any real deployed environment**, see completion record |
-| W1-2 | B2 | Remove public MySQL exposure | BLOCKING | NOT_STARTED |
+| W1-2 | B2 | Remove public MySQL exposure | BLOCKING | `CODE_COMPLETE` — **live container on this machine still exposed until recreated, see completion record** |
 | W1-3 | B3 | Enforce Admin authorization | BLOCKING | NOT_STARTED |
 | W1-4 | B4 | Fix forgot-password OTP/token leakage | BLOCKING | NOT_STARTED |
 | W1-5 | B5 | Remove plaintext password cookie | BLOCKING | NOT_STARTED |
@@ -426,7 +426,8 @@ DB rotation must coordinate:
 ---
 
 ## W1-2 / B2 — Remove public MySQL exposure
-**Status:** `NOT_STARTED`
+**Status:** `CODE_COMPLETE` (tracked config fixed; live container on this machine not yet recreated — operator decision needed, see below)
+**Started:** 2026-07-14
 
 ### Preferred design
 ```text
@@ -450,12 +451,21 @@ Alternative for host-only debugging:
 - database volume remains intact
 
 ### Completion record
-- Completed:
-- Classification:
-- Files changed:
-- Verification:
-- Live verification:
-- Remaining risk:
+- Completed: 2026-07-14 (tracked config only — see "Live verification" below for what remains open)
+- Classification: **Still Present**, confirmed against current HEAD before editing — `docker-compose.yml`'s `db` service published `"3308:3306"` on all interfaces, no compose override file exists, and the app already connects over the internal Docker network (`DB_HOST: db`, `DB_PORT: 3306`), so the host port mapping was never load-bearing for the app itself. No documented need for host-level MySQL client access was found in `docs/ai/DOCKER_VPS_GUIDELINES.md` or `docs/ai/DEPLOYMENT_RUNBOOK.md` — implemented the plan's *preferred* design (remove the mapping entirely) rather than the `127.0.0.1:3308:3306` alternative.
+- Files changed: `docker-compose.yml` — removed the `ports:` block under `db` (2-line diff). Committed as `8af3f6d fix(docker): stop publishing MySQL port 3308 to the host`, pushed to `origin/redesign_v2`.
+- Verification (static/tracked-config level):
+  - `git diff` reviewed — exactly the 2 lines removed, nothing else touched.
+  - `docker compose config` (structural checks only — booleans/counts, never raw content, after three earlier accidental prints during W1-1/W1-2 verification taught this lesson): `db` service has zero `ports:` keys; literal `3308` appears zero times anywhere in the resolved config; `app`'s `DB_HOST`/`DB_PORT` still resolve to `db`/`3306` (unaffected); `mysql_data` volume mount still present for `db`.
+  - `docker volume ls` → `sleephealing_mysql_data` / `sleephealing_app_storage` still present, untouched.
+- **Live verification: not satisfied — found a materially important fact.** `docker ps` shows this machine already has live containers running right now:
+  - `sleephealing-db-1` — **up 12 days, still publishing `0.0.0.0:3308->3306/tcp` at this moment** — the exact exposure this task fixes, still live.
+  - `sleephealing-app-1` — up 3 days.
+  - Both predate every change made in this session (W1-1 and W1-2 alike). Editing `docker-compose.yml` only changes what a *future* `docker compose up`/recreate will do — it has no effect on already-running containers. **The W1-1 secret-externalization fix and this W1-2 port fix are therefore both still "on paper" only on this machine**; the live `db` container is still using whatever `MYSQL_PASSWORD`/`MYSQL_ROOT_PASSWORD` it was originally initialized with (presumably the original hardcoded `secret123`/`rootsecret123`, since it predates W1-1), and is still reachable on host port 3308.
+  - Recreating the containers now (`docker compose up -d`) is not a destructive command and would not touch the `mysql_data`/`app_storage` volumes — but it carries a real operational risk this session should not resolve unilaterally: this session's local `.env` has fresh, randomly-generated `DB_PASSWORD`/`MYSQL_ROOT_PASSWORD` values that were never coordinated with whatever password is already baked into the 12-day-old volume (MySQL only applies those env vars on first init of an empty data directory — this volume is not empty). Recreating both containers with a mismatched password would very likely break the `app`→`db` connection (and the healthcheck) on a stack that may currently be in active local use, until the real rotation procedure (`docs/ai/playbooks/SECRET_ROTATION_PLAYBOOK.md`) is followed to bring the volume's actual password and `.env` back into agreement.
+  - Left the running containers untouched pending explicit operator direction on how to proceed.
+- Remaining risk: the live MySQL exposure on this machine (port 3308, all interfaces) remains active right now until the operator chooses how to safely recreate the containers (ideally combined with the still-pending W1-1 live rotation, so it only needs to happen once).
+- Notes: this also retroactively sharpens W1-1's own "Live operator action: required, not performed" line above from a general caveat into a confirmed, concrete fact — the same live containers are involved for both tasks.
 
 ---
 
@@ -1380,3 +1390,30 @@ Do not delete previous changelog entries.
 - Separate, larger decision (not started): whether to rewrite git history to strip the old values from past commits. Requires explicit operator authorization.
 - Self-reported process incident: a locally-generated (non-production) verification secret was printed in full to tool output twice during this task, due to an incomplete redaction pattern for `docker compose config`'s array-style healthcheck line. Immediately remediated by regenerating the local `.env` each time; no real/production secret and no original audit-referenced value was ever printed. Full disclosure recorded above and in the completion record.
 - Not yet started: W1-2 (public MySQL exposure) — explicitly out of scope for this task per operator instruction.
+
+## 2026-07-14 — W1-2 / B2 — Remove public MySQL exposure
+
+**Status:** CODE_COMPLETE — live container on this machine still exposed, operator decision needed
+
+### What changed
+- Re-verified B2 against current HEAD: `docker-compose.yml`'s `db` service still published `"3308:3306"` on all interfaces; no compose override existed; app already used the internal network (`DB_HOST: db`, `DB_PORT: 3306`).
+- Removed the `ports:` block from the `db` service entirely (the plan's preferred design), rather than rebinding to `127.0.0.1` — no documented need for host-level DB client access found.
+- **Discovered a materially important live-state fact while verifying:** this machine has `sleephealing-db-1` running right now (up 12 days) still publishing `0.0.0.0:3308->3306/tcp`, and `sleephealing-app-1` (up 3 days) — both predate this session entirely. Neither the W1-1 secret fix nor this W1-2 port fix has taken effect on the actual running containers yet; both changes only affect a future `docker compose up`/recreate. The live db container is still using its original (pre-W1-1) password.
+- Deliberately did **not** recreate the running containers: this session's local `.env` (generated for static `docker compose config` verification only) has fresh random passwords never coordinated with whatever is already baked into the 12-day-old `mysql_data` volume — recreating now could break the live `app`↔`db` connection until proper rotation (`docs/ai/playbooks/SECRET_ROTATION_PLAYBOOK.md`) is carried out. That is an operator decision, not one to make unilaterally mid-task.
+- During verification, a locally-generated (non-production) secret was again printed in full to tool output (4th occurrence across W1-1/W1-2, same root cause: the `healthcheck.test` array line doesn't match keyword-based redaction). Immediately regenerated `.env` a 4th time and switched verification entirely to boolean/count checks that never print raw resolved-config content — this held clean for the rest of the task.
+
+### Files
+- `docker-compose.yml` — removed `db.ports` (2 lines)
+- `docs/ai/PRODUCTION_READINESS_PLAN.md` (this file)
+
+### Verification
+- `git diff -- docker-compose.yml` → exactly 2 lines removed, nothing else.
+- `docker compose config` structural checks (no raw content printed): `db` has 0 `ports:` keys; literal `3308` count = 0; `app` `DB_HOST`/`DB_PORT` unaffected (`db`/`3306`); `mysql_data` volume mount still present.
+- `docker volume ls` → both named volumes intact, untouched.
+- `docker ps` → confirmed the concrete live-exposure fact described above.
+- `git commit` → `8af3f6d fix(docker): stop publishing MySQL port 3308 to the host`, pushed to `origin/redesign_v2`.
+
+### Remaining actions
+- **Awaiting operator decision:** how/when to safely recreate `sleephealing-app-1`/`sleephealing-db-1` on this machine so the tracked fixes (W1-1 secrets + W1-2 port removal) actually take effect, ideally coordinated with the real password rotation so the app doesn't lose DB connectivity in the process.
+- Any real VPS running the old config has the same live gap — same rotation-then-recreate sequence applies there, per `docs/ai/playbooks/SECRET_ROTATION_PLAYBOOK.md`.
+- Not started: W1-3 (Enforce Admin authorization) — explicitly out of scope for this task per operator instruction.
