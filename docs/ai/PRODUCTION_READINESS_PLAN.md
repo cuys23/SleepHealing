@@ -158,8 +158,8 @@ No secrets were introduced by the handbook commit (grepped for key/password/toke
 
 | ID | Audit ID | Task | Priority | Status |
 |---|---|---|---:|---|
-| W1-1 | B1 | Externalize and rotate compromised secrets | BLOCKING | `VERIFIED` (code/config level) — **live rotation still required on any real deployed environment**, see completion record |
-| W1-2 | B2 | Remove public MySQL exposure | BLOCKING | `CODE_COMPLETE` — **live container on this machine still exposed until recreated, see completion record** |
+| W1-1 | B1 | Externalize and rotate compromised secrets | BLOCKING | Repository/config remediation: `VERIFIED`. Live secret rotation: **PENDING** (operator decision — see "Pending Live Maintenance" below) |
+| W1-2 | B2 | Remove public MySQL exposure | BLOCKING | `CODE_COMPLETE`. Runtime application (container recreation): **PENDING** (operator decision — see "Pending Live Maintenance" below) |
 | W1-3 | B3 | Enforce Admin authorization | BLOCKING | NOT_STARTED |
 | W1-4 | B4 | Fix forgot-password OTP/token leakage | BLOCKING | NOT_STARTED |
 | W1-5 | B5 | Remove plaintext password cookie | BLOCKING | NOT_STARTED |
@@ -361,7 +361,11 @@ backup/pre-production-hardening-2026-07-14
 Wave 1 must be completed before any production deploy.
 
 ## W1-1 / B1 — Externalize and rotate compromised secrets
-**Status:** `VERIFIED` (code/config level — live rotation is a separate, undone operator action, see below)
+**Status:** Repository/config remediation `VERIFIED`. Live secret rotation `PENDING` (deliberately not performed — see "Live operator action" below and the "Pending Live Maintenance Procedure" after W1-2).
+
+This task has two distinct halves that must not be conflated:
+1. **Repository remediation** (removing hardcoded secrets from tracked config, adding safe templates and a rotation runbook) — this half is done and verified.
+2. **Live secret rotation** (actually changing the real MySQL/APP_KEY values on any environment that used the compromised ones, including this machine's own running containers) — this half has not started. It is an operator-scheduled action, coordinated with W1-2's container recreation (see the operational dependency note below).
 
 ### Finding
 Tracked config contains real:
@@ -426,7 +430,7 @@ DB rotation must coordinate:
 ---
 
 ## W1-2 / B2 — Remove public MySQL exposure
-**Status:** `CODE_COMPLETE` (tracked config fixed; live container on this machine not yet recreated — operator decision needed, see below)
+**Status:** `CODE_COMPLETE`. Runtime verification `PENDING` — tracked config fixed; the live container on this machine has not been recreated (operator decision needed — see the "Pending Live Maintenance Procedure" below).
 **Started:** 2026-07-14
 
 ### Preferred design
@@ -466,6 +470,46 @@ Alternative for host-only debugging:
   - Left the running containers untouched pending explicit operator direction on how to proceed.
 - Remaining risk: the live MySQL exposure on this machine (port 3308, all interfaces) remains active right now until the operator chooses how to safely recreate the containers (ideally combined with the still-pending W1-1 live rotation, so it only needs to happen once).
 - Notes: this also retroactively sharpens W1-1's own "Live operator action: required, not performed" line above from a general caveat into a confirmed, concrete fact — the same live containers are involved for both tasks.
+
+---
+
+## Pending Live Maintenance Procedure (W1-1 + W1-2) — not yet executed
+
+**Operator decision (2026-07-14):** do not recreate the running containers yet. W1-1's repository/config fix and W1-2's repository/config fix both remain complete and verified at the tracked-config level. W1-1's live secret rotation and W1-2's runtime application (container recreation) both remain pending, and must be performed together as a single controlled maintenance action, not separately — recreating containers before rotating the real DB/root passwords would apply W1-2's port removal using a `.env` whose random values don't match what's already inside the `sleephealing_mysql_data` volume, breaking `app`→`db` connectivity.
+
+**Explicit operational dependency:**
+
+> **W1-1 live credential rotation must be coordinated with W1-2 container recreation.**
+
+Neither may be performed independently of the other on this machine (or any real environment in the same state) without risking an application outage.
+
+### Future maintenance runbook sequence (to be executed later, as one operator-controlled procedure — not automated, not started)
+
+1. Take a verified database backup.
+2. Confirm the currently running environment and which host/VPS is actually being changed.
+3. Verify current application-to-database connectivity without printing credentials.
+4. Rotate the application DB password inside MySQL.
+5. Rotate the MySQL root password.
+6. Generate and deploy a new `APP_KEY` after checking whether encrypted persistent data depends on the old key.
+7. Update the real untracked environment file.
+8. Recreate the app and DB containers non-destructively.
+9. Verify Laravel DB connectivity.
+10. Verify MySQL is no longer published on host port 3308.
+11. Verify application health and Admin/API access.
+12. Keep rollback instructions.
+
+This sequence is documented here for later execution. **It has not been run.** No container has been recreated, no live password has been changed, and the `sleephealing_mysql_data`/`sleephealing_app_storage` volumes have not been touched.
+
+### Standing security verification rule (applies to all remaining Wave 1+ work)
+
+Never print full output from `docker compose config` (or any command resolving environment variables) when the result may contain secrets. From this point forward, verification of Docker/compose state must use only:
+- boolean checks
+- counts
+- key-name inspection
+- redacted parsing
+- presence/absence assertions
+
+Never print: `APP_KEY` values, DB passwords, MySQL passwords, root passwords, or resolved healthcheck commands containing credentials. (This formalizes the lesson from the four accidental prints during W1-1/W1-2 verification, all now recorded above.)
 
 ---
 
@@ -1417,3 +1461,23 @@ Do not delete previous changelog entries.
 - **Awaiting operator decision:** how/when to safely recreate `sleephealing-app-1`/`sleephealing-db-1` on this machine so the tracked fixes (W1-1 secrets + W1-2 port removal) actually take effect, ideally coordinated with the real password rotation so the app doesn't lose DB connectivity in the process.
 - Any real VPS running the old config has the same live gap — same rotation-then-recreate sequence applies there, per `docs/ai/playbooks/SECRET_ROTATION_PLAYBOOK.md`.
 - Not started: W1-3 (Enforce Admin authorization) — explicitly out of scope for this task per operator instruction.
+
+## 2026-07-14 — W1-1/W1-2 — Operator decision recorded: defer live rotation + container recreation
+
+**Status:** Documentation update only — no live action taken, no application code changed.
+
+### What changed
+- Operator explicitly decided: do not recreate running containers yet. W1-1 and W1-2 repository/config remediation both remain complete; live secret rotation (W1-1) and container recreation (W1-2) are deferred and must happen together as one controlled maintenance procedure, per the reasoning already recorded in each task's completion record (random local `.env` values don't match the live volume's real credentials).
+- Updated the Wave 1 dashboard and W1-1/W1-2 status lines to explicitly separate "repository/config" status from "live" status instead of using one blended status field.
+- Added a new "Pending Live Maintenance Procedure (W1-1 + W1-2)" section with the explicit operational dependency (`W1-1 live credential rotation must be coordinated with W1-2 container recreation`) and the 12-step future maintenance runbook sequence (backup → confirm environment → verify connectivity without printing credentials → rotate DB password → rotate root password → rotate APP_KEY → update real `.env` → recreate containers → verify DB connectivity → verify port 3308 no longer published → verify app/Admin/API health → keep rollback instructions). Not executed.
+- Added a standing security verification rule for all remaining Wave 1+ work: never print full `docker compose config` output when secrets may resolve; use boolean/count/key-name/redacted/presence-absence checks only.
+
+### Files
+- `docs/ai/PRODUCTION_READINESS_PLAN.md` (this file)
+
+### Verification
+- N/A — documentation and process-rule update only, no command run against the live environment.
+
+### Remaining actions
+- Live maintenance procedure remains scheduled but not started; requires explicit operator go-ahead to execute.
+- Proceeding to W1-3 (Enforce Admin authorization), which the operator confirmed is independent of the pending W1-1/W1-2 live operations.
